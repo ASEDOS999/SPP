@@ -6,6 +6,6 @@ Let's consider a following method for minimization function *f* on a square *Q*.
 
 ## Parts Of Project
 
-[Theoretical results](https://github.com/ASEDOS999/Optimization-Halving-The-Square/One-method.pdf)
+[Theoretical results](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/One%20method.pdf)
 
-[Tests](https://github.com/ASEDOS999/Optimization-Halving-The-Square/Tests)
+[Tests](https://github.com/ASEDOS999/Optimization-Halving-The-Square/tree/master/Tests)
