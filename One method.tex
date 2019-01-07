@@ -1,0 +1,205 @@
+ \documentclass[12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}       
+
+\usepackage[english]{babel}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,amsbsy,amstext,amscd,amsxtra,multicol}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+\usepackage[stable]{footmisc}
+\usepackage{ dsfont }
+
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{bm}
+\usepackage{color}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\intt}{int}
+\DeclareMathOperator{\conv}{conv}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+\section{Description Of A Task}
+
+Let's consider a following task:
+
+$$\min_{(x,y)}\left\{f(x,y)|(x,y) \in Q\right\},$$
+where $f$ is a convex function, $Q$ - is a square on the plane.
+
+Let's consider a following method. One solves task of minimization for a function $g(x) = f\left(x, y_0 = \frac{a}{2}\right)$ on a segment $[0, a]$ with an accuracy $\delta$ on function. After that one calculates a sub-gradient in a received point and chooses the rectangle which the sub-gradient "does not look" in. Similar actions are repeated for a vertical segment. As a result we have the square decreased twice. Let's find a possible value of error $\delta_0$ for task on segment and a sufficient iteration's number $N$ to solve the initial task with accuracy $\epsilon$ on function.
+
+Let's describe an algorithm formally. See pseudo-code \ref{alg:Example}.
+
+\begin{algorithm}[H]
+\caption{Algorithm of the method}\label{alg:Example}
+\begin{algorithmic}[1]
+\Function{Method}{convex function $f$, square $Q = [a, b]\times[c,d]$}
+
+$x_0:= solve(g = f(\cdot, \frac{c+d}{2}), [a,b], \delta)$
+ 
+$g = subgradient(f, (x_0, \frac{c+d}{2}))$
+ 
+\If{g[1] > 0}
+\State$Q := [a,b] \times [c, \frac{c+d}{2}]$ 
+\Else
+\State$Q := [a,b] \times [\frac{c+d}{2}, d]$ 
+\EndIf
+
+ $y_0:= solve(g = f(\frac{a+b}{2}, \cdot), [c,d], \delta)$
+ 
+ $g := subgradient(f, (\frac{a+b}{2}), y_0)$
+ 
+ \If{g[0] > 0}
+ \State$Q := [a, \frac{a+b}{2}] \times [c, d]$ 
+\Else
+\State$Q := [\frac{a+b}{2},b] \times [c, d]$ 
+\EndIf
+\If{StopRec() == False}
+\State Method($f$, $Q$) 
+\EndIf
+\Return $(\frac{a+b}{2}, \frac{c+d}{2})$
+\EndFunction 
+ \end{algorithmic}
+\end{algorithm}
+
+\section{Algorithm correctness}
+Let's $\textbf{x}_0$ is solution of the task on segment, $Q_1$ is choosed rectangle, $Q_2$ is not choosed rectangle.
+
+\subsection{Zero Error}
+
+\begin{lemma}\label{l1}
+If the optimization task on segment is solved with zero error and the $f$ is convex and differentiable at a point-solution, rectangle with solution of initial task was choosed correct.
+\end{lemma}
+\begin{proof}
+From sub-gradient definition, $\textbf{x}^* \in \{x|(\textbf{g}(\textbf{x}_0), \textbf{x}_0 - \textbf{x}^*) \geq 0)\}$. Lemma's statement follows from it and a fact that the first (or the second for vertical segment) gradient's component in point $\textbf{x}_0$ is zero.
+\end{proof}
+
+The method does not work for all convex functions even for zero error on segment. Let's consider following example.
+
+\textbf{Example 1}.
+\begin{equation}
+f(x,y) = \max\{x-2y, y-2x\}, \\
+Q = [-1, 1]^2
+\end{equation}
+
+Function $f$ is convex as maximum of affine functions on $x$ and $y$. A solution of task on horizontal segment $[-1, 1]\times\{0\}$ is point $(0, 0)$. Its subdifferential is $$\partial f(0,0) = \conv\left\{(1, -2)^\top, (-2,1)^\top\right\}.$$ 
+
+So if one takes a subgradient $(1,-2)^\top$ then a bottom rectangle will be choosed. But optimal value is point $(1,1)$ and there is not it in choosed rectangle. Therefore, this method cannot give a solution of initial task with error less than $\frac{1}{2}$.
+\subsection{Nonzero Error}
+\begin{theorem}
+Let's the $f$ has continuous derivative on the square. Then there is a neighbourhood of a solution of optimization task on segment such as a choice of rectangle will not change if one use any point from the   neighbourhood.
+\end{theorem}
+\begin{proof}
+Let's consider a case when we work with horizontal segment. Case with vertical segment is considered analogously. Then we are interesting in $f_y'(x_0, y_0)$. If $\textbf{x}_0$ is not solution of initial task, then $f_y'(x_0, y_0) \neq 0$. 
+
+From a continuity of the derivative:
+
+$$\lim\limits_{\delta \rightarrow 0}f_y'(x_0+\delta, y_0) = f_y'(x_0, y_0)$$
+
+Therefore, 
+
+$$\exists \delta_0:\forall \textbf{x}_\delta\in B_{\delta_0}(x_0)\times y_0\Rightarrow \sign(f_y'(\textbf{x}_\delta)) = \sign(f_y'(\textbf{x}_0))$$
+
+From it and lemma 1 theorem's statement follows.
+
+\end{proof}
+
+\section{Error's Value}
+
+Let's find possible value of error's value $\delta_0$. Rectangles are defined correctly for a horizontal optimization task, if:
+
+\begin{equation}\label{1}
+\forall\delta : |\delta| < \delta_0 \Rightarrow f'_y(\textbf{x}_0)f'_y(x_0+\delta, y_0) > 0
+\end{equation}
+
+Analogically, for a vertical segment:
+\begin{equation}
+\forall\delta: |\delta| < \delta_0 \Rightarrow f'_x(\textbf{x}_0)f'_x(x_0, y_0+\delta) > 0
+\end{equation}
+\begin{theorem}
+Let's function $f$ is convex and differentiable and current rectangle is $[a,b]\times[c,d]$.
+
+\textbf{For horizontal segment:}  There is $f''_{xy}$ on the segment. Rectangle is defined in point $(x_0 + \delta, y_0)$ correctly if one meet following condition:
+\begin{equation}
+\boxed{\delta_0 < \frac{|f'_y(\textbf{x}_0)|}{\max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|}}
+\end{equation}
+
+\textbf{For vertical segment:}  There is $f''_{yx}$ on the segment. Rectangle is defined in point $(x_0, y_0+\delta)$ correctly if one meet following condition:
+\begin{equation}
+\boxed{\delta_0 < \frac{|f'_x(\textbf{x}_0)|}{\max\limits_{t\in [c,d]}|f''_{yx}(x_0, t)|}}
+\end{equation}
+
+\end{theorem}
+\begin{proof}
+
+Let's prove this statement for horizontal segment.
+
+Rewrite the condition (1) using Taylor formula:
+
+$$\forall \delta:|\delta|\leq\delta_0\Rightarrow f'_y(\textbf{x}_0)\left(f'_y(\textbf{x}_0)+f''_{xy}\left(\textbf{x}_0+(\theta\delta,0)^\top\right)\delta\right) > 0,$$
+where $\theta\in(0,1)$
+
+Using the written above inequality we have a following inequality for $\delta_0$:
+
+$$\delta_0<\frac{|f'_y(\textbf{x}_0)|}{\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)|}$$
+
+It and an obvious inequality $\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)| < \max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|$ proves (3). Inequality (4) are proved similar.
+\end{proof}
+
+\begin{theorem}
+Let's function $f$ is convex and has $L$-Lipschitz continuous gradient. 
+
+And on horizontal segment $\exists M_1  : \forall \textbf{x}\Rightarrow|f_y'(\textbf{x})| > M_1$. Then rectangle is defined correctly if the possible value of error is not more $\frac{M_1}{L}$.
+
+And on vertical segment $\exists M_2  : \forall \textbf{x}\Rightarrow|f_x'(\textbf{x})| > M_2$. Then rectangle is defined correctly if the possible value of error is not more $\frac{M_2}{L}$
+\end{theorem}
+\begin{proof}
+Condition (1) is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
+$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
+
+$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
+
+The $L$-Lipschitz continuity gives following inequality:
+
+$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right| \leq L|\delta|$$
+
+Theorem's estimate for vertical segment follows from two written above inequality. Inequality for vertical segment is proved similarly.
+\end{proof}
+
+\section{Number of iterations}
+\begin{theorem}
+If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
+$$N = \left\lceil\log\frac{La}{\epsilon}\right\rceil,$$
+where $a$ is a size of the initial square $Q$
+\end{theorem}
+\begin{proof}
+$$|f(\textbf{x}^*) - f(\textbf{x})| < L|\textbf{x}^* - \textbf{x}|$$
+
+After $N$ iterations we have a square with size $\frac{a}{2^N}$. That's why
+$$|\textbf{x}^* - \textbf{x}| \leq a2^{-N}$$
+$$|f(\textbf{x}^*) - f(\textbf{x})| < La2^{-N}$$
+
+Therefore, for accuracy epsilon following number of iterations is sufficient:
+$$N > \log\frac{La}{\epsilon}$$
+
+\end{proof}
+
+But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
+
+\begin{theorem}
+If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
+$$N = \left\lceil\log\max\left\{\frac{a}{\epsilon_0(x^*)},\log\frac{La}{\epsilon}\right\}\right\rceil,$$
+where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in.
+\end{theorem}
+
+\end{document}
