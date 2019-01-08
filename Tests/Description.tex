@@ -1,0 +1,86 @@
+ \documentclass[12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}       
+
+\usepackage[english]{babel}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,amsbsy,amstext,amscd,amsxtra,multicol}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+\usepackage[stable]{footmisc}
+\usepackage{ dsfont }
+
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{bm}
+\usepackage{color}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\intt}{int}
+\DeclareMathOperator{\conv}{conv}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}
+
+\begin{document}
+\section{Tests functions}
+
+Functions $-\sin\frac{\pi x}{a}$ and $-\sin\frac{\pi x}{b}$ are convex on square $Q = [0,1]^2$ when $a,b\geq 1$. Therefore, a function $-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b}$ is convex for all $A,B\geq 0$ as cone combination of convex function.
+
+Functions $x^n$ are convex and monotonously non-decreasing on $[0, 1]$ for all $n \in \mathbb{N}$ that's why functions $\left(-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b} + A + B + D\right)^n$ are convex for all $D\geq 0$.
+
+Therefore, following function is convex:
+
+$$f(x,y) = -A_1\sin\frac{\pi x}{a_1} - B_1\sin\frac{\pi x}{b_1} + \sum\limits_{n=2}^N\left(-A_n\sin\frac{\pi x}{a_n} - B_n\sin\frac{\pi y}{b_n} + A_n + B_n + D_n\right)^n,$$
+
+where $A_i, B_i. D_i\geq 0$ and $a_i, b_i \geq 1$ for all $i = \overline{1, n}$.
+
+The function $f$ is differentiable infinite times and we can use it to test the method.
+
+Let's take $a_1 = \dots = a_n = a$ and $b_1 = \dots = b_n = b$:
+
+$$f(x,y) = -A_1\sin\frac{\pi x}{a} - B_1\sin\frac{\pi x}{b} + \sum\limits_{n=2}^N\left(-A_n\sin\frac{\pi x}{a} - B_n\sin\frac{\pi y}{b} + A_n + B_n + D_n\right)^n,$$
+
+where $A_i, B_i. D_i\geq 0$ for all $i = \overline{1, n}$ and $a, b \geq 1$.
+
+Then functions derivative is:
+
+$$f'_x(x,y) = \left(-A_1 - \sum\limits_{n=2}^NnA_n\left(-A_n\sin\frac{\pi x}{a} - B_n\sin\frac{\pi y}{b} + A_n + B_n + D_n\right)^{n-1}\right)\cdot$$
+$$\cdot\frac{\pi}{a}\cos \frac{\pi x}{a}$$
+
+$$f'_y(x,y) = \frac{\pi}{b}\left(-B_1 - \sum\limits_{n=2}^NnB_n\left(-A_n\sin\frac{\pi x}{a} - B_n\sin\frac{\pi y}{b} + A_n + B_n + D_n\right)^{n-1}\right)\cdot$$
+$$\cdot\frac{\pi}{b}\cos \frac{\pi y}{b}$$
+
+$$f''_{xy}(x,y) = \left(\sum\limits_{n=2}^Nn(n-1)A_nB_n\left(-A_n\sin\frac{\pi x}{a} - B_n\sin\frac{\pi y}{b} + A_n + B_n + D_n\right)^{n-2}\right)\cdot$$
+$$\cdot\frac{\pi^2}{ab}\cos \frac{\pi x}{a}\cos \frac{\pi y}{b}$$
+
+Using written above expressions we can give estimates for derivatives:
+
+$$|f'_x|\Big|_{x = x_0} \geq \left(A_1 + \sum\limits_{n=2}^N n A_n D_n^{n-1}\right)\frac{\pi}{a}\Big|\cos \frac{\pi x_0}{a}\Big|$$
+$$|f'_x|\Big|_{y = y_0} \geq \left(B_1 + \sum\limits_{n=2}^N n B_n D_n^{n-1}\right)\frac{\pi}{b}\Big|\cos \frac{\pi y_0}{b}\Big|$$
+$$|f''_{xy}| \leq \frac{\pi^2}{ab}\left(\sum\limits_{n=2}^Nn(n-1)A_nB_n\left(A_n + B_n + D_n\right)^{n-2}\right)$$
+
+Also we know solution of this task:
+
+\begin{equation}
+x^* = \begin{cases}
+1, \text{if $a \geq 2$},\\
+\frac{a}{2}, \text{else}
+\end{cases}
+\end{equation}
+
+\begin{equation}
+y^* = \begin{cases}
+1, \text{if $b \geq 2$},\\
+\frac{b}{2}, \text{else}
+\end{cases}
+\end{equation}
+and task's value:
+$$f^* = f(x^*, y^*).$$
+\end{document}
