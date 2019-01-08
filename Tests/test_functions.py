@@ -8,6 +8,8 @@ class sinuses():
         self.parameters = a
         self.coef = b
         self.min = self.calculate_function(b[0]/2, b[1]/2)
+        self.min_x = b[0]/2
+        self.min_y = b[1]/2
 
     def calculate_function(self, x, y):
         a = self.parameters
@@ -31,7 +33,7 @@ class sinuses():
         der = a[0][0]
         for i in range(1, len(a)):
             der += (i+1) * a[i][0] * a[i][2]**i
-        return der * cos(x * pi / b[0]) * pi / b[0]
+        return der * abs(cos(x * pi / b[0])) * pi / b[0]
     
     def der_y(self, x, y):
         a = self.parameters
@@ -47,7 +49,7 @@ class sinuses():
         der = a[0][1]
         for i in range(1, len(a)):
             der += (i+1) * a[i][1] * a[i][2]**i
-        return der * cos(y * pi / b[1]) * pi / b[1]
+        return der * abs(cos(y * pi / b[1])) * pi / b[1]
 
     def max_der_xy(self, x, num):
         a = self.parameters
