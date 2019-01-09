@@ -11,3 +11,5 @@ One should install `matplotlib` and `numpy` to use programs.
 * [Examples of tests functions](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/Example%20of%20test%20function.ipynb) - graphics of some tests functions
 * [Code for tests functions](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/test_functions.py)
 * [Code for the method](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/method_functions.py)
+* [Main part to give results](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/tests.py)
+* [Tests results in .ipynb](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/Test_Results.ipynb)
