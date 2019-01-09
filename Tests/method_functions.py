@@ -9,11 +9,14 @@ def grad_discent_segment(segm, deriv, alpha_0, delta, sol):
     while abs(x - sol) > delta and N < 1000:
         x = min(max(x - alpha_0 * deriv(x), segm[0]), segm[1])
         N += 1
-    return (x, N % 1000)
+    return (x, int(N) // 1000)
 
 def method(f, eps, Q):
-    N = 1
+    N = 0
     flag = 0
+    
+    if abs(f.calculate_function((Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2) - f.min) <  eps:
+        return (((Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2), N, flag)
     while True:
         r = grad_discent_segment([Q[0], Q[1]], 
                                  lambda x: f.der_x(x, (Q[2] + Q[3]) / 2), 

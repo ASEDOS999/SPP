@@ -10,7 +10,10 @@ class sinuses():
         self.min = self.calculate_function(b[0]/2, b[1]/2)
         self.min_x = b[0]/2
         self.min_y = b[1]/2
-
+        s = a[0][1] + a[0][0]
+        for i in range(1, len(a)):
+            s += (i+1) * (a[i][0] + a[i][1]) * a[i][2]**i
+        self.L = s
     def calculate_function(self, x, y):
         a = self.parameters
         b = self.coef
