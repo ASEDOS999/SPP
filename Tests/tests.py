@@ -32,10 +32,10 @@ for i in np.linspace(1.1, 1.9, 5).tolist():
             a[max(m, 0)][n] *= 10
         num += 1
 print('100 % is completed')
-plt.plot([math.log(i[3] / i[1]) for i in results if i[2] == 0], [i[0] for i in results if i[2] == 0], 'ro')
-plt.plot([math.log(i[3] / i[1]) for i in results if i[2] != 0], [i[0] for i in results if i[2] != 0], 'g+')
+plt.plot([math.log(i[3] / i[1] / math.sqrt(2), 2) for i in results if i[2] == 0], [i[0] for i in results if i[2] == 0], 'ro')
+plt.plot([math.log(i[3] / i[1] / math.sqrt(2), 2) for i in results if i[2] != 0], [i[0] for i in results if i[2] != 0], 'g+')
 plt.plot([0, 17], [0, 17], 'b')
-plt.legend(('Type 1', 'Type_2', r'Line $N = \log \frac{La}{\epsilon}$'))
+plt.legend(('Type 1', 'Type_2', r'Line $N = \log \frac{La}{\sqrt{2}\epsilon}$'))
 plt.ylabel(r'$N$')
-plt.xlabel(r'$\log \frac{La}{\epsilon}$')
+plt.xlabel(r'$\log \frac{La}{\sqrt{2}\epsilon}$')
 plt.show()
