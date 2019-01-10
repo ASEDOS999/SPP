@@ -21,7 +21,7 @@ def method(f, eps, Q):
         r = grad_discent_segment([Q[0], Q[1]], 
                                  lambda x: f.der_x(x, (Q[2] + Q[3]) / 2), 
                                  (Q[0] + Q[1]) / 4, 
-                                 f.min_der_y((Q[2] + Q[3]) / 2) / f.max_der_xy((Q[2] + Q[3]) / 2, 1),
+                                 f.get_est((Q[2] + Q[3]) / 2, 1),
                                  f.min_x)
         x_0 = r[0]
         flag += r[1]
@@ -36,7 +36,7 @@ def method(f, eps, Q):
         r = grad_discent_segment([Q[2], Q[3]], 
                                  lambda y: f.der_y((Q[0] + Q[1]) / 2, y), 
                                  (Q[2] + Q[3]) / 4, 
-                                 f.min_der_x((Q[0] + Q[1]) / 2) / f.max_der_xy((Q[0] + Q[1]) / 2, 0),
+                                 f.get_est((Q[0] + Q[1]) / 2, 0),
                                  f.min_y)
         y_0 = r[0]
         flag += r[1]

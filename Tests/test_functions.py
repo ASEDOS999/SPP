@@ -54,7 +54,7 @@ class sinuses():
             der += (i+1) * a[i][1] * a[i][2]**i
         return der * abs(cos(y * pi / b[1])) * pi / b[1]
 
-    def max_der_xy(self, x, num):
+    def max_der_xy(self):
         a = self.parameters
         b = self.coef
         der = 0
@@ -62,5 +62,5 @@ class sinuses():
             der += i * (i+1) * (a[i][0] + a[i][1]+ a[i][2])**(i-1)
         return der * pi**2 / (b[0] * b[1])
     
-    def gradient(self, x, y):
-        return (self.derivative_x(x, y), self.derivative_y(x, y))
+    def get_est(self, x, num):
+        return self.min_der_y(x) / self.max_der_xy()
