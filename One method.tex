@@ -182,7 +182,7 @@ Following estimates are correct if each iterations was correct (a rectangle is s
 
 \begin{theorem}
 If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lceil\log_2\frac{La}{\sqrt{2}\epsilon}\right\rceil,$$
+$$N = \left\lfloor\log_2\frac{La}{\sqrt{2}\epsilon} + 1\right\rfloor,$$
 where $a$ is a size of the initial square $Q$
 \end{theorem}
 \begin{proof}
@@ -201,8 +201,29 @@ But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. 
 
 \begin{theorem}
 If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(x^*)},\log\frac{La}{\sqrt{2}\epsilon}\right\}\right\rceil,$$
+$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\log\frac{La}{\sqrt{2}\epsilon}\right\}+1\right\rfloor,$$
 where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in.
 \end{theorem}
 
+If $f$ is Lipschitz continuous then there is following inequality:
+
+$$|f(x_1)-f(x_2)| < L|\textbf{x}_1 - \textbf{x}_2|$$
+
+In particular, if $x_0$ is a squares center and $\textbf{x}^*$ is a solution then 
+
+$$\Delta f = f(x_0) - f(x^*) < L|\textbf{x}_0 - \textbf{x}^*| \leq L\frac{a}{2}$$
+
+Using this inequality and written above theorems 4.1 and 4.2  we have following results:
+
+\begin{theorem}
+If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
+$$N = \left\lfloor\log_2\frac{\Delta f}{\epsilon} + 1\right\rfloor,$$
+where $a$ is a size of the initial square $Q$
+\end{theorem}
+
+\begin{theorem}
+If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
+$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\log\frac{\Delta f}{\epsilon}\right\}+1\right\rfloor,$$
+where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in.
+\end{theorem}
 \end{document}
