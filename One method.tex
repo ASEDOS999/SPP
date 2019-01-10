@@ -29,6 +29,10 @@
 \newtheorem{lemma}{Lemma}
 
 \begin{document}
+
+\tableofcontents
+\newpage
+
 \section{Description Of A Task}
 
 Let's consider a following task:
@@ -84,17 +88,7 @@ If the optimization task on segment is solved with zero error and the $f$ is con
 From sub-gradient definition, $\textbf{x}^* \in \{x|(\textbf{g}(\textbf{x}_0), \textbf{x}_0 - \textbf{x}^*) \geq 0)\}$. Lemma's statement follows from it and a fact that the first (or the second for vertical segment) gradient's component in point $\textbf{x}_0$ is zero.
 \end{proof}
 
-The method does not work for all convex functions even for zero error on segment. Let's consider following example.
 
-\textbf{Example 1}.
-\begin{equation}
-f(x,y) = \max\{x-2y, y-2x\}, \\
-Q = [-1, 1]^2
-\end{equation}
-
-Function $f$ is convex as maximum of affine functions on $x$ and $y$. A solution of task on horizontal segment $[-1, 1]\times\{0\}$ is point $(0, 0)$. Its subdifferential is $$\partial f(0,0) = \conv\left\{(1, -2)^\top, (-2,1)^\top\right\}.$$ 
-
-So if one takes a subgradient $(1,-2)^\top$ then a bottom rectangle will be choosed. But optimal value is point $(1,1)$ and there is not it in choosed rectangle. Therefore, this method cannot give a solution of initial task with error less than $\frac{1}{2}$.
 \subsection{Nonzero Error}
 \begin{theorem}
 Let's the $f$ has continuous derivative on the square. Then there is a neighbourhood of a solution of optimization task on segment such as a choice of rectangle will not change if one use any point from the   neighbourhood.
@@ -113,6 +107,20 @@ $$\exists \delta_0:\forall \textbf{x}_\delta\in B_{\delta_0}(x_0)\times y_0\Righ
 From it and lemma 1 theorem's statement follows.
 
 \end{proof}
+
+\subsection{Undifferentiable convex function}
+
+The method does not work for all convex functions even for zero error on segment. Let's consider following example.
+
+\textbf{Example 1}.
+\begin{equation}
+f(x,y) = \max\{x-2y, y-2x\}, \\
+Q = [-1, 1]^2
+\end{equation}
+
+Function $f$ is convex as maximum of affine functions on $x$ and $y$. A solution of task on horizontal segment $[-1, 1]\times\{0\}$ is point $(0, 0)$. Its subdifferential is $$\partial f(0,0) = \conv\left\{(1, -2)^\top, (-2,1)^\top\right\}.$$ 
+
+So if one takes a subgradient $(1,-2)^\top$ then a bottom rectangle will be choosed. But optimal value is point $(1,1)$ and there is not it in choosed rectangle. Therefore, this method cannot give a solution of initial task with error less than $\frac{1}{2}$.
 
 \section{Error's Value}
 
@@ -181,9 +189,12 @@ Theorem's estimate for vertical segment follows from two written above inequalit
 Following estimates are correct if each iterations was correct (a rectangle is selected correctly on each iterations).
 
 \begin{theorem}
-If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lfloor\log_2\frac{La}{\sqrt{2}\epsilon} + 1\right\rfloor,$$
-where $a$ is a size of the initial square $Q$
+If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make any following iteration's numbers:
+$$N = \left\lfloor\log_2\frac{La}{\sqrt{2}\epsilon} + 1\right\rfloor, \eqno{(4.1)}$$
+
+$$N = \left\lfloor\log_2\frac{\Delta f}{\epsilon} + 1\right\rfloor, \eqno{(4.2)}$$
+
+where $a$ is a size of the initial square $Q$, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
 \begin{proof}
 $$|f(\textbf{x}^*) - f(\textbf{x})| < L|\textbf{x}^* - \textbf{x}|$$
@@ -195,35 +206,29 @@ $$|f(\textbf{x}^*) - f(\textbf{x})| < La2^{-N}$$
 Therefore, for accuracy epsilon following number of iterations is sufficient:
 $$N > \log_2\frac{La}{\sqrt{2}\epsilon}$$
 
+It proves the estimate (4.1).
+
+$$|f(x_1)-f(x_2)| < L|\textbf{x}_1 - \textbf{x}_2|$$
+
+In particular, if $x_0$ is a squares center and $\textbf{x}^*$ is a solution then 
+
+$$\Delta f = f(x_0) - f(x^*) < L|\textbf{x}_0 - \textbf{x}^*| \leq L\frac{a}{\sqrt{2}}$$
+
+Using it and estimate (4.1) we have estimate (4.2).
+
 \end{proof}
 
 But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
 
 \begin{theorem}
 If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\log\frac{La}{\sqrt{2}\epsilon}\right\}+1\right\rfloor,$$
-where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in.
+$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}+1\right\rfloor, \eqno{(4.3)}$$
+
+$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{\Delta f}{\epsilon}\right\}+1\right\rfloor, \eqno{(4.4)}$$
+where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
 
-If $f$ is Lipschitz continuous then there is following inequality:
+\section{Tests}
 
-$$|f(x_1)-f(x_2)| < L|\textbf{x}_1 - \textbf{x}_2|$$
 
-In particular, if $x_0$ is a squares center and $\textbf{x}^*$ is a solution then 
-
-$$\Delta f = f(x_0) - f(x^*) < L|\textbf{x}_0 - \textbf{x}^*| \leq L\frac{a}{2}$$
-
-Using this inequality and written above theorems 4.1 and 4.2  we have following results:
-
-\begin{theorem}
-If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lfloor\log_2\frac{\Delta f}{\epsilon} + 1\right\rfloor,$$
-where $a$ is a size of the initial square $Q$
-\end{theorem}
-
-\begin{theorem}
-If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\log\frac{\Delta f}{\epsilon}\right\}+1\right\rfloor,$$
-where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in.
-\end{theorem}
 \end{document}
