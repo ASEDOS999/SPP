@@ -83,9 +83,18 @@ class almost_polinomial():
     
     def psi(self, x):
         if x < 0:
-            return 1.5
-        return 1
+            return 3
+        else:
+            return 2
     
+    def calculate_function(self, x_ar, y_ar):
+        ans = np.zeros(np.shape(x_ar))
+        for i in range(np.shape(x_ar)[0]):
+            for j in range(np.shape(x_ar)[1]):
+                x, y = x_ar[i][j], y_ar[i][j]
+                ans[i][j] = (self.coef[0] * self.psi(x) * x**2 / 2 + self.coef[0] * self.psi(y) * y**2 / 2 +
+                    (self.coef[2] * x + self.coef[3] * y)**2)
+        return ans
     def der_x(self, x, y):
         return self.psi(x) * x + 2 * self.coef[2] * (self.coef[2] * x + self.coef[3] * y)
     
