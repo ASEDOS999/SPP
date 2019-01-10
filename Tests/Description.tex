@@ -31,6 +31,7 @@
 \begin{document}
 \section{Tests functions}
 
+\subsection{Sinuses}
 Functions $-\sin\frac{\pi x}{a}$ and $-\sin\frac{\pi x}{b}$ are convex on square $Q = [0,1]^2$ when $a,b\geq 1$. Therefore, a function $-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b}$ is convex for all $A,B\geq 0$ as cone combination of convex function.
 
 Functions $x^n$ are convex and monotonously non-decreasing on $[0, 1]$ for all $n \in \mathbb{N}$ that's why functions $\left(-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b} + A + B + D\right)^n$ are convex for all $D\geq 0$.
@@ -83,4 +84,92 @@ y^* = \begin{cases}
 \end{equation}
 and task's value:
 $$f^* = f(x^*, y^*).$$
+
+We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. That's why we can find task's value easy:
+
+$$f^* = -A_1 - B_1 + \sum\limits_{n=2}^ND_n^n$$
+
+Also we will use $N = 2$.
+
+\subsection{Lipschitz continuous gradient}
+
+Let's consider following function:
+
+\begin{equation}
+f(x) = x^2\cdot\begin{cases}
+\frac{3}{2}, \text{if $x < 0$},\\
+1, \text{if $x \geq 0$}
+\end{cases}
+\end{equation}
+
+Function $f(x)$ is convex and has a Lipschitz continuous derivative but it is not twice differentiable at zero:
+
+\begin{equation}
+f'(x) = x\cdot\begin{cases}
+3, \text{if $x < 0$},\\
+2, \text{if $x \geq 0$}
+\end{cases}
+\end{equation}
+
+Let's find $L$ for derivative:
+
+\begin{equation}
+\frac{|f'(x_1) - f'(x_2)|}{|x_1-x_2|} = \begin{cases}
+3, \text{if $x_1, x_2 < 0$},\\
+2, \text{if $x_1, x_2 \geq 0$}
+\end{cases}\leq 3
+\end{equation}
+Let $x_1<0, x_2\geq 0$: 
+
+$$\frac{|f'(x_1) - f'(x_2)|}{|x_1-x_2|} = \frac{|3x_1 - 2x_2|}{|x_1-x_2|} \leq \frac{|x_1|}{|x_1-x_2|} + 2\leq 3$$
+
+As a result, we have:
+$$L = 3$$
+
+Let's consider following function:
+
+$$g(x,y) = af(x)+bf(y) + \phi(x,y),$$
+where $a,b\geq 0$ - constants, $\phi$ is a convex function with a Lipschitz continuous derivative. Therefore, $g$ has a Lipschitz continuous derivative with a Lipschitz constant $3(a+b) + L_\phi$.
+
+Let's consider following functions:
+
+$$g(x,y) = af(x) + bf(y) + (Ax+By)^2,$$
+
+where $A, B$ and $a, b\geq 0$ are constants.
+
+Then $g$ is convex and has a Lipschitz continuous derivative with a constant $3(a+b) + 2(|A_1|+|B_1|)^2 + |A_2| + |B_2|$ but it is not twice differentiable at zero.
+
+$$g_x'(x,y) = \psi(x) x + 2A_1(A_1x+B_1y),$$
+$$g_y'(x,y) = \psi(y) y + 2B_1(A_1x+B_1y),$$
+where 
+\begin{equation}
+\psi(x) = \begin{cases}
+3, \text{if $x < 0$},\\
+2, \text{if $x \geq 0$}
+\end{cases}
+\end{equation}
+
+Then a point (0,0) is optimal. Also it is only optimal point. 
+
+Let's consider minimization task for $g$ on square $Q = [x_1, x_2]\times [y_1, y_2]$ such as $0\in Q$. Estimates for derivatives:
+
+\begin{eqnarray}
+|g_x'(x,y)|\Big|_{x=x_0} = |(\psi(x_0) + 2A_1^2)x_0 + 2A_1B_1y| \geq \nonumber\\
+\geq \begin{cases}
+0, \text{if $-\frac{(\psi(x_0) + A_1^2)x_0}{2A_1B_1}\in [y_1, y_2]$ },\\
+|(\psi(x_0) + 2A_1^2)x_0 + 2A_1B_1y_2|, \text{if $|(\psi(x_0) + 2A_1^2)x_0 + 2A_1B_1y|<0$},\\ 
+|(\psi(x_0) + 2A_1^2)x_0 + 2A_1B_1y_1|, \text{if $|(\psi(x_0) + 2A_1^2)x_0 + 2A_1B_1y|>0$},\\
+\end{cases}
+\end{eqnarray}
+
+For $g_y'$ we have similar estimate:
+
+\begin{eqnarray}
+|g_y'(x,y)|\Big|_{y=y_0} \geq\nonumber\\ 
+\geq \begin{cases}
+0, \text{if $-\frac{(\psi(y_0) + 2B_1^2)y_0}{2A_1B_1}\in [x_1, x_2]$ },\\
+|(\psi(y_0) + 2B_1^2)y_0 + 2A_1B_1x_2|, \text{if $|(\psi(y_0) + 2B_1^2)y_0 + 2A_1B_1x|<0$},\\ 
+|(\psi(y_0) + 2B_1^2)y_0 + 2A_1B_1x_1|, \text{if $|(\psi(y_0) + 2B_1^2)y_0 + 2A_1B_1x|>0$},\\
+\end{cases}
+\end{eqnarray}
 \end{document}
