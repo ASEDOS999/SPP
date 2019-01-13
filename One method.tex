@@ -124,6 +124,12 @@ So if one takes a subgradient $(-2, 1)^\top$ then a bottom rectangle will be cho
 
 \section{Error's Value}
 
+From derivative continuously we have following obvious result:
+
+\begin{lemma}
+If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizontal segment, then gradient has same direction in all points of segment. If $|f'_y(x_0, y)| > 0$ for all $y$ on vertical segment, then gradient has same direction in all points of segment.
+\end{lemma}
+
 Let's find possible value of error's value $\delta_0$. Rectangles are defined correctly for a horizontal optimization task, if:
 
 \begin{equation}\label{1}
@@ -134,17 +140,19 @@ Analogically, for a vertical segment:
 \begin{equation}
 \forall\delta: |\delta| < \delta_0 \Rightarrow f'_x(\textbf{x}_0)f'_x(x_0, y_0+\delta) > 0
 \end{equation}
+
+
 \begin{theorem}
 Let's function $f$ is convex and differentiable and current rectangle is $[a,b]\times[c,d]$.
 
 \textbf{For horizontal segment:}  There is $f''_{xy}$ on the segment. Rectangle is defined in point $(x_0 + \delta, y_0)$ correctly if one meet following condition:
 \begin{equation}
-\boxed{\delta_0 < \frac{|f'_y(\textbf{x}_0)|}{\max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|}}
+\delta_0 < \frac{|f'_y(\textbf{x}_0)|}{\max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|}
 \end{equation}
 
 \textbf{For vertical segment:}  There is $f''_{yx}$ on the segment. Rectangle is defined in point $(x_0, y_0+\delta)$ correctly if one meet following condition:
 \begin{equation}
-\boxed{\delta_0 < \frac{|f'_x(\textbf{x}_0)|}{\max\limits_{t\in [c,d]}|f''_{yx}(x_0, t)|}}
+\delta_0 < \frac{|f'_x(\textbf{x}_0)|}{\max\limits_{t\in [c,d]}|f''_{yx}(x_0, t)|}
 \end{equation}
 
 \end{theorem}
@@ -164,25 +172,6 @@ $$\delta_0<\frac{|f'_y(\textbf{x}_0)|}{\max\limits_{\theta \in [-1, 1]}|f''_{xy}
 It and an obvious inequality $\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)| < \max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|$ proves (3). Inequality (4) are proved similar.
 \end{proof}
 
-\begin{theorem}
-Let's function $f$ is convex and has $L$-Lipschitz continuous gradient. 
-
-And on horizontal segment $\exists M_1  : \forall \textbf{x}\Rightarrow|f_y'(\textbf{x})| > M_1$. Then rectangle is defined correctly if the possible value of error is not more $\frac{M_1}{L}$.
-
-And on vertical segment $\exists M_2  : \forall \textbf{x}\Rightarrow|f_x'(\textbf{x})| > M_2$. Then rectangle is defined correctly if the possible value of error is not more $\frac{M_2}{L}$
-\end{theorem}
-\begin{proof}
-Condition (1) is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
-$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
-
-$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
-
-The $L$-Lipschitz continuity gives following inequality:
-
-$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right| \leq L|\delta|$$
-
-Theorem's estimate for vertical segment follows from two written above inequality. Inequality for vertical segment is proved similarly.
-\end{proof}
 
 \section{Number of iterations}
 
