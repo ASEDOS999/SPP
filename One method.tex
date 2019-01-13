@@ -12,7 +12,7 @@
 \usepackage[colorlinks,urlcolor=blue]{hyperref}
 \usepackage[stable]{footmisc}
 \usepackage{ dsfont }
-
+\usepackage{wrapfig}
 \usepackage{xparse}
 \usepackage{ifthen}
 \usepackage{bm}
@@ -218,6 +218,56 @@ where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neig
 \end{theorem}
 
 \section{Tests}
+\subsection{About function $solve$}
 
+
+\subsection{Tests for iterations number}
+
+Let's make tests for the estimate (4.1). The estimate (4.2) is a consequence of the estimate (4.1) that's why following tests prove (4.2) too.
+
+Functions $-\sin\frac{\pi x}{a}$ and $-\sin\frac{\pi x}{b}$ are convex on square $Q = [0,1]^2$ when $a,b\geq 1$. Therefore, a function $-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b}$ is convex for all $A,B\geq 0$ as cone combination of convex function.
+
+Functions $x^n$ are convex and monotonously non-decreasing on $[0, 1]$ for all $n \in \mathbb{N}$ that's why functions $\left(-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b} + A + B + D\right)^n$ are convex for all $D\geq 0$.
+
+Therefore, following function is convex:
+
+$$f(x,y) = -A_1\sin\frac{\pi x}{a_1} - B_1\sin\frac{\pi x}{b_1} + \sum\limits_{n=2}^N\left(-A_n\sin\frac{\pi x}{a_n} - B_n\sin\frac{\pi y}{b_n} + A_n + B_n + D_n\right)^n,$$
+
+where $A_i, B_i. D_i\geq 0$ and $a_i, b_i \geq 1$ for all $i = \overline{1, n}$.
+
+The function $f$ is differentiable infinite times and we can use it to test the method.
+
+Let's take $a_1 = \dots = a_n = a$ and $b_1 = \dots = b_n = b$:
+
+$$f(x,y) = -A_1\sin\frac{\pi x}{a} - B_1\sin\frac{\pi x}{b} + \sum\limits_{n=2}^N\left(-A_n\sin\frac{\pi x}{a} - B_n\sin\frac{\pi y}{b} + A_n + B_n + D_n\right)^n,$$
+
+where $A_i, B_i. D_i\geq 0$ for all $i = \overline{1, n}$ and $a, b \geq 1$.
+
+We have following estimates for derivatives on horizontal and vertical segments:
+
+$$|f'_x|\Big|_{x = x_0} \geq \left(A_1 + \sum\limits_{n=2}^N n A_n D_n^{n-1}\right)\frac{\pi}{a}\Big|\cos \frac{\pi x_0}{a}\Big|$$
+$$|f'_y|\Big|_{y = y_0} \geq \left(B_1 + \sum\limits_{n=2}^N n B_n D_n^{n-1}\right)\frac{\pi}{b}\Big|\cos \frac{\pi y_0}{b}\Big|$$
+
+Therefore this functions met conditions of lemma 2. One can see examples of functions $f$ on fig.~\ref{fig:examples}
+
+\begin{figure}[h]
+\center{\includegraphics[scale=0.5]{tests/Examples.png}}
+\caption{Examples of tests functions}
+\label{fig:examples}
+\end{figure}
+
+We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. Let's solve task of minimization function $f$ with different parameters on square $[0,1]^2$ through new method and compares number of iteration with estimate (4.1).
+
+Result of the test you can see on fig.~\ref{fig:image}.
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.7]{tests/Test_results.png}}
+\caption{Tests results for iterations number}
+\label{fig:image}
+\end{figure}
+
+On graphic $N$ is number of done iterations for accuracy $\epsilon$, $\log_2\frac{La}{\sqrt{2}\epsilon}$ is the parameter of tests tasks. Line $N = \log_2\frac{La}{\sqrt{2}\epsilon}$ is our estimates (4.1).
+
+We can see that there are tests points under this line. It proves our estimates (4.1) and (4.2).
 
 \end{document}
