@@ -5,7 +5,8 @@ def grad_discent_segment(segm, deriv, alpha_0, delta, sol):
         delta = 0.1**2
     N = 1
     x = (segm[0] + segm[1]) / 2
-
+    if delta < 0:
+        return (x, N)
     while abs(x - sol) > delta and N < 1000:
         x = min(max(x - alpha_0 * deriv(x), segm[0]), segm[1])
         N += 1
