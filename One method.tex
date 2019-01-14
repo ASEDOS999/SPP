@@ -127,8 +127,19 @@ So if one takes a subgradient $(-2, 1)^\top$ then a bottom rectangle will be cho
 From derivative continuously we have following obvious result:
 
 \begin{lemma}
-If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizontal segment, then gradient has same direction in all points of segment. If $|f'_y(x_0, y)| > 0$ for all $y$ on vertical segment, then gradient has same direction in all points of segment.
+If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizontal segment, then gradient has same direction on parallel to the segment axis  in all points of segment. If $|f'_y(x_0, y)| > 0$ for all $y$ on vertical segment, then gradient has same direction in all points of segment.
 \end{lemma}
+
+\textbf{Example 2.} All functions $f$ of the following type meet conditions of written above lemma:
+
+$$f(x, y) = \psi(x) + \phi(y),$$
+where $\psi, \phi$ are convex and differentiable functions.
+
+\textbf{Example 3.} Let's illustrate that we can take any point from segment. Let's consider following task:
+
+$$\min\left\{(x-y)^2 + x^2\Big|Q = [0,1]^2\right\}$$
+
+On segment $[0,1]\times\left\{\frac{1}{2}\right\}$ this task has solution $f^* = f\left(\frac{1}{4}, \frac{1}{2}\right) = \frac{1}{8}$. Derivative on $y$ at this point is $f'_y\left(\frac{1}{4}, \frac{1}{2}\right) = \frac{]}{2}$ but at the point $\left(1, \frac{1}{2}\right)$ is equal to $-1$. We can see that in this case rectangle will selected non-correctly.
 
 Let's find possible value of error's value $\delta_0$. Rectangles are defined correctly for a horizontal optimization task, if:
 
@@ -172,58 +183,58 @@ $$\delta_0<\frac{|f'_y(\textbf{x}_0)|}{\max\limits_{\theta \in [-1, 1]}|f''_{xy}
 It and an obvious inequality $\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)| < \max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|$ proves (3). Inequality (4) are proved similar.
 \end{proof}
 
+\textbf{Example 4.} All positive semidefinite quadratic form meet conditions of written above theorem:
+
+$$B(x,y) = Ax^2 + 2Bxy + Cy^2 + Dx +Ey + F,$$
+$$B''_{xy} = B''_{yx} = 2B < \infty$$
+where $A \geq 0,AC - B^2\geq0$. Also estimate for $\delta$ has some sense (estimate is non zero if $\textbf{x}_0$ is not optimal solution). Also one can easy show that this estimate is accurate for task from example 3.
 
 \section{Number of iterations}
 
 Following estimates are correct if each iterations was correct (a rectangle is selected correctly on each iterations).
 
 \begin{theorem}
-If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to make any following iteration's numbers:
-$$N = \left\lfloor\log_2\frac{La}{\sqrt{2}\epsilon} + 1\right\rfloor, \eqno{(4.1)}$$
-
-$$N = \left\lfloor\log_2\frac{\Delta f}{\epsilon} + 1\right\rfloor, \eqno{(4.2)}$$
-
-where $a$ is a size of the initial square $Q$, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
+If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make any following iteration's numbers:
+$$N = \left\lceil\log_2\frac{La}{\sqrt{2}\epsilon}\right\rceil, \eqno{(4.1)}$$
+where $a$ is a size of the initial square $Q$.
 \end{theorem}
 \begin{proof}
 $$|f(\textbf{x}^*) - f(\textbf{x})| < L|\textbf{x}^* - \textbf{x}|$$
 
 After $N$ iterations we have a square with size $\frac{a}{2^N}$. That's why if we choose a squares center as proximal solution we have following estimates:
 $$|\textbf{x}^* - \textbf{x}| \leq \frac{a}{\sqrt{2}}2^{-N}$$
-$$|f(\textbf{x}^*) - f(\textbf{x})| < La2^{-N}$$
+$$|f(\textbf{x}^*) - f(\textbf{x})| < \frac{1}{\sqrt{2}}La2^{-N}$$
 
 Therefore, for accuracy epsilon following number of iterations is sufficient:
 $$N > \log_2\frac{La}{\sqrt{2}\epsilon}$$
 
 It proves the estimate (4.1).
-
-$$|f(x_1)-f(x_2)| < L|\textbf{x}_1 - \textbf{x}_2|$$
-
-In particular, if $x_0$ is a squares center and $\textbf{x}^*$ is a solution then 
-
-$$\Delta f = f(x_0) - f(x^*) < L|\textbf{x}_0 - \textbf{x}^*| \leq L\frac{a}{\sqrt{2}}$$
-
-Using it and estimate (4.1) we have estimate (4.2).
-
 \end{proof}
+
+There are functions which estimates from written above theorem are very accurate for.
+
+\textbf{Example 5.} Let's consider following task with positive constant $A$:
+
+$$\min\left\{A(x+y)|Q = [0,1]^2\right\}$$
+
+If one take a center of a current solution as proximal solution one have value $\frac{A}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{A}{\epsilon}\rceil$. For this function $L = 2A$. Therefore, estimate (4.1) is accurate for such tasks with little error that not more one iteration.
 
 But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
 
 \begin{theorem}
 If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
-$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}+1\right\rfloor, \eqno{(4.3)}$$
-
-$$N = \left\lfloor\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{\Delta f}{\epsilon}\right\}+1\right\rfloor, \eqno{(4.4)}$$
+$$N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}\right\rceil, \eqno{(4.2)}$$
 where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
 
 \section{Tests}
 \subsection{About function $solve$}
 
+If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use gradient descent with step $h_k = \frac{h}{k} = \frac{a}{4k}$, where $a$ is size of current segment.
 
 \subsection{Tests for iterations number}
 
-Let's make tests for the estimate (4.1). The estimate (4.2) is a consequence of the estimate (4.1) that's why following tests prove (4.2) too.
+Let's make tests for the estimate (4.1). The estimate (4.2) is a consequence of the estimate (4.1) that's why following tests confirm (4.2) too.
 
 Functions $-\sin\frac{\pi x}{a}$ and $-\sin\frac{\pi x}{b}$ are convex on square $Q = [0,1]^2$ when $a,b\geq 1$. Therefore, a function $-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b}$ is convex for all $A,B\geq 0$ as cone combination of convex function.
 
@@ -251,7 +262,7 @@ $$|f'_y|\Big|_{y = y_0} \geq \left(B_1 + \sum\limits_{n=2}^N n B_n D_n^{n-1}\rig
 Therefore this functions met conditions of lemma 2. One can see examples of functions $f$ on fig.~\ref{fig:examples}
 
 \begin{figure}[h]
-\center{\includegraphics[scale=0.5]{tests/Examples.png}}
+\center{\includegraphics[scale=0.6]{tests/Examples.png}}
 \caption{Examples of tests functions}
 \label{fig:examples}
 \end{figure}
@@ -268,6 +279,6 @@ Result of the test you can see on fig.~\ref{fig:image}.
 
 On graphic $N$ is number of done iterations for accuracy $\epsilon$, $\log_2\frac{La}{\sqrt{2}\epsilon}$ is the parameter of tests tasks. Line $N = \log_2\frac{La}{\sqrt{2}\epsilon}$ is our estimates (4.1).
 
-We can see that there are tests points under this line. It proves our estimates (4.1) and (4.2).
+We can see that there are tests points under this line. It confirms our estimates (4.1) and (4.2).
 
 \end{document}
