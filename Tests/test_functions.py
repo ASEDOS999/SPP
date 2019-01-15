@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from math import pi, sqrt, cos
+from math import pi, cos
 import numpy as np
 
 class sinuses():
@@ -39,6 +39,9 @@ class sinuses():
             der += (-(i+1) * a[i][1] * (-a[i][0] * np.sin(x * pi / b[0]) -
             a[i][1] * np.sin(y * pi/b[1]) + a[i][0] + a[i][1] + a[i][2])**i)
         return der * cos(y * pi / b[1]) * pi / b[1]
+    
+    def gradient(self, x, y):
+        return [self.der_x(x,y), self.der_y(x,y)]
     
     def get_est(self, x, num):
         return -1
