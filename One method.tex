@@ -141,7 +141,7 @@ $$\min\left\{(x-y)^2 + x^2\Big|Q = [0,1]^2\right\}$$
 
 On segment $[0,1]\times\left\{\frac{1}{2}\right\}$ this task has solution $f^* = f\left(\frac{1}{4}, \frac{1}{2}\right) = \frac{1}{8}$. Derivative on $y$ at this point is $f'_y\left(\frac{1}{4}, \frac{1}{2}\right) = \frac{]}{2}$ but at the point $\left(1, \frac{1}{2}\right)$ is equal to $-1$. We can see that in this case rectangle will selected non-correctly.
 
-Let's find possible value of error's value $\delta_0$. Rectangles are defined correctly for a horizontal optimization task, if:
+Let's find possible value of error's value, i.e. let's find a number $\delta_0$ such as if an error for   a solution on a segment is less $\delta_0$ then rectangle for the segment is defined correctly. Rectangles are defined correctly for a horizontal optimization task, if:
 
 \begin{equation}\label{MCH}
 \forall\delta : |\delta| < \delta_0 \Rightarrow f'_y(\textbf{x}_0)f'_y(x_0+\delta, y_0) > 0
@@ -158,12 +158,12 @@ Let the function $f$ be convex and differentiable and a current rectangle be $[a
 
 \textbf{For horizontal segment:}  There is $f''_{xy}$ on the segment. Rectangle is defined in point $(x_0 + \delta, y_0)$ correctly if one meet following condition:
 \begin{equation}\label{C1}
-\delta_0 < \frac{|f'_y(\textbf{x}_0)|}{\max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|}
+\delta_0 \leq \frac{|f'_y(\textbf{x}_0)|}{\max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|}
 \end{equation}
 
 \textbf{For vertical segment:}  There is $f''_{yx}$ on the segment. Rectangle is defined in point $(x_0, y_0+\delta)$ correctly if one meet following condition:
 \begin{equation}\label{C2}
-\delta_0 < \frac{|f'_x(\textbf{x}_0)|}{\max\limits_{t\in [c,d]}|f''_{yx}(x_0, t)|}
+\delta_0 \leq \frac{|f'_x(\textbf{x}_0)|}{\max\limits_{t\in [c,d]}|f''_{yx}(x_0, t)|}
 \end{equation}
 
 \end{theorem}
@@ -173,12 +173,12 @@ Let's prove this statement for horizontal segment.
 
 Rewrite the condition \eqref{MCH} using Taylor formula:
 
-$$\forall \delta:|\delta|\leq\delta_0\Rightarrow f'_y(\textbf{x}_0)\left(f'_y(\textbf{x}_0)+f''_{xy}\left(\textbf{x}_0+(\theta\delta,0)^\top\right)\delta\right) > 0,$$
+$$\forall \delta:|\delta|<\delta_0\Rightarrow f'_y(\textbf{x}_0)\left(f'_y(\textbf{x}_0)+f''_{xy}\left(\textbf{x}_0+(\theta\delta,0)^\top\right)\delta\right) > 0,$$
 where $\theta\in(0,1)$
 
 Using the written above inequality we have a following inequality for $\delta_0$:
 
-$$\delta_0<\frac{|f'_y(\textbf{x}_0)|}{\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)|}$$
+$$\delta_0\leq\frac{|f'_y(\textbf{x}_0)|}{\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)|}$$
 
 It and an obvious inequality $\max\limits_{\theta \in [-1, 1]}|f''_{xy}(x_0 + \theta\delta_0, y_0)| < \max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|$ proves (3). Inequality (4) are proved similar.
 \end{proof}
@@ -211,6 +211,29 @@ $$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
 Statement for vertical segment is proved similarly.
 \end{proof}
 
+
+In order to give an estimate for all functions with a continuous gradient let's consider following object. We define a modulus of continuity $\omega(f, \delta)$  for function $f$ on a set $E$ as:
+$$\omega(f, \delta) = \left\{\sup|f(x_1) - f(x_2)|\Big|x_1, x_2\in E, |x_1-x_2|<\delta\right\}$$
+
+\begin{theorem}
+Let function $f$ be convex and has a continuous gradient and $E$ is a current segment. 
+\begin{equation}\label{C3}\omega(f'_y, \delta_0) < |f'_y(\textbf{x}_0)|\end{equation}
+\begin{equation}\label{C4}\omega(f'_x, \delta_0) < |f'_x(\textbf{x}_0)|\end{equation}
+
+If a modulus of continuity $\omega(f'_y, \delta_0)$($\omega(f'_y, \delta_0)$) on a horizontal (vertical) segment $E$ meet the condition \eqref{C3}(the condition \eqref{C4}) and possible error less than $\delta_0$ then rectangle is selected correctly.
+\end{theorem}
+\begin{proof}
+Let $\delta$ be such as $|\delta|<\delta_0$
+$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta_1, y_0)\right| \leq \sup_{\delta : |\delta|<\delta_0}|f'_y(\textbf{x}_0) - f'_y(\textbf{x}_0 + \delta)|\leq$$
+$$ \leq \sup_{x_1, x_2 \in E : |x_1 - x_2|<\delta_0}|f'_y(\textbf{x}_1) - f'_y(\textbf{x}_2 |= \omega(f'_y, \delta_0) < |f'_y(\textbf{x}_0)|$$
+
+The condition \eqref{MCH} is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
+$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
+
+$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
+
+Therefore, the condition \eqref{MCH} is met. Statement for vertical segment is proved similarly.
+\end{proof}
 
 \section{Number of iterations}
 
