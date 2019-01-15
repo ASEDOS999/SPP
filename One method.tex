@@ -127,7 +127,7 @@ So if one takes a subgradient $(-2, 1)^\top$ then a bottom rectangle will be cho
 From derivative continuously we have following obvious result:
 
 \begin{lemma}
-If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizontal segment, then gradient has same direction on parallel to the segment axis  in all points of segment. If $|f'_y(x_0, y)| > 0$ for all $y$ on vertical segment, then gradient has same direction in all points of segment.
+If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizontal segment, then the second gradient's component has same sign at all points of segment. If $|f'_x(x_0, y)| > 0$ for all $y$ on vertical segment, then the first gradient's component has same sign at all points of segment.
 \end{lemma}
 
 \textbf{Example 2.} All functions $f$ of the following type meet conditions of written above lemma:
@@ -135,7 +135,7 @@ If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizon
 $$f(x, y) = \psi(x) + \phi(y),$$
 where $\psi, \phi$ are convex and differentiable functions.
 
-\textbf{Example 3.} Let's illustrate that we can take any point from segment. Let's consider following task:
+\textbf{Example 3.} Let's illustrate that we can not always take any point from segment. Let's consider following task:
 
 $$\min\left\{(x-y)^2 + x^2\Big|Q = [0,1]^2\right\}$$
 
@@ -154,7 +154,7 @@ Analogically, for a vertical segment:
 
 
 \begin{theorem}
-Let's function $f$ is convex and differentiable and current rectangle is $[a,b]\times[c,d]$.
+Let the function $f$ be convex and differentiable and a current rectangle be $[a,b]\times[c,d]$.
 
 \textbf{For horizontal segment:}  There is $f''_{xy}$ on the segment. Rectangle is defined in point $(x_0 + \delta, y_0)$ correctly if one meet following condition:
 \begin{equation}
@@ -189,12 +189,34 @@ $$B(x,y) = Ax^2 + 2Bxy + Cy^2 + Dx +Ey + F,$$
 $$B''_{xy} = B''_{yx} = 2B < \infty$$
 where $A \geq 0,AC - B^2\geq0$. Also estimate for $\delta$ has some sense (estimate is non zero if $\textbf{x}_0$ is not optimal solution). Also one can easy show that this estimate is accurate for task from example 3.
 
+\begin{theorem}
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
+
+The current segment is horizontal and $\exists M>0  : \Rightarrow|f_y'(\textbf{x}_0)| \geq M$ or the current segment is vertical and $\exists M>0  : \Rightarrow|f_x'(\textbf{x}_0)| \geq M$. Then rectangle is defined correctly if the possible value of error is less than $\frac{M}{L}$.
+\end{theorem}
+\begin{proof}
+Condition (1) is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
+$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
+
+$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
+
+The $L$-Lipschitz continuity gives following inequality:
+
+$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right| \leq L|\delta|$$
+
+Therefore the following possible value is sufficient to select rectangle correctly:
+
+$$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
+
+Statement for vertical segment is proved similarly.
+\end{proof}
+
 \section{Number of iterations}
 
 Following estimates are correct if each iterations was correct (a rectangle is selected correctly on each iterations).
 
 \begin{theorem}
-If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make any following iteration's numbers:
+If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
 $$N = \left\lceil\log_2\frac{La}{\sqrt{2}\epsilon}\right\rceil, \eqno{(4.1)}$$
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
@@ -222,7 +244,7 @@ If one take a center of a current solution as proximal solution one have value $
 But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
 
 \begin{theorem}
-If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to make following iteration's number:
+If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
 $$N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}\right\rceil, \eqno{(4.2)}$$
 where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
@@ -259,7 +281,7 @@ We have following estimates for derivatives on horizontal and vertical segments:
 $$|f'_x|\Big|_{x = x_0} \geq \left(A_1 + \sum\limits_{n=2}^N n A_n D_n^{n-1}\right)\frac{\pi}{a}\Big|\cos \frac{\pi x_0}{a}\Big|$$
 $$|f'_y|\Big|_{y = y_0} \geq \left(B_1 + \sum\limits_{n=2}^N n B_n D_n^{n-1}\right)\frac{\pi}{b}\Big|\cos \frac{\pi y_0}{b}\Big|$$
 
-Therefore this functions met conditions of lemma 2. One can see examples of functions $f$ on fig.~\ref{fig:examples}
+Therefore this functions met conditions of lemma 2 and we can take gradient at any point of segment. One can see examples of functions $f$ on fig.~\ref{fig:examples}
 
 \begin{figure}[h]
 \center{\includegraphics[scale=0.6]{tests/Examples.png}}
