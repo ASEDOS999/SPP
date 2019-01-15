@@ -143,12 +143,12 @@ On segment $[0,1]\times\left\{\frac{1}{2}\right\}$ this task has solution $f^* =
 
 Let's find possible value of error's value $\delta_0$. Rectangles are defined correctly for a horizontal optimization task, if:
 
-\begin{equation}\label{1}
+\begin{equation}\label{MCH}
 \forall\delta : |\delta| < \delta_0 \Rightarrow f'_y(\textbf{x}_0)f'_y(x_0+\delta, y_0) > 0
 \end{equation}
 
 Analogically, for a vertical segment:
-\begin{equation}
+\begin{equation}\label{MCV}
 \forall\delta: |\delta| < \delta_0 \Rightarrow f'_x(\textbf{x}_0)f'_x(x_0, y_0+\delta) > 0
 \end{equation}
 
@@ -157,12 +157,12 @@ Analogically, for a vertical segment:
 Let the function $f$ be convex and differentiable and a current rectangle be $[a,b]\times[c,d]$.
 
 \textbf{For horizontal segment:}  There is $f''_{xy}$ on the segment. Rectangle is defined in point $(x_0 + \delta, y_0)$ correctly if one meet following condition:
-\begin{equation}
+\begin{equation}\label{C1}
 \delta_0 < \frac{|f'_y(\textbf{x}_0)|}{\max\limits_{t\in [a,b]}|f''_{xy}(t, y_0)|}
 \end{equation}
 
 \textbf{For vertical segment:}  There is $f''_{yx}$ on the segment. Rectangle is defined in point $(x_0, y_0+\delta)$ correctly if one meet following condition:
-\begin{equation}
+\begin{equation}\label{C2}
 \delta_0 < \frac{|f'_x(\textbf{x}_0)|}{\max\limits_{t\in [c,d]}|f''_{yx}(x_0, t)|}
 \end{equation}
 
@@ -171,7 +171,7 @@ Let the function $f$ be convex and differentiable and a current rectangle be $[a
 
 Let's prove this statement for horizontal segment.
 
-Rewrite the condition (1) using Taylor formula:
+Rewrite the condition \eqref{MCH} using Taylor formula:
 
 $$\forall \delta:|\delta|\leq\delta_0\Rightarrow f'_y(\textbf{x}_0)\left(f'_y(\textbf{x}_0)+f''_{xy}\left(\textbf{x}_0+(\theta\delta,0)^\top\right)\delta\right) > 0,$$
 where $\theta\in(0,1)$
@@ -195,7 +195,7 @@ Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point
 The current segment is horizontal and $\exists M>0  : \Rightarrow|f_y'(\textbf{x}_0)| \geq M$ or the current segment is vertical and $\exists M>0  : \Rightarrow|f_x'(\textbf{x}_0)| \geq M$. Then rectangle is defined correctly if the possible value of error is less than $\frac{M}{L}$.
 \end{theorem}
 \begin{proof}
-Condition (1) is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
+Condition \eqref{MCH} is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
 $f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
 
 $$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
@@ -211,13 +211,14 @@ $$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
 Statement for vertical segment is proved similarly.
 \end{proof}
 
+
 \section{Number of iterations}
 
 Following estimates are correct if each iterations was correct (a rectangle is selected correctly on each iterations).
 
 \begin{theorem}
 If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
-$$N = \left\lceil\log_2\frac{La}{\sqrt{2}\epsilon}\right\rceil, \eqno{(4.1)}$$
+\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{La}{\sqrt{2}\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 \begin{proof}
@@ -230,7 +231,7 @@ $$|f(\textbf{x}^*) - f(\textbf{x})| < \frac{1}{\sqrt{2}}La2^{-N}$$
 Therefore, for accuracy epsilon following number of iterations is sufficient:
 $$N > \log_2\frac{La}{\sqrt{2}\epsilon}$$
 
-It proves the estimate (4.1).
+It proves the estimate \eqref{NI1}.
 \end{proof}
 
 There are functions which estimates from written above theorem are very accurate for.
@@ -239,13 +240,15 @@ There are functions which estimates from written above theorem are very accurate
 
 $$\min\left\{A(x+y)|Q = [0,1]^2\right\}$$
 
-If one take a center of a current solution as proximal solution one have value $\frac{A}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{A}{\epsilon}\rceil$. For this function $L = 2A$. Therefore, estimate (4.1) is accurate for such tasks with little error that not more one iteration.
+If one take a center of a current solution as proximal solution one have value $\frac{A}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{A}{\epsilon}\rceil$. For this function $L = 2A$. Therefore, estimate \eqref{NI1} is accurate for such tasks with little error that not more one iteration.
 
 But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
 
 \begin{theorem}
 If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
-$$N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}\right\rceil, \eqno{(4.2)}$$
+\begin{equation}\label{NI2}
+N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}\right\rceil
+\end{equation}
 where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
 
@@ -256,7 +259,7 @@ If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This 
 
 \subsection{Tests for iterations number}
 
-Let's make tests for the estimate (4.1). The estimate (4.2) is a consequence of the estimate (4.1) that's why following tests confirm (4.2) too.
+Let's make tests for the estimate \eqref{NI1}.
 
 Functions $-\sin\frac{\pi x}{a}$ and $-\sin\frac{\pi x}{b}$ are convex on square $Q = [0,1]^2$ when $a,b\geq 1$. Therefore, a function $-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b}$ is convex for all $A,B\geq 0$ as cone combination of convex function.
 
@@ -289,7 +292,7 @@ Therefore this functions met conditions of lemma 2 and we can take gradient at a
 \label{fig:examples}
 \end{figure}
 
-We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. Let's solve task of minimization function $f$ with different parameters on square $[0,1]^2$ through new method and compares number of iteration with estimate (4.1).
+We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. Let's solve task of minimization function $f$ with different parameters on square $[0,1]^2$ through new method and compares number of iteration with estimate~\eqref{NI1}.
 
 Result of the test you can see on fig.~\ref{fig:image}.
 
@@ -299,8 +302,8 @@ Result of the test you can see on fig.~\ref{fig:image}.
 \label{fig:image}
 \end{figure}
 
-On graphic $N$ is number of done iterations for accuracy $\epsilon$, $\log_2\frac{La}{\sqrt{2}\epsilon}$ is the parameter of tests tasks. Line $N = \log_2\frac{La}{\sqrt{2}\epsilon}$ is our estimates (4.1).
+On graphic $N$ is number of done iterations for accuracy $\epsilon$, $\log_2\frac{La}{\sqrt{2}\epsilon}$ is the parameter of tests tasks. Line $N = \log_2\frac{La}{\sqrt{2}\epsilon}$ is our estimates \eqref{NI1}.
 
-We can see that there are tests points under this line. It confirms our estimates (4.1) and (4.2).
+We can see that there are tests points under this line. It confirms our estimates \eqref{NI1}.
 
 \end{document}
