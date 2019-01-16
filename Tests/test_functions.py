@@ -45,3 +45,30 @@ class sinuses():
     
     def get_est(self, x, num):
         return -1
+    
+#Quadratic function
+class quadratic_function():
+    def __init__(self, list_of_paremeters):
+        self.A = list_of_paremeters
+        
+    def calculate_function(self, x, y):
+        p = self.A
+        f = p[0] * x**2 + 2 * p[1] * x * y + p[2] * y**2
+        f += p[3] * x + p[4] * y + p[5]
+        return f
+    
+    def der_x(self, x, y):
+        p = self.A
+        der = (p[3] + 2 * p[1] * y) + 2 * p[0] * x
+        return der
+    
+    def der_y(self, x, y):
+        p = self.A
+        der = (p[4] + 2 * p[1] * x) + 2 * p[2] * y
+        return der
+
+    def gradient(self, x, y):
+        return [self.der_x(x,y), self.der_y(x,y)]
+    
+    def ger_est(self, x, num):
+        return 0
