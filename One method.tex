@@ -220,7 +220,7 @@ Let function $f$ be convex and has a continuous gradient and $E$ is a current se
 \begin{equation}\label{C3}\omega(f'_y, \delta_0) < |f'_y(\textbf{x}_0)|\end{equation}
 \begin{equation}\label{C4}\omega(f'_x, \delta_0) < |f'_x(\textbf{x}_0)|\end{equation}
 
-If a modulus of continuity $\omega(f'_y, \delta_0)$($\omega(f'_y, \delta_0)$) on a horizontal (vertical) segment $E$ meet the condition \eqref{C3}(the condition \eqref{C4}) and possible error less than $\delta_0$ then rectangle is selected correctly.
+If a modulus of continuity $\omega(f'_y, \delta_0)$($\omega(f'_x, \delta_0)$) on a horizontal (vertical) segment $E$ meet the condition \eqref{C3}(the condition \eqref{C4}) and possible error less than $\delta_0$ then rectangle is selected correctly.
 \end{theorem}
 \begin{proof}
 Let $\delta$ be such as $|\delta|<\delta_0$
@@ -278,7 +278,7 @@ where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neig
 \section{Tests}
 \subsection{About function $solve$}
 
-If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use gradient descent with step $h_k = \frac{h}{k} = \frac{a}{4k}$, where $a$ is size of current segment.
+If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use gradient descent with step $h_k = \frac{h}{\sqrt{k}} = \frac{a}{4\sqrt{k}}$, where $a$ is size of current segment.
 
 \subsection{Tests for iterations number}
 
@@ -328,5 +328,54 @@ Result of the test you can see on fig.~\ref{fig:image}.
 On graphic $N$ is number of done iterations for accuracy $\epsilon$, $\log_2\frac{La}{\sqrt{2}\epsilon}$ is the parameter of tests tasks. Line $N = \log_2\frac{La}{\sqrt{2}\epsilon}$ is our estimates \eqref{NI1}.
 
 We can see that there are tests points under this line. It confirms our estimates \eqref{NI1}.
+
+\subsection{Comparison}
+
+Let's compare experimentally work's time of gradient descent and method of halving square. We will compare it on optimization task for functions from previous subsection and random quadric function with positive semidifenite matrix:
+\begin{equation}\label{ex_1}
+f(x,y) = -A_1\sin\frac{\pi x}{a} - B_1\sin\frac{\pi x}{b} + \left(-A_2\sin\frac{\pi x}{a} - B_2\sin\frac{\pi y}{b} + A_2 + B_2 + D_2\right)^2,
+\end{equation}
+where $A_i, B_i. D_i\geq 0$ for all $i = \overline{1, 2}$ and $a, b \in [1,2]$.
+
+\begin{equation}\label{ex_2}
+f(x,y) = (Ax + By)^2 + Cx^2 + Dx + Ey+ F, C\geq 0
+\end{equation}
+Halving square will stop when current value will be no further than $\epsilon$ from optimal value. Gradient descent will stop when distance between current and previous value will be not more than $\epsilon$.
+
+We will use gradient descent with a step $h_k = \frac{h}{\sqrt{k}} = \frac{a}{4\sqrt{k}}$, where $a$ is size of the square. Also we add limit $N_{max} = 1000$ on the iterations number for method of halving square, solving on segment and gradient descent.
+
+When we compare two method we distinguish the following situations (similar name of situations on graphics):
+
+\begin{itemize}
+\item Type 1 (T1) - tasks which gradient descent completed but halving square was not complete,
+\item Type 2 (T2) - gradient descent is faster than halving square,
+\item Type 3 (T3) - work's times are approximately equal or time is too short to measure,
+\item Type 4 (T4) - gradient descent is slower than halving square,
+\item Type 5 (T5) - gradient descent was not complete but halving square completed,
+\item Type 6 (T6) - both methods were not completed successfully
+\end{itemize}
+
+
+\subsubsection{Sinuses}  
+
+As already mentioned in previous subsection, functions \eqref{ex_1} meet conditions of lemma 2, therefore, we can take any point from segment on each iteration in method of halving square. Using all written above we have following results (see fig.~\ref{comp_sinuses}).
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.6]{tests/Comparison-sinuses.png}}
+\caption{Tests results for comparison on sinuses}
+\label{comp_sinuses}
+\end{figure}
+
+We can see that new method is not less efficient on the most tasks and more efficient on the task's half than gradient descent.
+
+\subsubsection{Quadric functions}
+
+Quadric functions do not always meet conditions of lemma 2, therefore, we can not think that error for task on segment can be very big. We can try to estimate this error but let's use for this task gradient descent with $|x-x_{prev}|<\delta$, where $\delta$ is much less than size of segment. In our experiments we will use $\delta = \frac{a}{400}$. Using it we have following results (see fig.~\ref{comp_pol}).
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.6]{tests/Comparison-pol.png}}
+\caption{Tests results for comparison on quadric function}
+\label{comp_pol}
+\end{figure}
 
 \end{document}
