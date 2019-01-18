@@ -13,4 +13,4 @@ Let's find cases when method works correctly. Also let's find a possible value o
 
 - [Tests](https://github.com/ASEDOS999/Optimization-Halving-The-Square/tree/master/Tests): there are a code for the method, test's functions and a brief description of their properties here.
 
-- [Tests results in .ipynb](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/Test_Results.ipynb) is the code and tests results for iterations number
+- [Tests results in .ipynb](https://github.com/ASEDOS999/Optimization-Halving-The-Square/blob/master/Tests/Test_Results.ipynb) is the code and tests' results
