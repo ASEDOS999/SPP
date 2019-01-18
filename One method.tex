@@ -20,14 +20,20 @@
 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
+	
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{linkcolor}{HTML}{799B03} % цвет гиперссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+ 
+\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
 
 \DeclareMathOperator{\sign}{sign}
 \DeclareMathOperator{\intt}{int}
 \DeclareMathOperator{\conv}{conv}
-
-\newtheorem{theorem}{Theorem}[section]
-\newtheorem{lemma}{Lemma}
-
 \begin{document}
 
 \tableofcontents
@@ -276,6 +282,9 @@ where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neig
 \end{theorem}
 
 \section{Tests}
+
+In this section we show estimate on number iterations of practice and compare work time of gradient descent and our new method - halving square\footnote{You can find all code in \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square/tree/master/Tests}{this repository}}.
+
 \subsection{About function $solve$}
 
 If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use gradient descent with step $h_k = \frac{h}{\sqrt{k}} = \frac{a}{4\sqrt{k}}$, where $a$ is size of current segment.
@@ -321,7 +330,7 @@ Result of the test you can see on fig.~\ref{fig:image}.
 
 \begin{figure}[h!]
 \center{\includegraphics[scale=0.7]{tests/Test_results.png}}
-\caption{Tests results for iterations number}
+\caption{Tests' results for iterations number}
 \label{fig:image}
 \end{figure}
 
@@ -362,7 +371,7 @@ As already mentioned in previous subsection, functions \eqref{ex_1} meet conditi
 
 \begin{figure}[h!]
 \center{\includegraphics[scale=0.6]{tests/Comparison-sinuses.png}}
-\caption{Tests results for comparison on sinuses}
+\caption{Tests' results for comparison on sinuses}
 \label{comp_sinuses}
 \end{figure}
 
@@ -374,8 +383,14 @@ Quadric functions do not always meet conditions of lemma 2, therefore, we can no
 
 \begin{figure}[h!]
 \center{\includegraphics[scale=0.6]{tests/Comparison-pol.png}}
-\caption{Tests results for comparison on quadric function}
+\caption{Tests' results for comparison on quadric function}
 \label{comp_pol}
 \end{figure}
 
+We can see that halving square was not completed successfully on big parts of task - about $\frac{1}{6}$ from all tasks. We can decrease $\delta$ in its modification, but work's time increases in this case.
+
+Also gradient descent was better than halving square in more than half tests. Decreasing $\delta$ lead to 
+decreasing work's time but also it can lead to that method will not completed successfully more often.
+
+Therefore, halving square with proposed function $solve$ is not efficient.
 \end{document}
