@@ -32,6 +32,7 @@
 \newtheorem{lemma}{Lemma}[section]
 
 \DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\grad}{grad}
 \DeclareMathOperator{\intt}{int}
 \DeclareMathOperator{\conv}{conv}
 \begin{document}
@@ -280,6 +281,31 @@ N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sq
 \end{equation}
 where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
+
+We can improve written above estimates:
+
+\begin{theorem}
+Let function $f$ be convex and has $L_g$-Lipschitz continuous gradient.
+
+If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{L_ga^2}{4\epsilon}\right\rceil\end{equation}
+where $a$ is a size of the initial square $Q$.
+\end{theorem}
+
+\begin{proof}
+For all convex functions there is following inequality (one may find proofs in many books on convex analysis or convex optimization):
+$$f(\textbf{x}) - f(\textbf{x}^*) - (f'(\textbf{x}^*), \textbf{x} - \textbf{x}^*) \leq \frac{L_g}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
+
+If $\textbf{x}^*$ is a solution and an internal point, then $f'(\textbf{x}^*) = 0$:
+
+$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L_g}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
+
+After $N$ iterations we have the estimate:
+
+$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L_g}{4}\left(\frac{a}{2^N}\right)^2$$
+
+Using it we have estimate \eqref{NI3}.
+\end{proof}
 
 \section{Tests}
 
