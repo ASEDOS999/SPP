@@ -260,11 +260,19 @@ $$f(\textbf{x}) + (\nabla f(\textbf{x}), \textbf{x}^* - \textbf{x}) +  \frac{1}{
 Let's use Cauchy–Bunyakovsky–Schwarz inequality. As result, we have:
 
 $$f(\textbf{x}) - f(\textbf{x}^*) \leq \|\nabla f(\textbf{x})\|_2\left(\|\textbf{x}^*-\textbf{x}\|_2 - \frac{1}{2L}\|\nabla f(\textbf{x})\|_2\right) \leq$$
-$$ \|\nabla f(\textbf{x})\|_2\left(\|\textbf{x}^* - \textbf{x}\|_2 + \frac{1}{2L}\|\nabla f(\textbf{x})\|_2\right)\leq$$
+$$\leq \|\nabla f(\textbf{x})\|_2\left(\|\textbf{x}^* - \textbf{x}\|_2 + \frac{1}{2L}\|\nabla f(\textbf{x})\|_2\right)\leq$$
 $$\leq \frac{3\|\nabla f(\textbf{x})\|_2\|\textbf{x}^* - \textbf{x}\|_2}{2} \leq \frac{3\|\nabla f(\textbf{x})\|_2a}{\sqrt{2}}$$
 
 This inequallite proves statement of theorem.
 \end{proof}
+
+Let's make a couple of remarks.
+
+Firstly, theorems 3.1 and 3.2 need some lower bound for $f'_{x}(\textbf{x}_0)$ and $f'_{y}(\textbf{x}_0)$ on segments. We can take this constant using Taylor's formula. For example, on horizontal segment we have:
+$$\dots$$
+If the left part is positive it is constant $M$ from theorem 3.2 and it can be used in theorem 3.1.
+
+Secondly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorem 3.2. Similarly, we can replace condition for the second derivative in theorem 3.1. 
 
 \section{Number of iterations}
 
