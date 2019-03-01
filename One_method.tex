@@ -254,7 +254,7 @@ where $a$ is size of current square.
 \end{theorem}
 
 \begin{proof}
-Let's consider following inequallity for convex functions (see prove in ):
+Let's consider following inequality for convex functions (see prove in ):
 $$f(\textbf{x}) + (\nabla f(\textbf{x}), \textbf{x}^* - \textbf{x}) +  \frac{1}{2L}\|\nabla f(\textbf{x})\|_2^2\leq f(\textbf{x}^*)$$
 
 Let's use Cauchy–Bunyakovsky–Schwarz inequality. As result, we have:
@@ -263,16 +263,42 @@ $$f(\textbf{x}) - f(\textbf{x}^*) \leq \|\nabla f(\textbf{x})\|_2\left(\|\textbf
 $$\leq \|\nabla f(\textbf{x})\|_2\left(\|\textbf{x}^* - \textbf{x}\|_2 + \frac{1}{2L}\|\nabla f(\textbf{x})\|_2\right)\leq$$
 $$\leq \frac{3\|\nabla f(\textbf{x})\|_2\|\textbf{x}^* - \textbf{x}\|_2}{2} \leq \frac{3\|\nabla f(\textbf{x})\|_2a}{\sqrt{2}}$$
 
-This inequallite proves statement of theorem.
+This inequalite proves statement of theorem.
+\end{proof}
+
+Now let's give a new condition to stop optimization on segment.
+
+\begin{theorem}
+Let $f$ be convex and has $L$-Lipschitz continuous gradient.
+
+If following condition is met 
+$$|f'_y(x_0+\delta, y_0)|^2 \geq L^2\delta_0^2 - (f'_x(x_0 + \delta, y_0))^2, \text{where } \delta_0\geq|\delta| $$
+and solution on the segment $\textbf{x}_0$ is internal point
+then 
+$$\sign\left(f'_y(x_0, y_0)\right) = sign(f'_y(x_0+\delta, y_0) \pm \sqrt{L^2\delta^2 - (f'_x(x_0 + \delta, y_0))^2})$$
+\end{theorem}
+\begin{proof}
+The $f$ has $L$-Lipschitz continuous gradient. Therefore,
+
+$$\left((f'_x(x_0 + \delta, y_0))^2 + \left(f'_y(x_0+\delta, y_0) - f'_y(\textbf{x}_0)\right)^2\right)^\frac{1}{2}\leq L\delta_0$$
+
+$$|f'_y(x_0+\delta, y_0) - f'_y(\textbf{x}_0)|\leq \sqrt{L^2\delta_0^2 - (f'_x(x_0 + \delta, y_0))^2} = q$$
+Then, if
+$$(f'_y(x_0+\delta, y_0)+q)(f'_y(x_0+\delta, y_0)-q) = (f'_y(x_0+\delta, y_0))^2-q^2 \geq 0$$
+then we can determine sign of $f'_y(\textbf{x}_0)$ accurately. Written above inequality is equivalent to inequality from theorem's condition.
 \end{proof}
 
 Let's make a couple of remarks.
 
 Firstly, theorems 3.1 and 3.2 need some lower bound for $f'_{x}(\textbf{x}_0)$ and $f'_{y}(\textbf{x}_0)$ on segments. We can take this constant using Taylor's formula. For example, on horizontal segment we have:
-$$\dots$$
-If the left part is positive it is constant $M$ from theorem 3.2 and it can be used in theorem 3.1.
+$$f'_y(x_0, y_0) = f'_y(x_0+\delta, y_0) - f''_{xy}(x_0 + \theta\delta, y_0)\delta, \text{where $\theta \in (0,1)$}$$
 
-Secondly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorem 3.2. Similarly, we can replace condition for the second derivative in theorem 3.1. 
+$$|f'_y(x_0, y_0)|\geq ||f'_y(x_0+\delta, y_0)| - |f''_{xy}(x_0 + \theta\delta, y_0)|\delta|\geq$$
+$$\geq |f'_y(x_0+\delta, y_0)| - \delta\max_{x \in [a,b]}|f''_{xy}(x, y_0)|$$
+$$\boxed{|f'_y(x_0, y_0)|\geq |f'_y(x_0+\delta, y_0)| - \delta\max_{x \in [a,b]}|f''_{xy}(x, y_0)|}$$
+If the right part is positive it is constant $M$ from theorem 3.2 and it can be used in theorem 3.1. Similar inequality we can make for vertical segment.
+
+Secondly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorems 3.2 and 3.5. Similarly, we can replace condition for the second derivative in theorem 3.1. 
 
 \section{Number of iterations}
 
