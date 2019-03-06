@@ -46,9 +46,13 @@
 
 In this paper we research one method of optimization on a square in $\mathbb{R}^2$. The method was offered by Nesterov (see ex.~4 from ~\cite{task}). 
 
-In the paper~\cite{Ston_Pas} there are some results for this method. In this paper we want to continue this research.
+In the paper~\cite{Ston_Pas} there are some results for this method. Namely, there are some estimates for iterations number and accuracy for task on segment (see the next section or \cite{Ston_Pas}). Also there are comparison of this method with method of ellipsoids. Discussed method showed better results on time.
 
-\section{Description Of A Task}
+In this paper we want to continue this research. In the next section there is description of method and pseudocode for it. In the section~3. there are results where this method works correctly. The section~4. includes two ways to estimate accuracy for a task on segment and it is one of two main results in this paper. Following important result is theorem 5.3 for iterations number that is asymptotically twice as good as the estimate in \cite{Ston_Pas}.
+
+Section Tests include different tests that show some theoretical results in practice and include comparison of this method with gradient descent. 
+
+\section{Description Of Method}
 
 Let's consider a following task:
 
@@ -119,23 +123,15 @@ Therefore,
 
 $$\exists \delta_0:\forall \textbf{x}_\delta\in B_{\delta_0}(x_0)\times y_0\Rightarrow \sign(f_y'(\textbf{x}_\delta)) = \sign(f_y'(\textbf{x}_0))$$
 
-From it and lemma 1 theorem's statement follows.
+From it and lemma 3.1 theorem's statement follows.
 
 \end{proof}
 
 \subsection{Undifferentiable convex function}
 
-The method does not work for all convex functions even for zero error on segment. Let's consider following example.
+The method does not work for all convex functions even for zero error on segment. 
 
-\textbf{Example 1}.
-\begin{equation}
-f(x,y) = \max\{x-2y, y-2x\}, \\
-Q = [-1, 1]^2
-\end{equation}
-
-Function $f$ is convex as maximum of affine functions on $x$ and $y$. A solution of task on horizontal segment $[-1, 1]\times\{0\}$ is point $(0, 0)$. Its subdifferential is $$\partial f(0,0) = \conv\left\{(1, -2)^\top, (-2,1)^\top\right\}.$$ 
-
-So if one takes a subgradient $(-2, 1)^\top$ then a bottom rectangle will be choosed. But optimal value is point $(1,1)$ and there is not it in choosed rectangle. Therefore, this method cannot give a solution of initial task with error less than $\frac{1}{2}$.
+\textbf{Example 1.} There is an example in \cite{Ston_Pas}.
 
 \section{Error's Value}
 
@@ -198,37 +194,12 @@ $$B(x,y) = Ax^2 + 2Bxy + Cy^2 + Dx +Ey + F,$$
 $$L = B''_{xy} = B''_{yx} = 2B < \infty$$
 where $A \geq 0,AC - B^2\geq0$. Also estimate for $\delta$ has some sense (estimate is non zero if $\textbf{x}_0$ is not optimal solution). Also one can easy show that this estimate is accurate for task from example 3.
 
-
-
-In order to give an estimate for all functions with a continuous gradient let's consider following object. We define a modulus of continuity $\omega(f, \delta)$  for function $f$ on a set $E$ as:
-$$\omega(f, \delta) = \left\{\sup|f(x_1) - f(x_2)|\Big|x_1, x_2\in E, |x_1-x_2|<\delta\right\}$$
-
-\begin{theorem}
-Let function $f$ be convex and has a continuous gradient and $E$ is a current segment. 
-\begin{equation}\label{C3}\omega(f'_y, \delta_0) < |f'_y(\textbf{x}_0)|\end{equation}
-\begin{equation}\label{C4}\omega(f'_x, \delta_0) < |f'_x(\textbf{x}_0)|\end{equation}
-
-If a modulus of continuity $\omega(f'_y, \delta_0)$($\omega(f'_x, \delta_0)$) on a horizontal (vertical) segment $E$ meet the condition \eqref{C3}(the condition \eqref{C4}) and possible error less than $\delta_0$ then rectangle is selected correctly.
-\end{theorem}
-\begin{proof}
-Let $\delta$ be such as $|\delta|<\delta_0$
-$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta_1, y_0)\right| \leq \sup_{\delta : |\delta|<\delta_0}|f'_y(\textbf{x}_0) - f'_y(\textbf{x}_0 + \delta)|\leq$$
-$$ \leq \sup_{x_1, x_2 \in E : |x_1 - x_2|<\delta_0}|f'_y(\textbf{x}_1) - f'_y(\textbf{x}_2 |= \omega(f'_y, \delta_0) < |f'_y(\textbf{x}_0)|$$
-
-The condition \eqref{MCH} is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
-$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
-
-$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
-
-Therefore, the condition \eqref{MCH} is met. Statement for vertical segment is proved similarly.
-\end{proof}
-
 Theorem 4.1 gives conditions of stop in the case when gradient in point-solution on segment is large. But what should we do if gradient in this point is small?
 
 \begin{theorem}
 Let $f$ be convex and has $L$-Lipschitz continuous gradient. Then for accuracy on function $\epsilon$ following condition in point $\textbf{x}$ is sufficient:
 
-$$\|\nabla f(\textbf{x})\|\leq \frac{\sqrt{2}\epsilon}{3a}, $$
+$$\|\nabla f(\textbf{x})\|\leq \frac{\epsilon}{a\sqrt{2}}, $$
 where $a$ is size of current square.
 \end{theorem}
 
@@ -280,22 +251,11 @@ Thirdly, all theorems in this section use $f'_y$ on horizontal segment and $f'_x
 Following estimates are correct if each iterations was correct (a rectangle is selected correctly on each iterations).
 
 \begin{theorem}
-If function $f$ is convex and $L$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
-\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{La}{\sqrt{2}\epsilon}\right\rceil\end{equation}
+If function $f$ is convex and $L_f$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
+\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{L_fa}{\sqrt{2}\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
-\begin{proof}
-$$|f(\textbf{x}^*) - f(\textbf{x})| < L|\textbf{x}^* - \textbf{x}|$$
-
-After $N$ iterations we have a square with size $\frac{a}{2^N}$. That's why if we choose a squares center as proximal solution we have following estimates:
-$$|\textbf{x}^* - \textbf{x}| \leq \frac{a}{\sqrt{2}}2^{-N}$$
-$$|f(\textbf{x}^*) - f(\textbf{x})| < \frac{1}{\sqrt{2}}La2^{-N}$$
-
-Therefore, for accuracy epsilon following number of iterations is sufficient:
-$$N > \log_2\frac{La}{\sqrt{2}\epsilon}$$
-
-It proves the estimate \eqref{NI1}.
-\end{proof}
+This estimate is a little improved estimate from \cite{Ston_Pas} because of we use a center of a current square as approximate  solution. The prove is similar to prove of not improved estimate.
 
 There are functions which estimates from written above theorem are very accurate for.
 
@@ -303,39 +263,39 @@ There are functions which estimates from written above theorem are very accurate
 
 $$\min\left\{A(x+y)|Q = [0,1]^2\right\}$$
 
-If one take a center of a current solution as proximal solution one have value $\frac{A}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{A}{\epsilon}\rceil$. For this function $L = 2A$. Therefore, estimate \eqref{NI1} is accurate for such tasks with little error that not more one iteration.
+If one take a center of a current solution as approximate  solution one have value $\frac{A}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{A}{\epsilon}\rceil$. For this function $L_f = 2A$. Therefore, estimate \eqref{NI1} is accurate for such tasks with little error that not more one iteration.
 
 But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
 
 \begin{theorem}
-If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
+If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
 \begin{equation}\label{NI2}
-N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{La}{\sqrt{2}\epsilon}\right\}\right\rceil
+N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{L_fa}{\sqrt{2}\epsilon}\right\}\right\rceil
 \end{equation}
-where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
+where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L_f$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
 
-We can improve written above estimates:
+We can improve written above estimates if to add new conditions:
 
 \begin{theorem}
-Let function $f$ be convex and has $L_g$-Lipschitz continuous gradient.
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient.
 
-If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as proximal solution and make following iteration's numbers:
-\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{L_ga^2}{4\epsilon}\right\rceil\end{equation}
+If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{La^2}{4\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
 \begin{proof}
 For all convex functions there is following inequality (one may find proof in \cite{Nesterov}):
-$$f(\textbf{x}) - f(\textbf{x}^*) - (f'(\textbf{x}^*), \textbf{x} - \textbf{x}^*) \leq \frac{L_g}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
+$$f(\textbf{x}) - f(\textbf{x}^*) - (f'(\textbf{x}^*), \textbf{x} - \textbf{x}^*) \leq \frac{L}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
 
 If $\textbf{x}^*$ is a solution and an internal point, then $f'(\textbf{x}^*) = 0$:
 
-$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L_g}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
+$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
 
 After $N$ iterations we have the estimate:
 
-$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L_g}{4}\left(\frac{a}{2^N}\right)^2$$
+$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L}{4}\left(\frac{a}{2^N}\right)^2$$
 
 Using it we have estimate \eqref{NI3}.
 \end{proof}
@@ -451,7 +411,7 @@ We can see that halving square was not completed successfully on big parts of ta
 Also gradient descent was better than halving square in more than half tests. Increasing $\delta$ lead to 
 decreasing work's time but also it can lead to that method will not completed successfully more often.
 
-Therefore, halving square with proposed function $solve$ is not efficient.
+Therefore, halving square with proposed function $solve$ and proposed stupid strategy for $\delta$ is not efficient.
 
 \section{Conclusion}
 \newpage
@@ -465,6 +425,6 @@ Nesterov U.E.  Methods of convex optimization // M.MCNMO --- 2010, 262 p.
 \bibitem{conda}
 Anaconda[site]. At available: \href{https://www.anaconda.com}{https://www.anaconda.com}
 \bibitem{my_git}
-Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square/tree/master/Tests}{this repository}
+Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
 \end{document}
