@@ -167,7 +167,7 @@ Analogically, for a vertical segment:
 
 
 \begin{theorem}
-Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient and an internal point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
 
 The current segment is horizontal and $\exists M>0  : \Rightarrow|f_y'(\textbf{x}_0)| \geq M$ or the current segment is vertical and $\exists M>0  : \Rightarrow|f_x'(\textbf{x}_0)| \geq M$. Then rectangle is defined correctly if the possible value of error is less than $\frac{M}{L}$.
 \end{theorem}
@@ -187,6 +187,8 @@ $$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
 
 Statement for vertical segment is proved similarly.
 \end{proof}
+
+In written above theorem $x_0$ can be on border of square. We want that $|f'_x(\textbf{x}_0)=0|$ on horizonttal segment and $|f'_y(\textbf{x}_0)=0|$ on vertical segment.
 
 \textbf{Example 4.} All positive semidefinite quadratic form meet conditions of written above theorem:
 
