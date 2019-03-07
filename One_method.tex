@@ -18,8 +18,6 @@
 \usepackage{bm}
 \usepackage{color}
 
-\graphicspath{{~/Desktop/opt/Optimization-Halving-The-Square/tests/}}
-
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 	
@@ -28,7 +26,7 @@
 \definecolor{linkcolor}{HTML}{799B03} % цвет гиперссылок
 \definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
  
-\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+%\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}{Lemma}[section]
@@ -123,7 +121,7 @@ Therefore,
 
 $$\exists \delta_0:\forall \textbf{x}_\delta\in B_{\delta_0}(x_0)\times y_0\Rightarrow \sign(f_y'(\textbf{x}_\delta)) = \sign(f_y'(\textbf{x}_0))$$
 
-From it and lemma 3.1 theorem's statement follows.
+From it and lemma 4.1 theorem's statement follows.
 
 \end{proof}
 
@@ -337,10 +335,11 @@ We have following estimates for derivatives on horizontal and vertical segments:
 $$|f'_x|\Big|_{x = x_0} \geq \left(A_1 + \sum\limits_{n=2}^N n A_n D_n^{n-1}\right)\frac{\pi}{a}\Big|\cos \frac{\pi x_0}{a}\Big|$$
 $$|f'_y|\Big|_{y = y_0} \geq \left(B_1 + \sum\limits_{n=2}^N n B_n D_n^{n-1}\right)\frac{\pi}{b}\Big|\cos \frac{\pi y_0}{b}\Big|$$
 
-Therefore this functions met conditions of lemma 3.1 and we can take gradient at any point of segment. One can see examples of functions $f$ on fig.~\ref{fig:examples}
+Therefore this functions met conditions of lemma 4.1 and we can take gradient at any point of segment. One can see examples of functions $f$ on fig.~\ref{fig:examples}
 
 \begin{figure}[H]
-\center{\includegraphics[scale=0.6]{tests/Examples.png}}
+\centering
+\includegraphics[scale=0.6]{./Tests/Examples.png}
 \caption{Examples of tests functions}
 \label{fig:examples}
 \end{figure}
@@ -350,7 +349,7 @@ We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. Let's solve task of minimizat
 Result of the test you can see on fig.~\ref{fig:image}.
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.7]{tests/Test_results.png}}
+\center{\includegraphics[scale=0.7]{Tests/Test_results.png}}
 \caption{Tests' results for iterations number}
 \label{fig:image}
 \end{figure}
@@ -388,10 +387,10 @@ When we compare two method we distinguish the following situations (similar name
 
 \subsubsection{Sinuses}  
 
-As already mentioned in previous subsection, functions \eqref{ex_1} meet conditions of lemma 3.1, therefore, we can take any point from segment on each iteration in method of halving square. Using all written above we have following results (see fig.~\ref{comp_sinuses}).
+As already mentioned in previous subsection, functions \eqref{ex_1} meet conditions of lemma 4.1, therefore, we can take any point from segment on each iteration in method of halving square. Using all written above we have following results (see fig.~\ref{comp_sinuses}).
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.6]{tests/Comparison-sinuses.png}}
+\center{\includegraphics[scale=0.6]{Tests/Comparison-sinuses.png}}
 \caption{Tests' results for comparison on sinuses}
 \label{comp_sinuses}
 \end{figure}
@@ -400,10 +399,10 @@ We can see that new method is not less efficient on the most tasks and more effi
 
 \subsubsection{Quadric functions}
 
-Quadric functions do not always meet conditions of lemma 3.1, therefore, we can not think that error for task on segment can be very big. We can try to estimate this error but let's use for this task gradient descent with $|x-x_{prev}|<\delta$, where $\delta$ is much less than size of segment. In our experiments we will use $\delta = \frac{a}{400}$. Using it we have following results (see fig.~\ref{comp_pol}).
+Quadric functions do not always meet conditions of lemma 4.1, therefore, we can not think that error for task on segment can be very big. We can try to estimate this error but let's use for this task gradient descent with $|x-x_{prev}|<\delta$, where $\delta$ is much less than size of segment. In our experiments we will use $\delta = \frac{a}{400}$. Using it we have following results (see fig.~\ref{comp_pol}).
 
 \begin{figure}[H]
-\center{\includegraphics[scale=0.6]{./tests/Comparison-pol.png}}
+\center{\includegraphics[scale=0.6]{./Tests/Comparison-pol.png}}
 \caption{Tests' results for comparison on quadric function}
 \label{comp_pol}
 \end{figure}
