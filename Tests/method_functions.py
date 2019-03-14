@@ -2,22 +2,42 @@
 
 import math
 
-def grad_descent_segment(segm, deriv, delta):
+def grad_descent_segment(segm, deriv, delta, x_opt):
 	N = 0
-	x, x_prev, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
+	x, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
 	if delta == 0:
 		delta = 0.01 * alpha_0
 	if delta < 0:
 		return x
-	while (abs(x - x_prev) > delta and N < 1000) or (N == 0):
-		x, x_prev = min(max(x - alpha_0 / math.sqrt(N + 1) * deriv(x), 
-				segm[0]), segm[1]), x
+	while abs(x - x_opt) > delta and N < 1000:
+		x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
+		x = min(max(x, segm[0]), segm[1])
 		N += 1
 	if N >= 1000:
 		N = -1
 	return x
 
-def halving_square(f, eps, square, solve_vert_segm, solve_hor_segm):
+def gss(f, segm, tol=1e-3):
+	a, b = segm
+	#print(tol)
+	gr = (math.sqrt(5) + 1) / 2
+	c = b - (b - a) / gr
+	d = a + (b - a) / gr 
+	f_c, f_d = f(c), f(d)
+	while abs(c - d) > tol:
+		if f(c) < f(d):
+			b = d
+			d, f_d = c, f_c
+			c = b - (b- a) / gr
+			f_c = f(c)
+		else:
+			a = c
+			c, f_c = d, f_d
+			d = a + (b - a) / gr
+			f_d = f(d)
+	return (b + a) / 2
+
+def halving_square(f, eps, square, solve_hor_segm, solve_vert_segm):
 	Q = square.copy()
 	N = 0
 	minimum = f.min
@@ -47,7 +67,7 @@ def halving_square(f, eps, square, solve_vert_segm, solve_hor_segm):
 		
 		x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 		f_opt = f.calculate_function(x_0, y_0) 
-		if N >= 1000 or abs(f_opt - minimum) < eps:
+		if N >= 100 or abs(f_opt - minimum) < eps:
 			if N >= 1000:
 				N = -1
 			return ((x_0, y_0), N)

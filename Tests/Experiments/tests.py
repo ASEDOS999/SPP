@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import sys
+sys.path.append("../")
+sys.path.append("../Tests_functions")
+
 from time import time
 import matplotlib.pyplot as plt
 import numpy as np
@@ -9,7 +13,7 @@ from test_functions import quadratic_function as qf
 from method_functions import halving_square, gradient_descent
 from method_functions import grad_descent_segment as GD_s
 import math
-
+'''
 #Tests for iterations number
 results = []
 epsilon = [0.1**(1 + i) for i in range(7)] + [0.5**(1 + i) for i in range(7)]
@@ -140,6 +144,71 @@ data = (len([i[0] for i in results
 			 if i[1] < 0 and i[2] >= 0]),
 		len([i[0] for i in results
 			 if i[1] < 0 and i[2] < 0]))
+ind = np.arange(6)
+width = 0.35
+p1 = plt.bar(ind, data, width)
+plt.title('QF')
+plt.ylabel('Number of tasks')
+plt.xticks(ind, ('T1', 'T2', 'T3', 'T4', 'T5', 'T6'))
+plt.show()
+'''
+
+from method_functions import gss
+print('hello')
+#Quadratic functions
+results = []
+epsilon = [0.1**(i) for i in range(3)]
+num = 0
+N = 1000
+n = 0
+while len(results) < 3 * N:
+		n += 1
+		if n % 100 == 0:
+			print(n / 10,'%')
+		param = np.random.uniform(-10, 10, 6)
+		param[2] =  abs(param[2])
+		param = [4, -3, 7, 1, 5, 6]
+		f = qf(param)
+		size_1, size_2 = random.uniform(0.5, 1), random.uniform(0.5, 1)
+		x_1, y_1 = f.solution[0], f.solution[1]
+		Q = [x_1 - (1-size_1), x_1 + (1+size_1), y_1 - (1-size_2), y_1 + (1+size_2)]
+		R = 2
+		L = 3 * max(abs(param[0]), abs(param[1]), param[2]) *  max(abs(Q[1]), abs(Q[3]))
+		M = (2 * param[0]**2 + 4 * abs(param[0] * param[1]) + 2 * param[1] ** 2 + 2 * param[2]) * 10
+		for eps in epsilon:
+			m1 = time()
+			est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
+			res_1 = halving_square(f, eps, Q, 
+				lambda segm, y: gss(lambda x: f.calculate_function(x,y), segm, est),
+				lambda segm, x: gss(lambda y: f.calculate_function(x,y), segm, est))
+			m2 = time()
+			res_2 = halving_square(f, eps, Q, 
+				lambda segm, y: GD_s(segm, lambda x: f.der_x(x, y), est),
+				lambda segm, x: GD_s(segm, lambda y: f.der_y(x, y), est))
+			m3 = time()
+			results.append((eps, res_1[1], res_2[1], m2 - m1, m3 - m2))
+
+p = 1.05
+
+data = (len([i[0] for i in results
+			 if i[1] >= 0 and i[2] < 0]),
+		len([i[0] for i in results
+			 if i[1] >= 0 and i[2] >= 0 and i[4] > p * i[3]]),
+		len([i[0] for i in results
+			 if i[1] >= 0 and i[2] >= 0 and (1/p * i[3]) <= i[4] and i[4] <= (p * i[3])]),
+		len([i[0] for i in results
+			 if i[1] >= 0 and i[2] >= 0 and i[4] < 1/p * i[3]]),
+		len([i[0] for i in results
+			 if i[1] < 0 and i[2] >= 0]),
+		len([i[0] for i in results
+			 if i[1] < 0 and i[2] < 0]))
+
+list_gss = [i[3] for i in results]
+list_grad = [i[4] for i in results]
+import numpy as np
+print('GSS\n', 'Mean time = ', np.mean(list_gss))
+print('GSS\n', 'Mean time = ', np.mean(list_grad))
+print(np.mean(list_gss), np.mean(list_grad))
 ind = np.arange(6)
 width = 0.35
 p1 = plt.bar(ind, data, width)

@@ -91,7 +91,7 @@ class quadratic_function():
 	def get_sol_vert(self, segm, x):
 		p = self.A
 		if  p[1] != 0:
-			y_0 = - (2 * p[0] * p[1] * y + p[4]) / (2 * p[1]**2)
+			y_0 = - (2 * p[0] * p[1] * x + p[4]) / (2 * p[1]**2)
 		else:
 			y_0 = segm[0] - 1
 		if segm[0] <= y_0 <= segm[1]:
