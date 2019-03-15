@@ -19,7 +19,6 @@ def grad_descent_segment(segm, deriv, delta, x_opt):
 
 def gss(f, segm, tol=1e-3):
 	a, b = segm
-	#print(tol)
 	gr = (math.sqrt(5) + 1) / 2
 	c = b - (b - a) / gr
 	d = a + (b - a) / gr 
