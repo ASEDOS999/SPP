@@ -27,7 +27,6 @@ while len(results) < 3 * N:
 			print(n / 10,'%')
 		param = np.random.uniform(-10, 10, 6)
 		param[2] =  abs(param[2])
-		param = [4, -3, 7, 1, 5, 6]
 		f = qf(param)
 		size_1, size_2 = random.uniform(0.5, 1), random.uniform(0.5, 1)
 		x_1, y_1 = f.solution[0], f.solution[1]
