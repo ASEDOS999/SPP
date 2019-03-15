@@ -1,0 +1,16 @@
+\select@language {english}
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}
+\contentsline {section}{\numberline {2}Description Of Method}{2}{section.2}
+\contentsline {section}{\numberline {3}Algorithm correctness}{3}{section.3}
+\contentsline {subsection}{\numberline {3.1}Zero Error}{3}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Nonzero Error}{4}{subsection.3.2}
+\contentsline {subsection}{\numberline {3.3}Undifferentiable convex function}{4}{subsection.3.3}
+\contentsline {section}{\numberline {4}Error's Value}{4}{section.4}
+\contentsline {section}{\numberline {5}Number of iterations}{7}{section.5}
+\contentsline {section}{\numberline {6}Tests}{9}{section.6}
+\contentsline {subsection}{\numberline {6.1}About function $solve$}{9}{subsection.6.1}
+\contentsline {subsection}{\numberline {6.2}Tests for iterations number}{10}{subsection.6.2}
+\contentsline {subsection}{\numberline {6.3}Comparison}{12}{subsection.6.3}
+\contentsline {subsubsection}{\numberline {6.3.1}Sinuses}{13}{subsubsection.6.3.1}
+\contentsline {subsubsection}{\numberline {6.3.2}Quadric functions}{13}{subsubsection.6.3.2}
+\contentsline {section}{\numberline {7}Conclusion}{14}{section.7}

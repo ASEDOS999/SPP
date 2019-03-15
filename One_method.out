@@ -1,0 +1,15 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [1][-]{section.2}{Description Of Method}{}% 2
+\BOOKMARK [1][-]{section.3}{Algorithm correctness}{}% 3
+\BOOKMARK [2][-]{subsection.3.1}{Zero Error}{section.3}% 4
+\BOOKMARK [2][-]{subsection.3.2}{Nonzero Error}{section.3}% 5
+\BOOKMARK [2][-]{subsection.3.3}{Undifferentiable convex function}{section.3}% 6
+\BOOKMARK [1][-]{section.4}{Error's Value}{}% 7
+\BOOKMARK [1][-]{section.5}{Number of iterations}{}% 8
+\BOOKMARK [1][-]{section.6}{Tests}{}% 9
+\BOOKMARK [2][-]{subsection.6.1}{About function solve}{section.6}% 10
+\BOOKMARK [2][-]{subsection.6.2}{Tests for iterations number}{section.6}% 11
+\BOOKMARK [2][-]{subsection.6.3}{Comparison}{section.6}% 12
+\BOOKMARK [3][-]{subsubsection.6.3.1}{Sinuses}{subsection.6.3}% 13
+\BOOKMARK [3][-]{subsubsection.6.3.2}{Quadric functions}{subsection.6.3}% 14
+\BOOKMARK [1][-]{section.7}{Conclusion}{}% 15

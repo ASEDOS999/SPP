@@ -339,7 +339,7 @@ Therefore this functions met conditions of lemma 4.1 and we can take gradient at
 
 \begin{figure}[H]
 \centering
-\includegraphics[scale=0.6]{./Tests/Examples.png}
+\includegraphics[scale=0.6]{./Tests/Images/Examples.png}
 \caption{Examples of tests functions}
 \label{fig:examples}
 \end{figure}
@@ -349,7 +349,7 @@ We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. Let's solve task of minimizat
 Result of the test you can see on fig.~\ref{fig:image}.
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.7]{Tests/Test_results.png}}
+\center{\includegraphics[scale=0.7]{Tests/Images/Test_results.png}}
 \caption{Tests' results for iterations number}
 \label{fig:image}
 \end{figure}
@@ -390,7 +390,7 @@ When we compare two method we distinguish the following situations (similar name
 As already mentioned in previous subsection, functions \eqref{ex_1} meet conditions of lemma 4.1, therefore, we can take any point from segment on each iteration in method of halving square. Using all written above we have following results (see fig.~\ref{comp_sinuses}).
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.6]{Tests/Comparison-sinuses.png}}
+\center{\includegraphics[scale=0.6]{Tests/Images/Comparison-sinuses.png}}
 \caption{Tests' results for comparison on sinuses}
 \label{comp_sinuses}
 \end{figure}
@@ -402,7 +402,7 @@ We can see that new method is not less efficient on the most tasks and more effi
 Quadric functions do not always meet conditions of lemma 4.1, therefore, we can not think that error for task on segment can be very big. We can try to estimate this error but let's use for this task gradient descent with $|x-x_{prev}|<\delta$, where $\delta$ is much less than size of segment. In our experiments we will use $\delta = \frac{a}{400}$. Using it we have following results (see fig.~\ref{comp_pol}).
 
 \begin{figure}[H]
-\center{\includegraphics[scale=0.6]{./Tests/Comparison-pol.png}}
+\center{\includegraphics[scale=0.6]{./Tests/Images/Comparison-pol.png}}
 \caption{Tests' results for comparison on quadric function}
 \label{comp_pol}
 \end{figure}
