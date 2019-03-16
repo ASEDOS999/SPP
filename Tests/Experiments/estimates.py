@@ -13,9 +13,9 @@ import math
 
 #Quadratic functions
 results = []
-epsilon = [0.1**(i) for i in range(10)]
+epsilon = [0.1**(i) for i in range(9)]
 num = 0
-N = 10
+N = 1
 n = 0
 full_results = []
 for eps in epsilon:
@@ -37,12 +37,14 @@ for eps in epsilon:
 		solver.init_help_function(stop_func = 'const_est')
 		res_2 = solver.halving_square()
 		m3 = time()
-		# solver.init_help_function(stop_func = 'stop_ineq')
-		# res_3 = solver.halving_square()
-		results.append((eps, res_1[1], m2-m1, res_2[1], m3-m2))
+		solver.init_help_function(stop_func = 'stop_ineq')
+		res_3 = solver.halving_square()
+		m4 = time()
+		results.append((eps, res_1[1], m2-m1, res_2[1], m3-m2, res_3[1], m4 - m3))
 	list_gss = [i[2] for i in results]
 	print('eps = ', eps)
 	print('Mean time (Little Big) = %.2fms'%(1000 * np.mean([i[2] for i in results])))
 	print('Mean time (Constant) = %.2fms'%(1000 * np.mean([i[4] for i in results])))
+	print('Mean time (Stop_ineq) = %.2fms'%(1000 * np.mean([i[6] for i in results])))
 	full_results = full_results + results
 	results = []
