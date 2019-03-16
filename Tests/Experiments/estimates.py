@@ -15,7 +15,7 @@ import math
 results = []
 epsilon = [0.1**(i) for i in range(10)]
 num = 0
-N = 1000
+N = 10
 n = 0
 full_results = []
 for eps in epsilon:
