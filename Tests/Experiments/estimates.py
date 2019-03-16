@@ -35,7 +35,6 @@ for eps in epsilon:
 		res_1 = solver.halving_square()
 		m2 = time()
 		solver.init_help_function(stop_func = 'const_est')
-		#print(solver.stop)
 		res_2 = solver.halving_square()
 		m3 = time()
 		# solver.init_help_function(stop_func = 'stop_ineq')

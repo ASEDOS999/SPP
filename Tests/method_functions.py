@@ -11,18 +11,25 @@ class solver_segment:
 		self.eps = eps
 		self.stop = self.const_est
 		self.solve = self.gss
+		self.type_stop = 'const_est'
 		self.value = 0
 		self.axis = 'x'
 		self.segm = []
+		self.est = 0
+
 
 	def init_help_function(self, stop_func = 'const_est', solve_segm = 'gss'):
 		if stop_func == 'big_grad':
 			self.stop = self.big_grad
+			self.type_stop = stop_func
 		if stop_func == 'stop_ineq':
 			self.stop = self.stop_ineq
+			self.type_stop = stop_func
 		if stop_func == 'true':
+			self.type_stop = stop_func
 			self.stop = self.always_true
 		if stop_func == 'const_est':
+			self.type_stop = stop_func
 			self.stop = self.const_est
 		
 		if solve_segm == 'gss':
@@ -30,15 +37,25 @@ class solver_segment:
 		if solve_segm == 'grad_desc':
 			self.solve = self.grad_descent_segment
 
-	def big_grad(self, a, b):
+	def get_est(self):
+		L = self.f.lipschitz_function(self.Q)
+		M = self.f.lipschitz_gradient(self.Q)
+		R = self.size
+		eps = self.eps
 		arg = self.value
 		f = self.f
-		L = f.lipschitz_gradient(self.Q)
-		if self.axis == 'x':
-			return b - a <= abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / L
-		if self.axis == 'y':
-			return b - a <= abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / L
-	
+		if self.type_stop == 'big_grad':
+			if self.axis == 'x':
+				self.est = abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / M
+			if self.axis == 'y':
+				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / M
+		if self.type_stop == 'const_est':
+			self.est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
+
+
+	def big_grad(self, a, b):
+		return b - a <= self.est
+
 	def stop_ineq(self, a, b):
 		if self.axis == 'x':
 			sol = self.f.get_sol_hor(self.segm, self.value)
@@ -56,12 +73,7 @@ class solver_segment:
 		return True
 	
 	def const_est(self, a, b):
-		L = self.f.lipschitz_function(self.Q)
-		M = self.f.lipschitz_gradient(self.Q)
-		R = self.size
-		eps = self.eps
-		est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
-		return b - a <= 0.0001 * est
+		return b - a <= self.est
 
 	def grad_descent_segment(self):
 		segm = self.segm
@@ -77,6 +89,7 @@ class solver_segment:
 			delta = 0.01 * alpha_0
 		if delta < 0:
 			return x
+		self.get_est()
 		while not self.stop(x, x_opt) and N < 1000:
 			x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
 			x = min(max(x, segm[0]), segm[1])
@@ -95,6 +108,7 @@ class solver_segment:
 		c = b - (b - a) / gr
 		d = a + (b - a) / gr 
 		f_c, f_d = f(c), f(d)
+		self.get_est()
 		while not self.stop(a, b):
 			if f(c) < f(d):
 				b = d
