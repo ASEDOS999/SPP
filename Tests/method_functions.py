@@ -1,6 +1,23 @@
 # -*- coding: utf-8 -*-
 
 import math
+import numpy as np
+
+
+def big_grad(f, L, a, b, is_inter, axis, arg):
+	if axis == 'x':
+		return abs(f.der_y(f.get_sol_hor(segm, arg), arg)) / L
+	if axis == 'y':
+		return abs(f.der_x(arg, f.get_sol_vert(arg, segm))) / L
+
+def stop_ineq(f, L, is_inter, a, b):
+	if is_inter:
+		if b - a <= np.linalg.norm(f.gradient) / L:
+			return True
+		else:
+			return False
+	else:
+		return little_big(f, L, a, b)
 
 def grad_descent_segment(segm, deriv, delta, x_opt):
 	N = 0
@@ -17,13 +34,13 @@ def grad_descent_segment(segm, deriv, delta, x_opt):
 		N = -1
 	return x
 
-def gss(f, segm, tol=1e-3):
+def gss(f, segm, est):
 	a, b = segm
 	gr = (math.sqrt(5) + 1) / 2
 	c = b - (b - a) / gr
 	d = a + (b - a) / gr 
 	f_c, f_d = f(c), f(d)
-	while abs(c - d) > tol:
+	while b - a > est:
 		if f(c) < f(d):
 			b = d
 			d, f_d = c, f_c
@@ -36,6 +53,10 @@ def gss(f, segm, tol=1e-3):
 			f_d = f(d)
 	return (b + a) / 2
 
+def add_cond(x, y, f, eps, a):
+	if np.linalg.norm(f.gradient(x, y)) <= eps / (a * math.sqrt(2)):
+		return True
+
 def halving_square(f, eps, square, solve_hor_segm, solve_vert_segm):
 	Q = square.copy()
 	N = 0
@@ -46,6 +67,8 @@ def halving_square(f, eps, square, solve_hor_segm, solve_vert_segm):
 	f_opt = f.calculate_function(x_0, y_0)
 	while True:
 		x_0 = solve_hor_segm([Q[0], Q[1]], (Q[2]+ Q[3]) / 2)
+		if add_cond(x_0, (Q[2] + Q[3])/ 2, f, eps, Q[1] - Q[0]):
+			return (x_0, (Q[2] + Q[3]) / 2)
 		der = f.der_y(x_0, (Q[2] + Q[3]) / 2)
 		if der == 0 and f.der_x(x_0, (Q[2] + Q[3]) / 2) == 0:
 			return ((x_0, (Q[2] + Q[3]) / 2), N)
