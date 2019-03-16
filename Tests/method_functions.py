@@ -19,9 +19,8 @@ class solver_segment:
 		self.f_M = self.f.lipschitz_gradient(self.Q)
 
 
-	def init_help_function(self, stop_func = 'const_est', solve_segm = 'gss'):
+	def init_help_function(self, stop_func = 'big_grad', solve_segm = 'gss'):
 		self.type_stop = stop_func
-		
 		if solve_segm == 'gss':
 			self.solve = self.gss
 		if solve_segm == 'grad_desc':
@@ -74,24 +73,23 @@ class solver_segment:
 				return b - a <= self.est
 
 		if self.type_stop == 'const_est_est' or self.type_stop == 'big_grad':
+			if self.est <= 1e-15:
+				print('error', self.type_stop)
+				return True
 			return b - a <= self.est
 
 	def grad_descent_segment(self):
 		segm = self.segm
 		if self.axis == 'x':
-			deriv = self.f.der_x
-			x_opt = f.get_sol_hor(self.segm)
+			deriv = lambda x: self.f.der_x(x, self.value)
+			x_opt = self.f.get_sol_hor(self.segm, self.value)
 		else:
-			deriv = self.f.der_y
-			x_opt = f.get_sol_vert(self.segm)
+			deriv = lambda y: self.f.der_y(self.value, y)
+			x_opt = self.f.get_sol_vert(self.segm, self.value)
 		N = 0
 		x, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
-		if delta == 0:
-			delta = 0.01 * alpha_0
-		if delta < 0:
-			return x
 		self.get_est()
-		while not self.stop(x, x_opt) and N < 1000:
+		while not self.stop(x, x_opt):
 			x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
 			x = min(max(x, segm[0]), segm[1])
 			N += 1
@@ -111,8 +109,8 @@ class solver_segment:
 		d = a + (b - a) / gr 
 		f_c, f_d = f(c), f(d)
 		self.get_est()
+		N = 0
 		while not self.stop(a, b):
-		#while b - a >= self.est:
 			if f(c) < f(d):
 				b = d
 				d, f_d = c, f_c
@@ -123,6 +121,10 @@ class solver_segment:
 				c, f_c = d, f_d
 				d = a + (b - a) / gr
 				f_d = f(d)
+			N+=1
+			if N >= 100:
+				print('error in gss', self.type_stop)
+				return (b+a)/2
 		return (b + a) / 2
 
 class main_solver(solver_segment):
