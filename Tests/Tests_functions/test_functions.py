@@ -56,6 +56,16 @@ class quadratic_function():
 							np.array([-p[3], -p[4]]))
 		self.min = self.calculate_function(self.solution[0], self.solution[1])
 
+	def lipschitz_function(self, Q):
+		p = self.A
+		L = 3 * max(abs(p[0]), abs(p[1]), p[2]) *  max(abs(Q[1]), abs(Q[3]))
+		return L
+
+	def lipschitz_gradient(self, Q):
+		param = self.A
+		M = (2 * param[0]**2 + 4 * abs(param[0] * param[1]) + 2 * param[1] ** 2 + 2 * param[2]) * 10
+		return M
+
 	def calculate_function(self, x, y):
 		p = self.A
 		f = (p[0] * x + p[1] * y)**2 + p[2] * x**2
