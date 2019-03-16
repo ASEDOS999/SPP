@@ -89,11 +89,12 @@ class solver_segment:
 		N = 0
 		x, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
 		self.get_est()
-		while not self.stop(x, x_opt):
+		while not self.stop(x, x_opt) and N < 1000:
 			x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
 			x = min(max(x, segm[0]), segm[1])
 			N += 1
 		if N >= 1000:
+			print('error in GDS')
 			N = -1
 		return x
 	
