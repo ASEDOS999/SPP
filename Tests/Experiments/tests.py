@@ -10,14 +10,16 @@ import numpy as np
 import random
 from test_functions import sinuses
 from test_functions import quadratic_function as qf
-from method_functions import halving_square, gradient_descent
-from method_functions import grad_descent_segment as GD_s
+from method_functions import main_solver
+from method_functions import gradient_descent
 import math
 
 #Tests for iterations number
 results = []
 epsilon = [0.1**(1 + i) for i in range(7)] + [0.5**(1 + i) for i in range(7)]
 num = 0
+Q = [0, 1, 0, 1]
+print(Q.copy())
 for i in np.linspace(1.1, 1.9, 5).tolist():
 	for j in np.linspace(1.1, 1.9, 5).tolist():
 		print((num * 4), '% is completed')
@@ -26,9 +28,10 @@ for i in np.linspace(1.1, 1.9, 5).tolist():
 		while m != -1:
 			f = sinuses(a, [i, j])
 			for eps in epsilon:
-				N = halving_square(f, eps, [0, 1, 0, 1], 
-					lambda segm, y: GD_s(segm, lambda x: f.der_x(x, y), f.get_est(y, 1)),
-					lambda segm, x: GD_s(segm, lambda y: f.der_y(x, y), f.get_est(x, 0)))
+				print(Q.copy())
+				solver = main_solver(f, Q, eps)
+				solver.init_help_function(stop_func = 'true')
+				N = solver.halving_square()
 				results.append((N[1], eps, f.L))
 			m, n = 1, 2
 			while m != -1 and a[m][n] == 1:
@@ -66,9 +69,9 @@ for i in np.linspace(1.1, 1.9, 5).tolist():
 				m1 = time()
 				res_1 = gradient_descent(f.calculate_function, [0, 1, 0, 1], f.gradient, eps, 0.25, f.min)
 				m2 = time()
-				res_2 = halving_square(f, eps, [0, 1, 0, 1], 
-					lambda segm, y: GD_s(segm, lambda x: f.der_x(x, y), f.get_est(y, 1)),
-					lambda segm, x: GD_s(segm, lambda y: f.der_y(x, y), f.get_est(x, 0)))
+				solver = main_solver(f, Q, eps)
+				solver.init_help_function(stop_func = 'true')
+				res_2 = solver.halving_square()
 				m3 = time()
 				results.append((eps, res_1[1], res_2[1], m2 - m1, m3 - m2))
 			m, n = 1, 2
@@ -104,6 +107,7 @@ plt.ylabel('Number of tasks')
 plt.xticks(ind, ('T1', 'T2', 'T3', 'T4', 'T5'))
 plt.show()
 
+
 #Quadratic functions
 results = []
 epsilon = [0.1**(i) for i in range(3)]
@@ -124,9 +128,9 @@ while len(results) < 3 * N:
 			m1 = time()
 			res_1 = gradient_descent(f.calculate_function, Q, f.gradient, eps, 0.25, f.min)
 			m2 = time()
-			res_2 = halving_square(f, eps, [0, 1, 0, 1], 
-				lambda segm, y: GD_s(segm, lambda x: f.der_x(x, y), f.get_est(y, 1)),
-				lambda segm, x: GD_s(segm, lambda y: f.der_y(x, y), f.get_est(x, 0)))
+			solver = main_solver(f, Q, eps)
+			solver.init_help_function(stop_func = 'const_est')
+			res_2 = solver.halving_square()
 			m3 = time()
 			results.append((eps, res_1[1], res_2[1], m2 - m1, m3 - m2))
 
