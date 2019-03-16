@@ -73,7 +73,7 @@ class quadratic_function():
 		return der
 
 	def gradient(self, x, y):
-		return [self.der_x(x,y), self.der_y(x,y)]
+		return np.array([self.der_x(x,y), self.der_y(x,y)])
 	
 	def get_sol_hor(self, segm, y):
 		p = self.A
