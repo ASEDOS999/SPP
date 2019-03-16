@@ -39,7 +39,7 @@ class solver_segment:
 			if self.axis == 'y':
 				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / M
 		if self.type_stop == 'const_est':
-			self.type_stop = ''
+			self.type_stop = 'const_est_est'
 			self.est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
 		if self.type_stop == 'stop_ineq':
 			if self.axis == 'x':
@@ -73,7 +73,7 @@ class solver_segment:
 			else:
 				return b - a <= self.est
 
-		if self.type_stop == 'const_est' or self.type_stop == 'big_grad':
+		if self.type_stop == 'const_est_est' or self.type_stop == 'big_grad':
 			return b - a <= self.est
 
 	def grad_descent_segment(self):
