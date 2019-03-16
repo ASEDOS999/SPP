@@ -9,13 +9,15 @@ class solver_segment:
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
 		self.eps = eps
-		self.stop = self.const_est
+		self.stop = self.big_grad
 		self.solve = self.gss
-		self.type_stop = 'const_est'
+		self.type_stop = 'big_grad'
 		self.value = 0
 		self.axis = 'x'
-		self.segm = []
+		self.segm = [Q[0], Q[1]]
 		self.est = 0
+		self.f_L = self.f.lipschitz_function(self.Q)
+		self.f_M = self.f.lipschitz_gradient(self.Q)
 
 
 	def init_help_function(self, stop_func = 'const_est', solve_segm = 'gss'):
@@ -38,19 +40,22 @@ class solver_segment:
 			self.solve = self.grad_descent_segment
 
 	def get_est(self):
-		L = self.f.lipschitz_function(self.Q)
-		M = self.f.lipschitz_gradient(self.Q)
+		L, M = self.f_L, self.f_M
 		R = self.size
 		eps = self.eps
 		arg = self.value
 		f = self.f
 		if self.type_stop == 'big_grad':
+			#print('qqqq')
 			if self.axis == 'x':
+				#print(1)
 				self.est = abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / M
 			if self.axis == 'y':
+				#print(2)
 				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / M
-		if self.type_stop == 'const_est':
-			self.est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
+#		if self.type_stop == 'const_est':
+#			self.type_stop = ''
+#			self.est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
 
 
 	def big_grad(self, a, b):
@@ -109,7 +114,8 @@ class solver_segment:
 		d = a + (b - a) / gr 
 		f_c, f_d = f(c), f(d)
 		self.get_est()
-		while not self.stop(a, b):
+		#while not self.stop(a, b):
+		while b - a >= self.est:
 			if f(c) < f(d):
 				b = d
 				d, f_d = c, f_c
@@ -124,10 +130,12 @@ class solver_segment:
 
 class main_solver(solver_segment):
 	def add_cond(self, x, y):
+		return False
 		eps = self.eps
 		if np.linalg.norm(self.f.gradient(x, y)) <= eps / (self.size * math.sqrt(2)):
 			return True
-	
+		return False
+
 	def halving_square(self):
 		eps = self.eps
 		Q = self.Q.copy()
@@ -137,12 +145,13 @@ class main_solver(solver_segment):
 		if self.add_cond(x_0, y_0):
 			return ((x_0, y_0), N)
 		f_opt = self.f.calculate_function(x_0, y_0)
+		self.get_est()
 		while True:
 			y_0 = (Q[2] + Q[3]) / 2
 			self.axis, self.value, self.segm = 'x', y_0, [Q[0], Q[1]]
 			x_0 = self.solve()
 			if self.add_cond(x_0, y_0):
-				return (x_0, y_0)
+				return ((x_0, y_0), N)
 			der = self.f.der_y(x_0, y_0)
 			if der == 0 and self.f.der_x(x_0, y_0) == 0:
 				return ((x_0, (Q[2] + Q[3]) / 2), N)
@@ -151,11 +160,11 @@ class main_solver(solver_segment):
 			else:
 				Q[3], Q[2] = Q[3],  y_0
 			
-			x_0 = (Q[2] + Q[3]) / 2
+			x_0 = (Q[0] + Q[1]) / 2
 			self.axis, self.value, self.segm = 'y', x_0, [Q[2], Q[3]]
 			y_0 = self.solve()
 			if self.add_cond(x_0, y_0):
-				return (x_0, y_0)
+				return ((x_0, y_0), N)
 			der = self.f.der_x(x_0, y_0)
 			if der == 0 and self.f.der_y(x_0, y_0) == 0:
 				return ((x_0, (Q[2] + Q[3]) / 2), N)
@@ -169,7 +178,7 @@ class main_solver(solver_segment):
 			x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 			f_opt = self.f.calculate_function(x_0, y_0) 
 			if N >= 100 or abs(f_opt - minimum) < eps:
-				if N >= 1000:
+				if N >= 100:
 					N = -1
 				return ((x_0, y_0), N)
 
