@@ -1,0 +1,35 @@
+ \documentclass[12pt]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}       
+
+\usepackage[english]{babel}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,amsbsy,amstext,amscd,amsxtra,multicol}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+\usepackage[stable]{footmisc}
+\usepackage{ dsfont }
+\usepackage{wrapfig}
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{bm}
+\usepackage{color}
+	
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{linkcolor}{HTML}{799B03} % цвет гиперссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+ 
+\begin{document}
+
+\begin{center}
+\large{One Method for Convex Optimization on Square}\\
+\end{center}
+\bigskip 
+
+We consider some new approach to method convex 2-dimensional optimization on a fixed square recently proposed by Yu. E. Nesterov (see ex.1.5 in \href{https://arxiv.org/pdf/1711.00394.pdf}{https://arxiv.org/pdf/1711.00394.pdf}). The idea of the method consists in the narrowing of the domain until we achieve an acceptable quality of the solution. This method has to search minimum on the separating segments and we propose some strategy for a choice of solution's accuracy on segment. Estimations for the iteraions number are proved for the cases of smooth and non-smooth functions and we compared them. There are experiments that show a work of the strategy for segment and prove the estimates for iterations number. Moreover, there is an experimental comparison of the method with other method of convex optimization such as ellipsoid method and gradient descent.
+
+\end{document}
