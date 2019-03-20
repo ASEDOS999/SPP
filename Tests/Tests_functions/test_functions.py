@@ -21,7 +21,12 @@ class sinuses():
 		for i in range(1, len(a)):
 			z +=  (-a[i][0] * np.sin(x * pi / b[0]) - a[i][1] * np.sin(y * pi / b[1]) + a[i][0] + a[i][1] + a[i][2])**(i+1)
 		return z
-	
+	def lipschitz_function(self, Q):
+		return self.L
+
+	def lipschitz_gradient(self, Q):
+		return self.L
+
 	def der_x(self, x, y):
 		a = self.parameters
 		b = self.coef
