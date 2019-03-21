@@ -39,7 +39,7 @@ class solver_segment:
 				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / M
 		if self.type_stop == 'const_est':
 			self.type_stop = 'const_est_est'
-			self.est = eps / (2 * M * R * (math.sqrt(2) + math.sqrt(5)) * ( - math.log(eps / (L * R * math.sqrt(2)), 2)))
+			self.est = eps / (2 * M * R * math.sqrt(5) * ( - math.log((2 * L * R * math.sqrt(2)) / 2, 2)))
 		if self.type_stop == 'stop_ineq':
 			if self.axis == 'x':
 				sol = self.f.get_sol_hor(self.segm, self.value)
