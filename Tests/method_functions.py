@@ -73,8 +73,8 @@ class solver_segment:
 				return b - a <= self.est
 
 		if self.type_stop == 'const_est_est' or self.type_stop == 'big_grad':
-			if self.est <= 1e-15:
-				print('error', self.type_stop)
+			if self.est <= 0:
+				#print('error', self.type_stop)
 				return True
 			return b - a <= self.est
 
@@ -89,12 +89,11 @@ class solver_segment:
 		N = 0
 		x, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
 		self.get_est()
-		while not self.stop(x, x_opt) and N < 1000:
+		while not self.stop(x, x_opt) and N < 100000:
 			x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
 			x = min(max(x, segm[0]), segm[1])
 			N += 1
-		if N >= 1000:
-			print('error in GDS')
+		if N >= 100000:
 			N = -1
 		return x
 	
@@ -123,8 +122,7 @@ class solver_segment:
 				d = a + (b - a) / gr
 				f_d = f(d)
 			N+=1
-			if N >= 100:
-				print('error in gss', self.type_stop)
+			if N >= 100000:
 				return (b+a)/2
 		return (b + a) / 2
 
