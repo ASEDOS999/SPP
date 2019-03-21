@@ -1,0 +1,10 @@
+..gitignore.swp
+Tests/.ipynb_checkpoints/
+Tests/Experiments/__pycache__/
+Tests/Tests_functions/__pycache__/
+Tests/__pycache__/
+
+One_method.*
+!One_method.pdf
+!One_method.tex
+
