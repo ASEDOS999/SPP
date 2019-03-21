@@ -10,7 +10,7 @@ class solver_segment:
 		self.size = Q[1] - Q[0]
 		self.eps = eps
 		self.solve = self.gss
-		self.type_stop = 'big_grad'
+		self.type_stop = 'true_grad'
 		self.value = 0
 		self.axis = 'x'
 		self.segm = [Q[0], Q[1]]
@@ -19,7 +19,7 @@ class solver_segment:
 		self.f_M = self.f.lipschitz_gradient(self.Q)
 
 
-	def init_help_function(self, stop_func = 'big_grad', solve_segm = 'gss'):
+	def init_help_function(self, stop_func = 'true_grad', solve_segm = 'gss'):
 		self.type_stop = stop_func
 		if solve_segm == 'gss':
 			self.solve = self.gss
@@ -32,15 +32,15 @@ class solver_segment:
 		eps = self.eps
 		arg = self.value
 		f = self.f
-		if self.type_stop == 'big_grad':
+		if self.type_stop == 'true_grad':
 			if self.axis == 'x':
 				self.est = abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / M
 			if self.axis == 'y':
 				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / M
 		if self.type_stop == 'const_est':
 			self.type_stop = 'const_est_est'
-			self.est = eps / (2 * M * R * math.sqrt(5) * ( - math.log((2 * L * R * math.sqrt(2)) / 2, 2)))
-		if self.type_stop == 'stop_ineq':
+			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
+		if self.type_stop == 'cur_grad':
 			if self.axis == 'x':
 				sol = self.f.get_sol_hor(self.segm, self.value)
 				is_inter = sol != self.segm[0] and sol != self.segm[1]
@@ -62,7 +62,7 @@ class solver_segment:
 		if self.type_stop == 'true':
 			return True
 
-		if self.type_stop == 'stop_ineq':
+		if self.type_stop == 'cur_grad':
 			if self.est == -1:
 				if self.axis == 'y':
 					grad = np.linalg.norm(self.f.gradient(self.value, (b+a) / 2))
@@ -72,7 +72,7 @@ class solver_segment:
 			else:
 				return (b - a) / 2 <= self.est
 
-		if self.type_stop == 'const_est_est' or self.type_stop == 'big_grad':
+		if self.type_stop == 'const_est_est' or self.type_stop == 'true_grad':
 			if self.est <= 0:
 				return True
 			return (b - a) / 2 <= self.est

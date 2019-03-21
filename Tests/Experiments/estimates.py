@@ -30,17 +30,17 @@ def get_tests_estimates(epsilon):
 			M = f.lipschitz_gradient(Q)
 			solver = main_solver(f, Q, eps)
 			m1 = time()
-			solver.init_help_function(stop_func = 'big_grad')
+			solver.init_help_function(stop_func = 'true_grad')
 			res_1 = solver.halving_square()
 			m2 = time()
 			solver.init_help_function(stop_func = 'const_est')
 			res_2 = solver.halving_square()
 			m3 = time()
-			solver.init_help_function(stop_func = 'stop_ineq')
+			solver.init_help_function(stop_func = 'cur_grad')
 			res_3 = solver.halving_square()
 			m4 = time()
 			results.append((eps, res_1[1], m2-m1, res_2[1], m3-m2, res_3[1], m4 - m3))
-		name = ['Little Big', 'Constant', 'Stop_ineq']
+		name = ['True gradient', 'Constant estimate', 'Current gradient']
 		print('eps = ', "{:.1e}".format(eps))
 		for j in range(3):
 			list = [i[2 + j * 2] for i in results if i[1 + j * 2] >= 0]
