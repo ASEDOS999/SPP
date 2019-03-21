@@ -68,15 +68,14 @@ class solver_segment:
 					grad = np.linalg.norm(self.f.gradient(self.value, (b+a) / 2))
 				if self.axis == 'x':
 					grad = np.linalg.norm(self.f.gradient((b+a) / 2, self.value))
-				return b - a <= grad/self.f_M
+				return (b - a) / 2 <= grad/self.f_M
 			else:
-				return b - a <= self.est
+				return (b - a) / 2 <= self.est
 
 		if self.type_stop == 'const_est_est' or self.type_stop == 'big_grad':
 			if self.est <= 0:
-				#print('error', self.type_stop)
 				return True
-			return b - a <= self.est
+			return (b - a) / 2 <= self.est
 
 	def grad_descent_segment(self):
 		segm = self.segm
