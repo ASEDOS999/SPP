@@ -12,7 +12,6 @@ from method_functions import main_solver
 import math
 
 def get_tests_estimates(epsilon):
-	#Quadratic functions
 	results = []
 	num = 0
 	N = 1000
@@ -41,14 +40,18 @@ def get_tests_estimates(epsilon):
 			res_3 = solver.halving_square()
 			m4 = time()
 			results.append((eps, res_1[1], m2-m1, res_2[1], m3-m2, res_3[1], m4 - m3))
-		list_gss = [i[2] for i in results]
-		print('eps = ', eps)
-		print('Mean time (Little Big) = %.2fms'%(1000 * np.mean([i[2] for i in results])))
-		print('Mean time (Constant) = %.2fms'%(1000 * np.mean([i[4] for i in results])))
-		print('Mean time (Stop_ineq) = %.2fms'%(1000 * np.mean([i[6] for i in results])))
+		name = ['Little Big', 'Constant', 'Stop_ineq']
+		print('eps = ', "{:.1e}".format(eps))
+		for j in range(3):
+			list = [i[2 + j * 2] for i in results if i[1 + j * 2] >= 0]
+			print('Mean time (%s) = %.2fms'%(name[j], 1000 * np.mean(list)))
+			list = [i[2 + j * 2] for i in results if i[1 + j * 2] <  0]
+			q = len(list)
+			if q > 0:
+				print("%s: Number of failed tests equals %d"%(name[j], q))
 		full_results = full_results + results
 		results = []
 
 if __name__ == "__main__":
-	eps = [0.1**(i) for i in range(9)]
+	eps = [0.1**(i) for i in range(7)]
 	get_tests_estimates(eps)
