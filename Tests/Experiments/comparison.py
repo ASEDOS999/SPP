@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.append("../")
-sys.path.append("../Tests_functions")
+sys.path.append("/Tests_functions")
 
 from time import time
 import matplotlib.pyplot as plt
@@ -21,7 +20,6 @@ def num_iter_tests(epsilon):
 	Q = [0, 1, 0, 1]
 	for i in np.linspace(1.1, 1.9, 5).tolist():
 		for j in np.linspace(1.1, 1.9, 5).tolist():
-			print((num * 4), '% is completed')
 			a = [[0.1, 0.1], [0.1, 0.1, 0.1]]
 			m, n = 1, 2
 			while m != -1:
@@ -43,9 +41,10 @@ def num_iter_tests(epsilon):
 							n = 1
 				a[max(m, 0)][n] *= 10
 			num += 1
-	print('100 % is completed')
 	plt.plot([math.log(i[2] / i[1] / math.sqrt(2), 2) for i in results], [i[0] for i in results], 'ro')
 	plt.plot([0, 17], [0, 17], 'b')
+	plt.title("Iterations number")
+	plt.grid()
 	plt.legend(('Tests functions', r'Line $N = \log \frac{La}{\sqrt{2}\epsilon}$'))
 	plt.ylabel(r'$N$')
 	plt.xlabel(r'$\log \frac{La}{\sqrt{2}\epsilon}$')
@@ -59,7 +58,6 @@ def comparison_GD_HS_sinuses(epsilon):
 	Q = [0, 1, 0, 1]
 	for i in np.linspace(1.1, 1.9, 5).tolist():
 		for j in np.linspace(1.1, 1.9, 5).tolist():
-			print((num * 4), '% is completed')
 			a = [[0.1, 0.1], [0.1, 0.1, 0.1]]
 			m, n = 1, 2
 			while m != -1:
@@ -85,7 +83,6 @@ def comparison_GD_HS_sinuses(epsilon):
 							n = 1
 				a[max(m, 0)][n] *= 10
 			num += 1
-	print('100 % is completed')
 	
 	p = 1.05
 	
@@ -102,6 +99,7 @@ def comparison_GD_HS_sinuses(epsilon):
 	ind = np.arange(5)
 	width = 0.35
 	p1 = plt.bar(ind, data, width)
+	plt.grid()
 	plt.ylabel('Number of tasks')
 	plt.xticks(ind, ('T1', 'T2', 'T3', 'T4', 'T5'))
 	plt.show()
@@ -115,8 +113,6 @@ def comparison_GD_HS_QFunc(epsilon):
 	n = 0
 	while len(results) < 3 * N:
 			n += 1
-			if n % 100 == 0:
-				print(n / 10,'%')
 			param = np.random.uniform(-10, 10, 6)
 			param[2] =  abs(param[2])
 			f = qf(param)
@@ -151,6 +147,7 @@ def comparison_GD_HS_QFunc(epsilon):
 	width = 0.35
 	p1 = plt.bar(ind, data, width)
 	plt.title('QF')
+	plt.grid()
 	plt.ylabel('Number of tasks')
 	plt.xticks(ind, ('T1', 'T2', 'T3', 'T4', 'T5', 'T6'))
 	plt.show()
@@ -160,4 +157,3 @@ if __name__ == "__main__":
 	num_iter_tests(eps)
 	comparison_GD_HS_sinuses(eps)
 	comparison_GD_HS_QFunc(eps)
-
