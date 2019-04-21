@@ -14,7 +14,7 @@ class solver_segment:
 		self.value = 0
 		self.axis = 'x'
 		self.segm = [Q[0], Q[1]]
-		self.est = 0
+		self.est = None
 		self.f_L = self.f.lipschitz_function(self.Q)
 		self.f_M = self.f.lipschitz_gradient(self.Q)
 
@@ -26,56 +26,53 @@ class solver_segment:
 		if solve_segm == 'grad_desc':
 			self.solve = self.grad_descent_segment
 
-	def get_est(self):
-		L, M = self.f_L, self.f_M
-		R = self.size
-		eps = self.eps
-		arg = self.value
-		f = self.f
-		if self.type_stop == 'true_grad':
+	def TG(self, a, b):
+		if self.est is None:
+			f = self.f
+			arg = self.value
 			if self.axis == 'x':
-				self.est = abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / M
+				self.est = abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / self.f_M
 			if self.axis == 'y':
-				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / M
-		if self.type_stop == 'const_est':
-			self.type_stop = 'const_est_est'
+				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / self.f_M
+		cond = ((b - a) / 2 <= self.est)
+		if cond:
+			self.est = None
+		return cond
+
+	def CE(self, a, b):
+		if self.est is None:
+			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
 			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
-		if self.type_stop == 'cur_grad':
-			if self.axis == 'x':
-				sol = self.f.get_sol_hor(self.segm, self.value)
-				is_inter = sol != self.segm[0] and sol != self.segm[1]
-				if is_inter:
-					self.est = -1
-				else:
-					self.est = abs(f.der_y(sol, arg)) / M
+		return ((b - a) / 2 <= self.est)
+
+	def CG_CE(self, a, b):
+		is_inter = (a != self.segm[0] and b != self.segm[1])
+		if is_inter:
 			if self.axis == 'y':
-				sol = self.f.get_sol_vert(self.segm, self.value)
-				is_inter = sol != self.segm[0] and sol != self.segm[1]
-				if is_inter:
-					self.est = -1
-				else:
-					self.est = abs(f.der_y(arg, sol)) / M
-		if self.type_stop == 'true':
-			self.est = self.size
+				grad = np.linalg.norm(self.f.gradient(self.value, (b+a) / 2))
+			if self.axis == 'x':
+				grad = np.linalg.norm(self.f.gradient((b+a) / 2, self.value))
+			cond_TG = ((b - a) / 2 <= grad/self.f_M)
+		else:
+			cond_TG = False
+		if self.est is None:
+			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
+			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
+		cond_CE = ((b - a) / 2 <= self.est)
+		return cond_CE or cond_TG
 
-	def stop(self, a, b):
-		if self.type_stop == 'true':
-			return True
+	def always_true(self, a, b):
+		return True
 
+	def stop(self):
+		if self.type_stop == 'true_grad':
+			return self.TG
+		if self.type_stop == 'const_est':
+			return self.CE
 		if self.type_stop == 'cur_grad':
-			if self.est == -1:
-				if self.axis == 'y':
-					grad = np.linalg.norm(self.f.gradient(self.value, (b+a) / 2))
-				if self.axis == 'x':
-					grad = np.linalg.norm(self.f.gradient((b+a) / 2, self.value))
-				return (b - a) / 2 <= grad/self.f_M
-			else:
-				return (b - a) / 2 <= self.est
-
-		if self.type_stop == 'const_est_est' or self.type_stop == 'true_grad':
-			if self.est <= 0:
-				return True
-			return (b - a) / 2 <= self.est
+			return self.CG_CE
+		if self.type_stop == 'true':
+			return self.always_true
 
 	def grad_descent_segment(self):
 		segm = self.segm
@@ -87,12 +84,12 @@ class solver_segment:
 			x_opt = self.f.get_sol_vert(self.segm, self.value)
 		N = 0
 		x, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
-		self.get_est()
-		while not self.stop(x, x_opt) and N < 100000:
+		mystop = stop()
+		while not mystop(x, x_opt) and N < 200:
 			x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
 			x = min(max(x, segm[0]), segm[1])
 			N += 1
-		if N >= 100000:
+		if N >= 200:
 			N = -1
 		return x
 	
@@ -107,9 +104,9 @@ class solver_segment:
 		c = b - (b - a) / gr
 		d = a + (b - a) / gr 
 		f_c, f_d = f(c), f(d)
-		self.get_est()
 		N = 0
-		while not self.stop(a, b):
+		mystop = self.stop()
+		while not mystop(a, b):
 			if f(c) < f(d):
 				b = d
 				d, f_d = c, f_c
@@ -121,7 +118,7 @@ class solver_segment:
 				d = a + (b - a) / gr
 				f_d = f(d)
 			N+=1
-			if N >= 100000:
+			if N >= 200:
 				return (b+a)/2
 		return (b + a) / 2
 
@@ -142,7 +139,6 @@ class main_solver(solver_segment):
 		if self.add_cond(x_0, y_0):
 			return ((x_0, y_0), N)
 		f_opt = self.f.calculate_function(x_0, y_0)
-		self.get_est()
 		while True:
 			y_0 = (Q[2] + Q[3]) / 2
 			self.axis, self.value, self.segm = 'x', y_0, [Q[0], Q[1]]
