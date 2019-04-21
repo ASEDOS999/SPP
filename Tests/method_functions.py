@@ -26,7 +26,7 @@ class solver_segment:
 		if solve_segm == 'grad_desc':
 			self.solve = self.grad_descent_segment
 
-	def TG(self, a, b):
+	def TrueGrad(self, a, b):
 		if self.est is None:
 			f = self.f
 			arg = self.value
@@ -39,40 +39,32 @@ class solver_segment:
 			self.est = None
 		return cond
 
-	def CE(self, a, b):
+	def ConstEst(self, a, b):
 		if self.est is None:
 			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
 			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
 		return ((b - a) / 2 <= self.est)
 
-	def CG_CE(self, a, b):
-		is_inter = (a != self.segm[0] and b != self.segm[1])
-		if is_inter:
-			if self.axis == 'y':
-				grad = np.linalg.norm(self.f.gradient(self.value, (b+a) / 2))
-			if self.axis == 'x':
-				grad = np.linalg.norm(self.f.gradient((b+a) / 2, self.value))
-			cond_TG = ((b - a) / 2 <= grad/self.f_M)
-		else:
-			cond_TG = False
-		if self.est is None:
-			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
-			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
-		cond_CE = ((b - a) / 2 <= self.est)
-		return cond_CE or cond_TG
+	def CurGrad(self, a, b):
+		if self.axis == 'y':
+			grad = abs(self.f.der_x(self.value, (b+a) / 2))
+		if self.axis == 'x':
+			grad = abs(self.f.der_y((b+a) / 2, self.value))
+		cond_TG = ((b - a) / 2 <= grad/self.f_M)
+		return cond_TG
 
-	def always_true(self, a, b):
+	def AlwaysTrue(self, a, b):
 		return True
 
 	def stop(self):
 		if self.type_stop == 'true_grad':
-			return self.TG
+			return self.TrueGrad
 		if self.type_stop == 'const_est':
-			return self.CE
+			return self.ConstEst
 		if self.type_stop == 'cur_grad':
-			return self.CG_CE
+			return self.CurGrad
 		if self.type_stop == 'true':
-			return self.always_true
+			return self.AlwaysTrue
 
 	def grad_descent_segment(self):
 		segm = self.segm
