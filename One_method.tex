@@ -165,7 +165,7 @@ Analogically, for a vertical segment:
 
 
 \begin{theorem}
-Let function $f$ be convex and has $L$-Lipschitz continuous gradient and an internal point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
 
 The current segment is horizontal and $\exists M>0  : \Rightarrow|f_y'(\textbf{x}_0)| \geq M$ or the current segment is vertical and $\exists M>0  : \Rightarrow|f_x'(\textbf{x}_0)| \geq M$. Then rectangle is defined correctly if the possible value of error is less than $\frac{M}{L}$.
 \end{theorem}
@@ -186,15 +186,31 @@ $$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
 Statement for vertical segment is proved similarly.
 \end{proof}
 
-In written above theorem $x_0$ can be on border of square. We want that $|f'_x(\textbf{x}_0)=0|$ on horizonttal segment and $|f'_y(\textbf{x}_0)=0|$ on vertical segment.
+In written above theorem the estimate needs some lower bound for derivatibe in point-solution on segment and this task can be hard in practise. Using other interpretation of the condition \eqref{MCH} one can take more useful result.
 
-\textbf{Example 4.} All positive semidefinite quadratic form meet conditions of written above theorem:
+\begin{theorem}
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
 
-$$B(x,y) = Ax^2 + 2Bxy + Cy^2 + Dx +Ey + F,$$
-$$L = B''_{xy} = B''_{yx} = 2B < \infty$$
-where $A \geq 0,AC - B^2\geq0$. Also estimate for $\delta$ has some sense (estimate is non zero if $\textbf{x}_0$ is not optimal solution). Also one can easy show that this estimate is accurate for task from example 3.
+The current segment is horizontal and $M = |f_y'(\textbf{x}_{current})|$ or the current segment is vertical and $M = |f_y'(\textbf{x}_{current})|$. Then rectangle is defined correctly if a distance between $\textbf{x}_{cur}$ and accurate solution on segment is less than $\frac{M}{L}$.
+\end{theorem}
+\begin{proof}
+Condition \eqref{MCH} is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
+$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_{cur})\right|$:
 
-Theorem 4.1 gives conditions of stop in the case when gradient in point-solution on segment is large. But what should we do if gradient in this point is small?
+$$\left|f'_y(\textbf{x}_0) - f'_y(\textbf{x}_{cur})\right|<\left|f'_y(\textbf{x}_{cur})\right|$$
+
+The $L$-Lipschitz continuity gives following inequality:
+
+$$\left|f'_y(\textbf{x}_0) - f'_y(\textbf{x}_{cur})\right| \leq L|\delta|$$
+
+Therefore the following possible value is sufficient to select rectangle correctly:
+
+$$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
+
+Statement for vertical segment is proved similarly.
+\end{proof}
+
+Theorems 4.1 and 4.2 give stop conditions in the case when gradient in point-solution on segment and close points is large. But what should we do if gradient in this point is small?
 
 \begin{theorem}
 Let $f$ be convex and has $L$-Lipschitz continuous gradient. Then for accuracy on function $\epsilon$ following condition in point $\textbf{x}$ is sufficient:
@@ -216,33 +232,9 @@ $$\leq \|\nabla f(\textbf{x})\| \|\textbf{x}^* - \textbf{x}\|\leq \|\nabla f(\te
 This inequality proves theorem's statement.
 \end{proof}
 
-Now let's give a new condition to stop optimization on segment.
-
-\begin{theorem}
-Let $f$ be convex and has $L$-Lipschitz continuous gradient on horizontal segment.
-
-If following condition is met 
-$$|f'_y(x_0+\delta, y_0)|^2 \geq L^2\delta_0^2 - (f'_x(x_0 + \delta, y_0))^2, \text{where } \delta_0\geq|\delta| $$
-and solution on the segment $\textbf{x}_0$ is internal point
-then 
-$$\sign\left(f'_y(x_0, y_0)\right) = \sign\left(f'_y(x_0+\delta, y_0) \pm \sqrt{L^2\delta^2 - (f'_x(x_0 + \delta, y_0))^2}\right)$$
-\end{theorem}
-\begin{proof}
-The $f$ has $L$-Lipschitz continuous gradient. Therefore,
-
-$$\left((f'_x(x_0 + \delta, y_0))^2 + \left(f'_y(x_0+\delta, y_0) - f'_y(\textbf{x}_0)\right)^2\right)^\frac{1}{2}\leq L\delta_0$$
-
-$$|f'_y(x_0+\delta, y_0) - f'_y(\textbf{x}_0)|\leq \sqrt{L^2\delta_0^2 - (f'_x(x_0 + \delta, y_0))^2} = q$$
-Then, if
-$$(f'_y(x_0+\delta, y_0)+q)(f'_y(x_0+\delta, y_0)-q) = (f'_y(x_0+\delta, y_0))^2-q^2 \geq 0$$
-then we can determine sign of $f'_y(\textbf{x}_0)$ accurately. Written above inequality is equivalent to inequality from theorem's condition.
-\end{proof}
-
 Let's make a couple of remarks.
 
-Firstly, theorem 4.1 needs some lower bound for $f'_{x}(\textbf{x}_0)$ and $f'_{y}(\textbf{x}_0)$ on segments and it can be hard task.
-
-Secondly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorem 4.1.
+Firstly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorems 4.1 and 4.2.
 
 Thirdly, all theorems in this section use $f'_y$ on horizontal segment and $f'_x$ on vertical segment. As a result, if one checks condition of stop on each iteration method will use full gradient on each iteration. It can slow down method but this estimates can be better than in ~\cite{Ston_Pas}. As a result, method can work faster.
 
@@ -413,6 +405,10 @@ Also gradient descent was better than halving square in more than half tests. In
 decreasing work's time but also it can lead to that method will not completed successfully more often.
 
 Therefore, halving square with proposed function $solve$ and proposed stupid strategy for $\delta$ is not efficient.
+
+\subsection{Comparison Of Stop Conditions}
+
+\subsection{Example: Least Square}
 
 \section{Conclusion}
 \newpage
