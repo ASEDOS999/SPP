@@ -183,16 +183,19 @@ def gradient_descent(f, Q, grad, eps, step, minimum):
 def ellipsoid(f, Q, x_0=None, eps=None):
 	n = 2
 	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if x_0 is None else x_0
-	eps = 5e-10 if eps is None else eps
-	rho = (Q[1] - Q[0]) / 2
+	eps = 5e-3 if eps is None else eps
+	rho = (Q[1] - Q[0]) * np.sqrt(2)
 	H = np.identity(n)
 	q = n * (n - 1) ** (-(n-1) / (2*n)) * (n + 1) ** (-(n+1) / (2*n))
+	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
-	while abs(f.calculate_function(x[0], x[1]) - f.min) > eps and k < 10000:
+	while abs(f.calculate_function(x[0], x[1]) - f.min) > eps and k < 1000:
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
+		d = (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.gradient(x[0], x[1])
-		x = x - gamma * H @ _df
-		H -= (2 / (n + 1)) * ((H @ _df @ _df.T * H) / ((H @ _df).T @ _df))
+		_df = _df / (np.sqrt(_df@H@_df))
+		x = np.clip(x - gamma * H @ _df, *domain.T)
+		H = H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H)
 		k += 1
 	if k >= 10000:
 		k = -1
