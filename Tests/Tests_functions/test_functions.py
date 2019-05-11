@@ -116,5 +116,33 @@ class quadratic_function():
 		else:
 			return segm[1]
 
-	def get_est(self, x, num):
-		return 0
+#Quadratic function
+class LSM_exp():
+	def __init__(self, a, b, n):
+		self.x = np.random.uniform(-1, 1, n)
+		self.y = a * np.exp(b * x) + np.random.normal(size = n)
+		self.n = n
+		self.min = 0
+
+	def lipschitz_function(self, Q):
+		return np.inf
+
+	def lipschitz_gradient(self, Q):
+		return np.inf
+
+	def calculate_function(self, a, b):
+		f = 1 / self.n * np.linalg.norm(a * np.exp(b * self.x) - self.y)**2
+		return f
+	
+	def der_x(self, a, b):
+		val = np.exp(b * self.x)
+		der = 2 / self.n * val.dot(a * val - self.y)
+		return der
+	
+	def der_y(self, x, y):
+		val = np.exp(b * self.x)
+		der = 2 / self.n * a * (x  * val).dot(a * val - self.y)
+		return der
+
+	def gradient(self, x, y):
+		return np.array([self.der_x(x,y), self.der_y(x,y)])
