@@ -19,7 +19,7 @@ class solver_segment:
 		self.f_M = self.f.lipschitz_gradient(self.Q)
 
 
-	def init_help_function(self, stop_func = 'true_grad', solve_segm = 'gss'):
+	def init_help_function(self, stop_func = 'cur_grad', solve_segm = 'gss'):
 		self.type_stop = stop_func
 		if solve_segm == 'gss':
 			self.solve = self.gss
@@ -113,7 +113,6 @@ class solver_segment:
 			if N >= 200:
 				return (b+a)/2
 		return (b + a) / 2
-
 class main_solver(solver_segment):
 	def add_cond(self, x, y):
 		return False
@@ -128,18 +127,19 @@ class main_solver(solver_segment):
 		N = 0
 		minimum = self.f.min
 		x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
+		results = [(x_0, y_0)]
 		if self.add_cond(x_0, y_0):
-			return ((x_0, y_0), N)
+			return ((x_0, y_0), N, results)
 		f_opt = self.f.calculate_function(x_0, y_0)
 		while True:
 			y_0 = (Q[2] + Q[3]) / 2
 			self.axis, self.value, self.segm = 'x', y_0, [Q[0], Q[1]]
 			x_0 = self.solve()
 			if self.add_cond(x_0, y_0):
-				return ((x_0, y_0), N)
+				return ((x_0, y_0), N, results)
 			der = self.f.der_y(x_0, y_0)
 			if der == 0 and self.f.der_x(x_0, y_0) == 0:
-				return ((x_0, (Q[2] + Q[3]) / 2), N)
+				return ((x_0, (Q[2] + Q[3]) / 2), N, results)
 			if der > 0:
 				Q[2], Q[3] = Q[2],  y_0
 			else:
@@ -149,47 +149,50 @@ class main_solver(solver_segment):
 			self.axis, self.value, self.segm = 'y', x_0, [Q[2], Q[3]]
 			y_0 = self.solve()
 			if self.add_cond(x_0, y_0):
-				return ((x_0, y_0), N)
+				return ((x_0, y_0), N, results)
 			der = self.f.der_x(x_0, y_0)
 			if der == 0 and self.f.der_y(x_0, y_0) == 0:
-				return ((x_0, (Q[2] + Q[3]) / 2), N)
+				return ((x_0, (Q[2] + Q[3]) / 2), N, results)
 			if der > 0:
 				Q[0], Q[1] = Q[0],  x_0
 			else:
 				Q[1], Q[0] = Q[1],  x_0
 
 			N += 1
-			
 			x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
+			results.append((x_0, y_0))
 			f_opt = self.f.calculate_function(x_0, y_0) 
 			if N >= 100 or abs(f_opt - minimum) < eps:
 				if N >= 100:
 					N = -1
-				return ((x_0, y_0), N)
+				return ((x_0, y_0), N,results)
 
-def gradient_descent(f, Q, grad, eps, step, minimum):
+def gradient_descent(f, Q, grad, L, eps, minimum):
 	N = 0
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
+	results = [x.copy()]
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
-	while (abs(f(x[0], x[1]) - f(x_prev[0], x_prev[1])) > eps and N < 1000) or (N == 0):
+	while (abs(f(x[0], x[1]) - minimum) > eps and N < 100) or (N == 0):
 		der = grad(x[0], x[1])
-		x[0], x_prev[0] = min(max(x[0] - step / math.sqrt(N+1) * der[0], Q[0]), Q[1]), x[0]
-		x[1], x_prev[1] = min(max(x[1] - step / math.sqrt(N+1) * der[1], Q[2]), Q[3]), x[1]
+		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
+		x[1], x_prev[1] = min(max(x[1] - 1. / L * der[1], Q[2]), Q[3]), x[1]
 		N += 1
-	if N >= 1000:
+		results.append(x.copy())
+	if N >= 100:
 		N = -1
-	return (x, N, abs(f(x[0], x[1]) - f(x_prev[0], x_prev[1])))
+	return (x, N, results)
 
 def ellipsoid(f, Q, x_0=None, eps=None):
 	n = 2
 	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if x_0 is None else x_0
 	eps = 5e-3 if eps is None else eps
-	rho = (Q[1] - Q[0]) * np.sqrt(2)
+	rho = (Q[1] - Q[0]) * np.sqrt(2) / 2
 	H = np.identity(n)
 	q = n * (n - 1) ** (-(n-1) / (2*n)) * (n + 1) ** (-(n+1) / (2*n))
 	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
-	while abs(f.calculate_function(x[0], x[1]) - f.min) > eps and k < 1000:
+	results = [x]
+	while abs(f.calculate_function(x[0], x[1]) - f.min) > eps and k < 100:
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
 		d = (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.gradient(x[0], x[1])
@@ -197,6 +200,8 @@ def ellipsoid(f, Q, x_0=None, eps=None):
 		x = np.clip(x - gamma * H @ _df, *domain.T)
 		H = H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H)
 		k += 1
-	if k >= 10000:
+		results.append(x)
+		print(x)
+	if k >= 100:
 		k = -1
-	return (x, k)
+	return (x, k, results)

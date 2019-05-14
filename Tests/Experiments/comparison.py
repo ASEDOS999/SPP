@@ -8,9 +8,11 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from test_functions import sinuses
+from test_functions import LSM_exp
 from test_functions import quadratic_function as qf
 from method_functions import main_solver
 from method_functions import gradient_descent
+from method_functions import ellipsoid
 import math
 
 #Tests for iterations number
@@ -124,7 +126,7 @@ def comparison_GD_HS_QFunc(epsilon):
 				res_1 = gradient_descent(f.calculate_function, Q, f.gradient, eps, 0.25, f.min)
 				m2 = time()
 				solver = main_solver(f, Q, eps)
-				solver.init_help_function(stop_func = 'const_est')
+				solver.init_help_function()
 				res_2 = solver.halving_square()
 				m3 = time()
 				results.append((eps, res_1[1], res_2[1], m2 - m1, m3 - m2))
@@ -151,6 +153,57 @@ def comparison_GD_HS_QFunc(epsilon):
 	plt.ylabel('Number of tasks')
 	plt.xticks(ind, ('T1', 'T2', 'T3', 'T4', 'T5', 'T6'))
 	plt.show()
+
+def qf_comparison(epsilon = 1e-6, out = True):
+	param = np.random.uniform(-10, 10, 6)
+	param[2] =  abs(param[2])
+	f = qf(param)
+	size_1, size_2 = random.uniform(0.5, 1), random.uniform(0.5, 1)
+	x_1, y_1 = f.solution[0], f.solution[1]
+	Q = [x_1 - (1-size_1), x_1 + (1+size_1), y_1 - (1-size_2), y_1 + (1+size_2)]
+	results = comparison(f, Q, epsilon)
+	if out:
+		norm_gradient = lambda x: np.linalg.norm(f.gradient(x[0], x[1]))
+		#norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
+		plt.semilogy([i for i in range(len(results[0]))], [norm_gradient(i) for i in results[0]])
+		plt.semilogy([i for i in range(len(results[2]))], [norm_gradient(i) for i in results[2]])
+		plt.semilogy([i for i in range(len(results[4]))], [norm_gradient(i) for i in results[4]])
+		plt.legend(['Gradiend Descent', 'Halving Square', 'Ellipsoid'])
+		print('Gradiend Descent %.4f'%(results[1]))
+		print('Halving Square %.4f'%(results[3]))
+		print('Ellipsoid %.4f'%(results[5]))
+	return results
+
+def LSM_comparison(epsilon = 1e-6, out = True):
+	a = random.uniform(-2, 2)
+	b = random.uniform(-2, 2)
+	f = LSM_exp(a, b, 10)
+	Q = [-2, 2, -2, 2]
+	results = comparison(f, Q, epsilon)
+	if out:
+		norm_gradient = lambda x: np.linalg.norm(f.gradient(x[0], x[1]))
+		norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
+		plt.semilogy([i for i in range(len(results[0]))], [norm_gradient(i) for i in results[0]])
+		plt.semilogy([i for i in range(len(results[2]))], [norm_gradient(i) for i in results[2]])
+		plt.semilogy([i for i in range(len(results[4]))], [norm_gradient(i) for i in results[4]])
+		plt.legend(['Gradiend Descent', 'Halving Square', 'Ellipsoid'])
+		print('Gradiend Descent %.4f'%(results[1]))
+		print('Halving Square %.4f'%(results[3]), results[2][-1], a, b)
+		print('Ellipsoid %.4f'%(results[5]), results[4][-1])
+	return results
+
+def comparison(f, Q, eps):
+	n = 0
+	m1 = time()
+	res_1 = gradient_descent(f.calculate_function, Q, f.gradient, f.lipschitz_gradient(Q) ,eps, f.min)
+	m2 = time()
+	solver = main_solver(f, Q, eps)
+	solver.init_help_function()
+	res_2 = solver.halving_square()
+	m3 = time()
+	res_3 = ellipsoid(f, Q, eps = eps)
+	m4 = time()
+	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
 
 if __name__ == "__main__":
 	eps = [0.1**(i) for i in range(7)]

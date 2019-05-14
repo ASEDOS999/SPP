@@ -117,10 +117,12 @@ class quadratic_function():
 			return segm[1]
 
 #Quadratic function
-class LSM_exp():
+class LSM_exp:
 	def __init__(self, a, b, n):
 		self.x = np.random.uniform(-1, 1, n)
-		self.y = a * np.exp(b * x) + np.random.normal(size = n)
+		sigma = a * np.exp(- abs(b))
+		#self.y = a * np.exp(b * self.x) + np.random.normal(0, sigma, size = n)
+		self.y = a * np.exp(b * self.x)
 		self.n = n
 		self.min = 0
 
@@ -139,10 +141,13 @@ class LSM_exp():
 		der = 2 / self.n * val.dot(a * val - self.y)
 		return der
 	
-	def der_y(self, x, y):
+	def der_y(self, a, b):
 		val = np.exp(b * self.x)
-		der = 2 / self.n * a * (x  * val).dot(a * val - self.y)
+		der = 2 / self.n * a * (self.x  * val).dot(a * val - self.y)
 		return der
 
-	def gradient(self, x, y):
-		return np.array([self.der_x(x,y), self.der_y(x,y)])
+	def gradient(self, a, b):
+		val = 2 / self.n *np.exp(b * self.x)
+		der_x = val.dot(a * val - self.y)
+		der_y = a * (self.x  * val).dot(a * val - self.y)
+		return np.array([der_x, der_y])
