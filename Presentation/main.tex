@@ -162,23 +162,58 @@ then the estimate through $L_g$ is better than through $L_f$.
 $$f(x,y) = (Ax+By)^2+Cy^2 + Dx+Ey$$
 $$(x^*, y^*)\in Q$$
 $$L_f = \max\limits_{(x,y) \in Q}\|\nabla f(x, y)\|$$
-$$L_g = \max |\lambda\left(H(f)\right)|$$\pause
-}
-
-\item{LSM for exponent
-$$f(x,y) = \sum\limits_{i=1}^n \left(x\exp(ya_i) - b_i\right)$$
-$$a_i \in [-1, 1], b_i = \tilde{x}\exp(\tilde{y}a_i) \text{ for } \tilde{x} \in [2, 4], \tilde{y}\in[-1, 1]$$
-$$Q = [2, 4]\times [-1, 1]$$
+$$L_g = \max |\lambda\left(H(f)\right)|$$
 }
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Experiments}{Comparison Of Strategies}
+\begin{frame}{Experiments}{Iterations Number}
+
+
+Theoretical Iteration Number through function constant 40
+
+Theoretical Iteration Number through gradient constant 20
+\pause
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.7]{Compar_Strateg.png}}
-\caption{Comparison of strategies}
+\center{\includegraphics[scale=0.3]{In_point.png}}
 \label{fig:image}
 \end{figure}
+\end{frame}
+
+\begin{frame}{Experiments}{Iterations Number}
+
+$$f(x,y) = (x+y)^2+x^2,\,Q = [1,2]^2,\,(x^*, y^*) = 1,1$$
+
+Theoretical Iteration Number through function constant 30
+
+Theoretical Iteration Number through gradient constant 14
+
+\pause
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.3]{Out_point.png}}
+\label{fig:image}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Experiments}{Comparison Of Methods}
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.4]{GD_HS_EL.png}}
+\label{fig:image}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Experiments}{Comparison Of Methods}
+
+\begin{block}{Work time}
+Gradiend Descent 0.0045
+
+Halving Square 0.0209
+
+Ellipsoid 0.0283
+\end{block}
 \end{frame}
 
 \section*{Summary}
@@ -186,55 +221,18 @@ $$Q = [2, 4]\times [-1, 1]$$
 \begin{frame}{Summary}
   \begin{itemize}
   \item
-    The \alert{first main message} of your talk in one or two lines.
+    \alert{Strategy for solution on segment}
   \item
-    The \alert{second main message} of your talk in one or two lines.
+    Convergence Results
   \item
-    Perhaps a \alert{third message}, but not more than that.
-  \end{itemize}
-  
-  \begin{itemize}
-  \item
-    Outlook
-    \begin{itemize}
+    Experiments for this method
+        \begin{itemize}
     \item
-      Something you haven't solved.
+      Iterations number
     \item
-      Something else you haven't solved.
+      Comparison with different methods
     \end{itemize}
   \end{itemize}
-\end{frame}
-
-
-
-% All of the following is optional and typically not needed. 
-\appendix
-\section<presentation>*{\appendixname}
-\subsection<presentation>*{For Further Reading}
-
-\begin{frame}[allowframebreaks]
-  \frametitle<presentation>{For Further Reading}
-    
-  \begin{thebibliography}{10}
-    
-  \beamertemplatebookbibitems
-  % Start with overview books.
-
-  \bibitem{Author1990}
-    A.~Author.
-    \newblock {\em Handbook of Everything}.
-    \newblock Some Press, 1990.
- 
-    
-  \beamertemplatearticlebibitems
-  % Followed by interesting articles. Keep the list short. 
-
-  \bibitem{Someone2000}
-    S.~Someone.
-    \newblock On this and that.
-    \newblock {\em Journal of This and That}, 2(1):50--100,
-    2000.
-  \end{thebibliography}
 \end{frame}
 
 \end{document}
