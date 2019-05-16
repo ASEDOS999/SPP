@@ -128,6 +128,18 @@ For this it is sufficient:
   $$\boxed{\delta < \frac{|f'_y(x_{current})|}{L}}$$
 \end{frame}
 
+\begin{frame}{Strategies}{Small Gradient}
+But what can we do when norm of gradient is small?
+
+\pause
+\begin{block}{Small Gradient}
+Let $f$ be convex and has $L$-Lipschitz continuous gradient. Then for accuracy on function $\epsilon$ following condition in point $\textbf{x}$ is sufficient:
+
+$$\|\nabla f(\textbf{x})\|\leq \frac{\epsilon}{a\sqrt{2}}, $$
+where $a$ is size of current square.
+\end{block}
+\end{frame}
+
 \section{Convergence}
 
 \begin{frame}{Convergence}
@@ -136,9 +148,9 @@ Function $f$ is convex. Size of square $Q$ is equal to $a$. One takes a center o
 Let function $f$ be $L_f$-Lipschitz continuous. Then for accuracy $\epsilon$ on function it is sufficient:
 \begin{equation}\label{NI1}N = \left\lceil\log_2\frac{L_fa}{\sqrt{2}\epsilon}\right\rceil.\end{equation}
 \end{block}
-
+\pause
 \begin{block}{Estimate through Lipschitz gradient constant}
-Let function $f$ have $L_g$-Lipschitz continuous gradient. Moreover, solution of initial task is \textbf{internal point}. Then for accuracy $\epsilon$ on function it is sufficient:
+Let function $f$ have $L_g$-Lipschitz continuous gradient. Moreover, point with zero derivative is  \textbf{internal point}. Then for accuracy $\epsilon$ on function it is sufficient:
 \begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{L_ga^2}{4\epsilon}\right\rceil.\end{equation}
 \end{block}
 \end{frame}
@@ -146,7 +158,6 @@ Let function $f$ have $L_g$-Lipschitz continuous gradient. Moreover, solution of
 \section{Convergence}
 
 \begin{frame}{Convergence}
-
 If following inequallity is met
 $$\frac{2L_f^2}{L_g} \geq \epsilon$$
 then the estimate through $L_g$ is better than through $L_f$.
@@ -170,9 +181,9 @@ $$L_g = \max |\lambda\left(H(f)\right)|$$
 \begin{frame}{Experiments}{Iterations Number}
 
 
-Theoretical Iteration Number through function constant 40
+Theoretical Iteration Number through function constant equals 40
 
-Theoretical Iteration Number through gradient constant 20
+Theoretical Iteration Number through gradient constant equals 20
 \pause
 \begin{figure}[h!]
 \center{\includegraphics[scale=0.3]{In_point.png}}
@@ -182,7 +193,7 @@ Theoretical Iteration Number through gradient constant 20
 
 \begin{frame}{Experiments}{Iterations Number}
 
-$$f(x,y) = (x+y)^2+x^2,\,Q = [1,2]^2,\,(x^*, y^*) = 1,1$$
+$$f(x,y) = (x+y)^2+x^2, Q = [1,2]^2,\,(x^*, y^*) = (1,1)$$
 
 Theoretical Iteration Number through function constant 30
 
@@ -208,11 +219,11 @@ Theoretical Iteration Number through gradient constant 14
 \begin{frame}{Experiments}{Comparison Of Methods}
 
 \begin{block}{Work time}
-Gradiend Descent 0.0045
+Gradiend Descent 4.5 ms
 
-Halving Square 0.0209
+Halving Square 20.9 ms
 
-Ellipsoid 0.0283
+Ellipsoid 28.3 ms
 \end{block}
 \end{frame}
 
@@ -221,7 +232,7 @@ Ellipsoid 0.0283
 \begin{frame}{Summary}
   \begin{itemize}
   \item
-    \alert{Strategy for solution on segment}
+    Strategy for solution on segment
   \item
     Convergence Results
   \item
