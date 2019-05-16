@@ -52,24 +52,32 @@ class sinuses():
 		return -1
 	
 #Quadratic function
+import scipy
+from scipy import optimize
 class quadratic_function():
-	def __init__(self, list_of_paremeters):
-		self.A = list_of_paremeters
+	def __init__(self, list_of_parameters):
+		self.A = list_of_parameters
 		p = self.A
 		self.solution = np.linalg.solve(2 * np.array([[p[0]**2 + p[2], p[0] * p[1]],
 												  [p[0] * p[1], p[1]**2]]),
 							np.array([-p[3], -p[4]]))
 		self.min = self.calculate_function(self.solution[0], self.solution[1])
-
+		self.L = None
+		self.M = None
 	def lipschitz_function(self, Q):
-		p = self.A
-		L = 3 * max(abs(p[0]), abs(p[1]), p[2]) *  max(abs(Q[1]), abs(Q[3]))
-		return L
+		if self.L is None:
+			self.L = -scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), np.array([Q[0], Q[2]]), bounds = [(Q[0], Q[1]), (Q[2], Q[3])])['fun']
+			print(self.L)
+		return self.L
 
 	def lipschitz_gradient(self, Q):
-		param = self.A
-		M = (2 * param[0]**2 + 4 * abs(param[0] * param[1]) + 2 * param[1] ** 2 + 2 * param[2]) * 10
-		return M
+		if self.M is None:
+			p = self.A
+			A = [[p[0]**2+p[2]**2, p[0]*p[1]], [p[0]*p[1], p[1]**2]]
+			A = 2 * np.array(A)
+			w, _ = np.linalg.eig(A)
+			self.M = w.max()
+		return self.M
 
 	def calculate_function(self, x, y):
 		p = self.A
@@ -125,9 +133,13 @@ class LSM_exp:
 		self.y = a * np.exp(b * self.x)
 		self.n = n
 		self.min = self.calculate_function(a, b)
-		print('Minimum', self.min)
+		self.L = None
+		self.M = None
+
 	def lipschitz_function(self, Q):
-		return np.inf
+		if self.L is None:
+			self.L = -scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), np.array([Q[0], Q[2]]), bounds = [(Q[0], Q[1]), (Q[2], Q[3])])['fun']
+		return self.L
 
 	def lipschitz_gradient(self, Q):
 		return np.inf
