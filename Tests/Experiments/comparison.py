@@ -175,10 +175,10 @@ def qf_comparison(epsilon = 1e-6, out = True):
 	return results
 
 def LSM_comparison(epsilon = 1e-6, out = True):
-	a = random.uniform(-2, 2)
+	a = random.uniform(4, 8)
 	b = random.uniform(-2, 2)
 	f = LSM_exp(a, b, 10)
-	Q = [-2, 2, -2, 2]
+	Q = [4, 8, -2, 2]
 	results = comparison(f, Q, epsilon)
 	if out:
 		norm_gradient = lambda x: np.linalg.norm(f.gradient(x[0], x[1]))

@@ -54,7 +54,6 @@ def get_tests_estimates(epsilon, mean_input = True, num_compare = False):
 				ind = len([i for i in results if i[2 + n[0] * 2] <= i[2 + n[1] * 2] <= i[2 + n[2] * 2]])
 				print("'%s' <= '%s' <= '%s': %d"%(name[n[0]], name[n[1]], name[n[2]], ind))
 		full_results += results
-	return full_results
 
 if __name__ == "__main__":
 	eps = [0.1**(i) for i in range(7)]

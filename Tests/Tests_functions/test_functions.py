@@ -124,8 +124,8 @@ class LSM_exp:
 		#self.y = a * np.exp(b * self.x) + np.random.normal(0, sigma, size = n)
 		self.y = a * np.exp(b * self.x)
 		self.n = n
-		self.min = 0
-
+		self.min = self.calculate_function(a, b)
+		print('Minimum', self.min)
 	def lipschitz_function(self, Q):
 		return np.inf
 
