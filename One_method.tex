@@ -294,122 +294,76 @@ Using it we have estimate \eqref{NI3}.
 
 \section{Tests}
 
-In this section we show estimate on number iterations of practice and compare work time of gradient descent and our new method - halving square\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
+In this section we show estimate on number iterations of practice and compare work time our new method with work time classic methods of optimization such as gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
 
 \subsection{About function $solve$}
 
-If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use gradient descent with step $h_k = \frac{h}{\sqrt{k}} = \frac{a}{4\sqrt{k}}$, where $a$ is size of current segment.
+If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use golden search selection.
 
 \subsection{Tests for iterations number}
 
-Let's make tests for the estimate \eqref{NI1}.
+Estimate \ref{NI1} works in all cases and better then estimate \ref{NI3} when following condition is met:
 
-Functions $-\sin\frac{\pi x}{a}$ and $-\sin\frac{\pi x}{b}$ are convex on square $Q = [0,1]^2$ when $a,b\geq 1$. Therefore, a function $-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b}$ is convex for all $A,B\geq 0$ as cone combination of convex function.
+$$\frac{2L_f^2}{L_g}\leq \epsilon,$$
+где $L_f, L_g$ is Lipschitz constants for function and for gradient. On the other hand, the estimate \ref{NI3} works if point with zero gradient exists in the square. 
 
-Functions $x^n$ are convex and monotonously non-decreasing on $[0, 1]$ for all $n \in \mathbb{N}$ that's why functions $\left(-A\sin\frac{\pi x}{a} - B\sin\frac{\pi y}{b} + A + B + D\right)^n$ are convex for all $D\geq 0$.
+Let's consider some quadratic form:
+$$f(x,y) = (Ax+By)^2+Cy^2+Dx+Ey+F,\,C>0.$$
 
-Therefore, following function is convex:
+One minimize this function on square that involve global solution. We took parameteres randomly. Then we have following values of the estimates \ref{NI1} and \ref{NI3}:
 
-$$f(x,y) = -A_1\sin\frac{\pi x}{a_1} - B_1\sin\frac{\pi x}{b_1} + \sum\limits_{n=2}^N\left(-A_n\sin\frac{\pi x}{a_n} - B_n\sin\frac{\pi y}{b_n} + A_n + B_n + D_n\right)^n,$$
+\textbf{Theoretical Iteration Number through function constant equals 40}
 
-where $A_i, B_i. D_i\geq 0$ and $a_i, b_i \geq 1$ for all $i = \overline{1, n}$.
-
-The function $f$ is differentiable infinite times and we can use it to test the method.
-
-Let's take $a_1 = \dots = a_n = a$ and $b_1 = \dots = b_n = b$:
-
-$$f(x,y) = -A_1\sin\frac{\pi x}{a} - B_1\sin\frac{\pi x}{b} + \sum\limits_{n=2}^N\left(-A_n\sin\frac{\pi x}{a} - B_n\sin\frac{\pi y}{b} + A_n + B_n + D_n\right)^n,$$
-
-where $A_i, B_i. D_i\geq 0$ for all $i = \overline{1, n}$ and $a, b \geq 1$.
-
-We have following estimates for derivatives on horizontal and vertical segments:
-
-$$|f'_x|\Big|_{x = x_0} \geq \left(A_1 + \sum\limits_{n=2}^N n A_n D_n^{n-1}\right)\frac{\pi}{a}\Big|\cos \frac{\pi x_0}{a}\Big|$$
-$$|f'_y|\Big|_{y = y_0} \geq \left(B_1 + \sum\limits_{n=2}^N n B_n D_n^{n-1}\right)\frac{\pi}{b}\Big|\cos \frac{\pi y_0}{b}\Big|$$
-
-Therefore this functions met conditions of lemma 4.1 and we can take gradient at any point of segment. One can see examples of functions $f$ on fig.~\ref{fig:examples}
-
-\begin{figure}[H]
-\centering
-\includegraphics[scale=0.6]{./Tests/Images/Examples.png}
-\caption{Examples of tests functions}
-\label{fig:examples}
-\end{figure}
-
-We will use $a$ and $b$ from $[1, 2]$ and $N = 2$. Let's solve task of minimization function $f$ with different parameters on square $[0,1]^2$ through new method and compares number of iteration with estimate~\eqref{NI1}.
-
-Result of the test you can see on fig.~\ref{fig:image}.
+\textbf{Theoretical Iteration Number through gradient constant equals 20}
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.7]{Tests/Images/Test_results.png}}
-\caption{Tests' results for iterations number}
-\label{fig:image}
+\center{\includegraphics[scale=0.5]{Tests/Images/In_point.png}}
+\label{fig:image2}
+ \caption{Test for iterations number when the estimate \ref{NI3} is reached}
 \end{figure}
 
-On graphic $N$ is number of done iterations for accuracy $\epsilon$, $\log_2\frac{La}{\sqrt{2}\epsilon}$ is the parameter of tests tasks. Line $N = \log_2\frac{La}{\sqrt{2}\epsilon}$ is our estimates \eqref{NI1}.
+We can see on \ref{fig:image2} that the estimate \ref{NI3} is reached in this case. But let's consider following task:
 
-We can see that there are tests points under this line. It confirms our estimates \eqref{NI1}.
+$$f(x,y) = (x+y)^2+x^2, Q = [1,2]^2,\,(x^*, y^*) = (1,1)$$
+$$\min\limits_{(x,y)\in Q}f(x,y)$$
 
-\subsection{Comparison}
+\textbf{Theoretical Iteration Number through function constant 30}
 
-Let's compare experimentally work's time of gradient descent and method of halving square. We will compare it on optimization task for functions from previous subsection and random quadric function with positive semidifenite matrix:
-\begin{equation}\label{ex_1}
-f(x,y) = -A_1\sin\frac{\pi x}{a} - B_1\sin\frac{\pi x}{b} + \left(-A_2\sin\frac{\pi x}{a} - B_2\sin\frac{\pi y}{b} + A_2 + B_2 + D_2\right)^2,
-\end{equation}
-where $A_i, B_i. D_i\geq 0$ for all $i = \overline{1, 2}$ and $a, b \in [1,2]$.
-
-\begin{equation}\label{ex_2}
-f(x,y) = (Ax + By)^2 + Cx^2 + Dx + Ey+ F, C\geq 0
-\end{equation}
-Halving square will stop when current value will be no further than $\epsilon$ from optimal value. Gradient descent will stop when distance between current and previous value will be not more than $\epsilon$.
-
-We will use gradient descent with a step $h_k = \frac{h}{\sqrt{k}} = \frac{a}{4\sqrt{k}}$, where $a$ is size of the square. Also we add limit $N_{max} = 1000$ on the iterations number for method of halving square, solving on segment and gradient descent.
-
-When we compare two method we distinguish the following situations (similar name of situations on graphics):
-
-\begin{itemize}
-\item Type 1 (T1) - tasks which gradient descent completed but halving square was not complete,
-\item Type 2 (T2) - gradient descent is faster than halving square,
-\item Type 3 (T3) - work's times are approximately equal or time is too short to measure,
-\item Type 4 (T4) - gradient descent is slower than halving square,
-\item Type 5 (T5) - gradient descent was not complete but halving square completed,
-\item Type 6 (T6) - both methods were not completed successfully
-\end{itemize}
-
-
-\subsubsection{Sinuses}  
-
-As already mentioned in previous subsection, functions \eqref{ex_1} meet conditions of lemma 4.1, therefore, we can take any point from segment on each iteration in method of halving square. Using all written above we have following results (see fig.~\ref{comp_sinuses}).
+\textbf{Theoretical Iteration Number through gradient constant 14}
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.6]{Tests/Images/Comparison-sinuses.png}}
-\caption{Tests' results for comparison on sinuses}
-\label{comp_sinuses}
+\center{\includegraphics[scale=0.5]{Tests/Images/Out_point.png}}
+\label{fig:image1}
+ \caption{Test for iterations number when the estimate \ref{NI3} is not reached}
 \end{figure}
 
-We can see that new method is not less efficient on the most tasks and more efficient on the task's half than gradient descent.
-
-\subsubsection{Quadric functions}
-
-Quadric functions do not always meet conditions of lemma 4.1, therefore, we can not think that error for task on segment can be very big. We can try to estimate this error but let's use for this task gradient descent with $|x-x_{prev}|<\delta$, where $\delta$ is much less than size of segment. In our experiments we will use $\delta = \frac{a}{400}$. Using it we have following results (see fig.~\ref{comp_pol}).
-
-\begin{figure}[H]
-\center{\includegraphics[scale=0.6]{./Tests/Images/Comparison-pol.png}}
-\caption{Tests' results for comparison on quadric function}
-\label{comp_pol}
-\end{figure}
-
-We can see that halving square was not completed successfully on big parts of task - about $\frac{1}{6}$ from all tasks. We can decrease $\delta$ in its modification, but work's time increases in this case.
-
-Also gradient descent was better than halving square in more than half tests. Increasing $\delta$ lead to 
-decreasing work's time but also it can lead to that method will not completed successfully more often.
-
-Therefore, halving square with proposed function $solve$ and proposed stupid strategy for $\delta$ is not efficient.
+And we see on \ref{fig:image1} that the estimate \ref{NI3} is not reached in this case and in this case we should use estimate \ref{NI1}.
 
 \subsection{Comparison Of Stop Conditions}
 
-\subsection{Example: Least Square}
+\subsection{Comparison With Other Methods}
 
+Let's compare out method with ellipsoid method and gradient descent (with step $\frac{1}{L_g}$) for some quadric function on square that involves point with zero condition.
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.png}}
+\label{fig:image}
+ \caption{Comparison with gradient descent and ellipsoid method}
+\end{figure}
+
+We can see on \ref{fig:image} that gradient descent is more slow than ellipsoid method and our method. Moreover, our method is faster twice than ellipoid method on iterations.
+
+Work time for this methods is following:
+
+\begin{center}
+Gradiend Descent 4.5 ms
+
+Halving Square 20.9 ms
+
+Ellipsoid 28.3 ms
+\end{center}
+
+And our method is faster than method ellipsoid and gradient descent.
 \section{Conclusion}
 \newpage
 \begin{thebibliography}{3}
