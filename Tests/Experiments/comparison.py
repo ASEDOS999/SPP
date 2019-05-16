@@ -67,7 +67,7 @@ def qf_comparison(epsilon = 1e-6, out = True):
 		plt.semilogy([i for i in range(len(results[2]))], [norm_gradient(i) for i in results[2]])
 		plt.semilogy([i for i in range(len(results[4]))], [norm_gradient(i) for i in results[4]])
 		plt.xlabel('Number of iterations')
-		plt.ylabel('Norm of gradient')
+		plt.ylabel(r'$f(x)-f^*$')
 		plt.xticks([i for i in range(0, 101, 10)])
 		plt.legend(['Gradiend Descent', 'Halving Square', 'Ellipsoid'])
 		print('Gradiend Descent %.4f'%(results[1]))
@@ -76,10 +76,10 @@ def qf_comparison(epsilon = 1e-6, out = True):
 	return results
 
 def qf_test(eps):
-	param = np.random.uniform(-10, 10, 6)
+	param = np.random.uniform(-100, 100, 6)
 	param[2] =  abs(param[2])
 	f = qf(param)
-	a = 0.01
+	a = 1
 	size_1, size_2 = random.uniform(0.5 *a, a), random.uniform(0.5*a, a)
 	x_1, y_1 = f.solution[0], f.solution[1]
 	Q = [x_1 - (a-size_1), x_1 + (a+size_1), y_1 - (a-size_2), y_1 + (a+size_2)]
@@ -88,15 +88,40 @@ def qf_test(eps):
 	res = solver.halving_square()[2]
 	norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
 	plt.semilogy([i for i in range(len(res))], [norm_gradient(i) for i in res])
-	print('L_f %.4f'%(f.lipschitz_function(Q)))
-	print('L_g %.4f'%(f.lipschitz_gradient(Q)))
-	if 2 * f.L**2 / f.M >= eps:
-		print(2)
-		q = 1./2 * np.log(f.M * a**2/(4 * eps)) / np.log(2)
-	else:
-		print(1)
-		q = np.log(f.L * a/(np.sqrt(2) * eps)) / np.log(2)
-	print(q)
+	plt.semilogy([i for i in range(len(res))], [(i[0] -x_1)**2 + (i[1]-y_1)**2 for i in res])
+	plt.grid()
+	plt.legend([r"$f(x)-f^*$", r"$\|x-x^*\|$"])
+	q_2 = 1./2 * np.log(f.M * a**2/(4 * eps)) / np.log(2)
+	q_1 = np.log(f.L * a/(np.sqrt(2) * eps)) / np.log(2)
+	plt.xlabel("Iterations Number")
+	plt.ylabel("Value of Error")
+	print('Theoretical Iteration Number through function constant', np.ceil(q_1))
+	print('Theoretical Iteration Number through gradient constant', np.ceil(q_2))
+	return res
+
+def qf_test_2(eps):
+	param = [1, 1, 1, 0, 0, 0]
+	f = qf(param)
+	a = 1
+	size_1, size_2 = random.uniform(0.5 *a, a), random.uniform(0.5*a, a)
+	x_1, y_1 = 1, 1
+	f.solution[0], f.solution[1] = x_1, y_1
+	f.min = 5
+	Q = [1, 2, 1, 2]
+	solver = main_solver(f, Q, eps)
+	solver.init_help_function()
+	res = solver.halving_square()[2]
+	norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
+	plt.semilogy([i for i in range(len(res))], [norm_gradient(i) for i in res])
+	plt.semilogy([i for i in range(len(res))], [(i[0] -x_1)**2 + (i[1]-y_1)**2 for i in res])
+	plt.grid()
+	plt.xlabel("Iterations Number")
+	plt.ylabel("Value of Error")
+	plt.legend([r"$f(x)-f^*$", r"$\|x-x^*\|$"])
+	q_2 = 1./2 * np.log(f.M * a**2/(4 * eps)) / np.log(2)
+	q_1 = np.log(f.L * a/(np.sqrt(2) * eps)) / np.log(2)
+	print('Theoretical Iteration Number through function constant', np.ceil(q_1))
+	print('Theoretical Iteration Number through gradient constant', np.ceil(q_2))
 	return res
 
 def LSM_comparison(epsilon = 1e-6, out = True):
