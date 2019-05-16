@@ -155,7 +155,7 @@ def comparison_GD_HS_QFunc(epsilon):
 	plt.show()
 
 def qf_comparison(epsilon = 1e-6, out = True):
-	param = np.random.uniform(-10, 10, 6)
+	param = np.random.uniform(-100, 100, 6)
 	param[2] =  abs(param[2])
 	f = qf(param)
 	size_1, size_2 = random.uniform(0.5, 1), random.uniform(0.5, 1)
