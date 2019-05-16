@@ -115,7 +115,6 @@ class solver_segment:
 		return (b + a) / 2
 class main_solver(solver_segment):
 	def add_cond(self, x, y):
-		return False
 		eps = self.eps
 		if np.linalg.norm(self.f.gradient(x, y)) <= eps / (self.size * math.sqrt(2)):
 			return True
@@ -192,13 +191,11 @@ def ellipsoid(f, Q, x_0=None, eps=None):
 	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
 	results = [x]
-	print(x)
 	while abs(f.calculate_function(x[0], x[1]) - f.min) > eps and k < 100:
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
 		d = (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.gradient(x[0], x[1])
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
-		print(x)
 		x = np.clip(x - gamma * H @ _df, *domain.T)
 		H = H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H)
 		k += 1

@@ -48,7 +48,7 @@ def num_iter_tests(epsilon):
 	plt.title("Iterations number")
 	plt.grid()
 	plt.legend(('Tests functions', r'Line $N = \log \frac{La}{\sqrt{2}\epsilon}$'))
-	plt.ylabel(r'$N$')
+	plt.ylabel(r'Iterations Number')
 	plt.xlabel(r'$\log \frac{La}{\sqrt{2}\epsilon}$')
 	plt.show()
 
@@ -163,11 +163,14 @@ def qf_comparison(epsilon = 1e-6, out = True):
 	Q = [x_1 - (1-size_1), x_1 + (1+size_1), y_1 - (1-size_2), y_1 + (1+size_2)]
 	results = comparison(f, Q, epsilon)
 	if out:
-		norm_gradient = lambda x: np.linalg.norm(f.gradient(x[0], x[1]))
-		#norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
+		#norm_gradient = lambda x: np.linalg.norm(f.gradient(x[0], x[1]))
+		norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
 		plt.semilogy([i for i in range(len(results[0]))], [norm_gradient(i) for i in results[0]])
 		plt.semilogy([i for i in range(len(results[2]))], [norm_gradient(i) for i in results[2]])
 		plt.semilogy([i for i in range(len(results[4]))], [norm_gradient(i) for i in results[4]])
+		plt.xlabel('Number of iterations')
+		plt.ylabel('Norm of gradient')
+		plt.xticks([i for i in range(0, 101, 10)])
 		plt.legend(['Gradiend Descent', 'Halving Square', 'Ellipsoid'])
 		print('Gradiend Descent %.4f'%(results[1]))
 		print('Halving Square %.4f'%(results[3]))
@@ -181,11 +184,14 @@ def LSM_comparison(epsilon = 1e-6, out = True):
 	Q = [4, 8, -2, 2]
 	results = comparison(f, Q, epsilon)
 	if out:
-		norm_gradient = lambda x: np.linalg.norm(f.gradient(x[0], x[1]))
 		norm_gradient = lambda x: f.calculate_function(x[0], x[1]) - f.min
 		plt.semilogy([i for i in range(len(results[0]))], [norm_gradient(i) for i in results[0]])
 		plt.semilogy([i for i in range(len(results[2]))], [norm_gradient(i) for i in results[2]])
 		plt.semilogy([i for i in range(len(results[4]))], [norm_gradient(i) for i in results[4]])
+		plt.xlabel('Number of iterations')
+		plt.ylabel('Norm of gradient')
+		plt.xticks([i for i in range(0, 101, 10)])
+		plt.grid()
 		plt.legend(['Gradiend Descent', 'Halving Square', 'Ellipsoid'])
 		print('Gradiend Descent %.4f'%(results[1]))
 		print('Halving Square %.4f'%(results[3]), results[2][-1], a, b)
