@@ -67,7 +67,6 @@ class quadratic_function():
 	def lipschitz_function(self, Q):
 		if self.L is None:
 			self.L = -scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), np.array([Q[0], Q[2]]), bounds = [(Q[0], Q[1]), (Q[2], Q[3])])['fun']
-			print(self.L)
 		return self.L
 
 	def lipschitz_gradient(self, Q):
@@ -150,7 +149,6 @@ class LogSumExp():
 				bounds = [(Q[0], Q[1]),
 				(Q[2], Q[3])])
 			self.L = L['fun']
-			print(self.L)
 		return self.L
 
 	def lipschitz_gradient(self, Q):
@@ -161,19 +159,19 @@ class LogSumExp():
 
 	def calculate_function(self, l1, l2):
 		a = self.a
-		if self.x_cur = None:
+		if self.x_cur is None:
 			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
 				np.array([Q[0], Q[2]])).x
 		return phi(l1, l2)(self.x_cur)
 	
 	def der_x(self, x, y):
-		if self.x_cur = None:
+		if self.x_cur is None:
 			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
 				np.array([Q[0], Q[2]])).x
 		return self.g1(x, y)
 	
 	def der_y(self, x, y):
-		if self.x_cur = None:
+		if self.x_cur is None:
 			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
 				np.array([Q[0], Q[2]])).x
 		return self.g2(x, y)
@@ -182,7 +180,7 @@ class LogSumExp():
 		return np.array([self.der_x(x,y), self.der_y(x,y)])
 
 	def sol_prime(self, l1 = None, l2 = None):
-		if self.x_cur = None:
+		if self.x_cur is None:
 			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
 				np.array([Q[0], Q[2]])).x
 		return f(x_cur)

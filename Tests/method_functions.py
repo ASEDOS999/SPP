@@ -3,6 +3,21 @@
 import math
 import numpy as np
 
+def get_cond(**kwargs):
+	f = kwargs['f']
+	if kwargs.__contains__('time') and kwargs['time']:
+		def _(list_, T = kwargs['time_max'], **kwargs):
+			list_.append(time.time())
+			return list_time[-1] < T
+		args = (_, [time.time()])
+		return args
+	if kwargs.__contains__('eps'):
+		def _(args, **kwargs):
+			x, N = kwargs['x'], kwargs['N']
+			return not ((abs(f(x[0], x[1]) - kwargs['minimum']) > kwargs['eps'] and N < 100) or N == 0)
+		args = (_, None)
+		return args
+
 class solver_segment:
 	def __init__(self, f, Q, eps):
 		self.f = f
@@ -116,15 +131,18 @@ class solver_segment:
 class main_solver(solver_segment):
 	def add_cond(self, x, y):
 		eps = self.eps
+		if eps is None:
+			return False
 		if np.linalg.norm(self.f.gradient(x, y)) <= eps / (self.size * math.sqrt(2)):
 			return True
 		return False
 
-	def halving_square(self):
+	def halving_square(self, **kwargs):
 		eps = self.eps
+		m = self.f.min if hasattr(self.f, 'min') else None
+		cond, args = get_cond(f = self.f.calculate_function, eps = eps, minimum = m)
 		Q = self.Q.copy()
 		N = 0
-		minimum = self.f.min
 		x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 		results = [(x_0, y_0)]
 		if self.add_cond(x_0, y_0):
@@ -137,8 +155,6 @@ class main_solver(solver_segment):
 			if self.add_cond(x_0, y_0):
 				return ((x_0, y_0), N, results)
 			der = self.f.der_y(x_0, y_0)
-			if der == 0 and self.f.der_x(x_0, y_0) == 0:
-				return ((x_0, (Q[2] + Q[3]) / 2), N, results)
 			if der > 0:
 				Q[2], Q[3] = Q[2],  y_0
 			else:
@@ -150,8 +166,6 @@ class main_solver(solver_segment):
 			if self.add_cond(x_0, y_0):
 				return ((x_0, y_0), N, results)
 			der = self.f.der_x(x_0, y_0)
-			if der == 0 and self.f.der_y(x_0, y_0) == 0:
-				return ((x_0, (Q[2] + Q[3]) / 2), N, results)
 			if der > 0:
 				Q[0], Q[1] = Q[0],  x_0
 			else:
@@ -161,17 +175,18 @@ class main_solver(solver_segment):
 			x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 			results.append((x_0, y_0))
 			f_opt = self.f.calculate_function(x_0, y_0) 
-			if N >= 100 or abs(f_opt - minimum) < eps:
+			if cond(args, x = (x_0, y_0), N = N, minimum = m, eps = eps):
 				if N >= 100:
 					N = -1
 				return ((x_0, y_0), N,results)
 
-def gradient_descent(f, Q, grad, L, eps, minimum):
+def gradient_descent(f, Q, grad, L, **kwargs):
 	N = 0
+	cond, args = get_cond(f=f, **kwargs)
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	results = [x.copy()]
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
-	while (abs(f(x[0], x[1]) - minimum) > eps and N < 100) or (N == 0):
+	while cond(args, x = x, N = N):
 		der = grad(x[0], x[1])
 		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
 		x[1], x_prev[1] = min(max(x[1] - 1. / L * der[1], Q[2]), Q[3]), x[1]
@@ -179,11 +194,12 @@ def gradient_descent(f, Q, grad, L, eps, minimum):
 		results.append(x.copy())
 	if N >= 100:
 		N = -1
-	return (x, N, results)
+	return (x, N, results, args)
 
-def ellipsoid(f, Q, x_0=None, eps=None):
+def ellipsoid(f, Q, **kwargs):
 	n = 2
-	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if x_0 is None else x_0
+	cond, args = get_cond(f=f, **kwargs)
+	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if kwargs['x_0'] is None else kwargs['x_0']
 	eps = 5e-3 if eps is None else eps
 	rho = (Q[1] - Q[0]) * np.sqrt(2) / 2
 	H = np.identity(n)
@@ -191,7 +207,7 @@ def ellipsoid(f, Q, x_0=None, eps=None):
 	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
 	results = [x]
-	while abs(f.calculate_function(x[0], x[1]) - f.min) > eps and k < 100:
+	while cond(args, x = x, N = N):
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
 		d = (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.gradient(x[0], x[1])
@@ -202,4 +218,4 @@ def ellipsoid(f, Q, x_0=None, eps=None):
 		results.append(x)
 	if k >= 100:
 		k = -1
-	return (x, k, results)
+	return (x, k, results, args)
