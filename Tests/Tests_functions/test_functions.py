@@ -124,42 +124,72 @@ class quadratic_function():
 		else:
 			return segm[1]
 
-#Quadratic function
-class LSM_exp:
-	def __init__(self, a, b, n):
-		self.x = np.random.uniform(-1, 1, n)
-		sigma = a * np.exp(- abs(b))
-		#self.y = a * np.exp(b * self.x) + np.random.normal(0, sigma, size = n)
-		self.y = a * np.exp(b * self.x)
-		self.n = n
-		self.min = self.calculate_function(a, b)
+
+# LOG-SUM-EXP
+import scipy
+from scipy import optimize
+
+class LogSumExp():
+	def __init__(self, list_of_parameters, R1 = 1, R2 = 2):
+		self.a = list_of_parameters
+		a = self.a
+		self.f = lambda x: np.log(1 + [np.exp(i*x[ind]) for ind, i in enumerate(a)].sum())
+		self.g1 = lambda x: np.linalg.norm(x)**2 - self.R1
+		self.g2 = lambda x: -np.linalg.norm(x)**2 + self.R2
+		self.phi = lambda l1, l2: lambda x: f(x) + l[0] * g1 + l[1] * g2
+		self.R1 = R1
+		self.R2 = R2
 		self.L = None
 		self.M = None
+		self.x_cur = None
 
 	def lipschitz_function(self, Q):
 		if self.L is None:
-			self.L = -scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), np.array([Q[0], Q[2]]), bounds = [(Q[0], Q[1]), (Q[2], Q[3])])['fun']
+			L = -scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), 
+				np.array([Q[0], Q[2]]),
+				bounds = [(Q[0], Q[1]),
+				(Q[2], Q[3])])
+			self.L = L['fun']
+			print(self.L)
 		return self.L
 
 	def lipschitz_gradient(self, Q):
-		return np.inf
+		if self.M is None:
+			# There should be code
+			print('There is not code')
+		return self.M
 
-	def calculate_function(self, a, b):
-		f = 1 / self.n * np.linalg.norm(a * np.exp(b * self.x) - self.y)**2
-		return f
+	def calculate_function(self, l1, l2):
+		a = self.a
+		if self.x_cur = None:
+			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
+				np.array([Q[0], Q[2]])).x
+		return phi(l1, l2)(self.x_cur)
 	
-	def der_x(self, a, b):
-		val = np.exp(b * self.x)
-		der = 2 / self.n * val.dot(a * val - self.y)
-		return der
+	def der_x(self, x, y):
+		if self.x_cur = None:
+			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
+				np.array([Q[0], Q[2]])).x
+		return self.g1(x, y)
 	
-	def der_y(self, a, b):
-		val = np.exp(b * self.x)
-		der = 2 / self.n * a * (self.x  * val).dot(a * val - self.y)
-		return der
+	def der_y(self, x, y):
+		if self.x_cur = None:
+			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
+				np.array([Q[0], Q[2]])).x
+		return self.g2(x, y)
 
-	def gradient(self, a, b):
-		val = 2 / self.n *np.exp(b * self.x)
-		der_x = val.dot(a * val - self.y)
-		der_y = a * (self.x  * val).dot(a * val - self.y)
-		return np.array([der_x, der_y])
+	def gradient(self, x, y):
+		return np.array([self.der_x(x,y), self.der_y(x,y)])
+
+	def sol_prime(self, l1 = None, l2 = None):
+		if self.x_cur = None:
+			self.x_cur = -scipy.optimize.minimize(phi(l1, l2), 
+				np.array([Q[0], Q[2]])).x
+		return f(x_cur)
+
+	def get_square(self):
+		x = np.zeros(len(a))
+		x[0] = R1 + (R2-R1)/10
+		gamma = min(-self.g1(x), -self.g2(x))
+		q = self.f(x) / gamma
+		return [0, q, 0, q]
