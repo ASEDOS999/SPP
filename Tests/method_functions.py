@@ -2,13 +2,16 @@
 
 import math
 import numpy as np
-
+import time
 def get_cond(**kwargs):
+	print(kwargs)
 	f = kwargs['f']
-	if kwargs.__contains__('time') and kwargs['time']:
-		def _(list_, T = kwargs['time_max'], **kwargs):
+	if kwargs.__contains__('get_time') and kwargs['get_time']:
+		if not kwargs.__contains__('max_time'):
+			kwargs['max_time'] = 0.1
+		def _(list_, T = kwargs['max_time'], **kwargs):
 			list_.append(time.time())
-			return list_time[-1] < T
+			return list_[-1] - list_[0] < T
 		args = (_, [time.time()])
 		return args
 	if kwargs.__contains__('eps'):
@@ -19,7 +22,7 @@ def get_cond(**kwargs):
 		return args
 
 class solver_segment:
-	def __init__(self, f, Q, eps):
+	def __init__(self, f, Q, eps = None):
 		self.f = f
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
@@ -57,6 +60,8 @@ class solver_segment:
 	def ConstEst(self, a, b):
 		if self.est is None:
 			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
+			if L == -0.0:
+				L = 1
 			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
 		return ((b - a) / 2 <= self.est)
 
@@ -75,6 +80,8 @@ class solver_segment:
 		if self.type_stop == 'true_grad':
 			return self.TrueGrad
 		if self.type_stop == 'const_est':
+			if self.eps is None:
+				self.eps = 1e-5
 			return self.ConstEst
 		if self.type_stop == 'cur_grad':
 			return self.CurGrad
@@ -140,7 +147,9 @@ class main_solver(solver_segment):
 	def halving_square(self, **kwargs):
 		eps = self.eps
 		m = self.f.min if hasattr(self.f, 'min') else None
-		cond, args = get_cond(f = self.f.calculate_function, eps = eps, minimum = m)
+		if not kwargs.__contains__('get_time'):
+			kwargs['get_time'] = False
+		cond, args = get_cond(f = self.f.calculate_function, eps = eps, minimum = m, get_time = kwargs['get_time'])
 		Q = self.Q.copy()
 		N = 0
 		x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
@@ -148,7 +157,7 @@ class main_solver(solver_segment):
 		if self.add_cond(x_0, y_0):
 			return ((x_0, y_0), N, results)
 		f_opt = self.f.calculate_function(x_0, y_0)
-		while True:
+		while cond(args, x = (x_0, y_0), N = N, minimum = m, eps = eps):
 			y_0 = (Q[2] + Q[3]) / 2
 			self.axis, self.value, self.segm = 'x', y_0, [Q[0], Q[1]]
 			x_0 = self.solve()
@@ -175,10 +184,7 @@ class main_solver(solver_segment):
 			x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 			results.append((x_0, y_0))
 			f_opt = self.f.calculate_function(x_0, y_0) 
-			if cond(args, x = (x_0, y_0), N = N, minimum = m, eps = eps):
-				if N >= 100:
-					N = -1
-				return ((x_0, y_0), N,results)
+		return (x_0, y_0), N,results, args
 
 def gradient_descent(f, Q, grad, L, **kwargs):
 	N = 0
@@ -194,20 +200,20 @@ def gradient_descent(f, Q, grad, L, **kwargs):
 		results.append(x.copy())
 	if N >= 100:
 		N = -1
-	return (x, N, results, args)
+	return x, N, results, args
 
 def ellipsoid(f, Q, **kwargs):
 	n = 2
 	cond, args = get_cond(f=f, **kwargs)
-	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if kwargs['x_0'] is None else kwargs['x_0']
-	eps = 5e-3 if eps is None else eps
+	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if not kwargs.__contains__('x_0') or kwargs['x_0'] is None else kwargs['x_0']
+	eps = 5e-3 if not kwargs.__contains__('x_0') or eps is None else kwargs['x_0']
 	rho = (Q[1] - Q[0]) * np.sqrt(2) / 2
 	H = np.identity(n)
 	q = n * (n - 1) ** (-(n-1) / (2*n)) * (n + 1) ** (-(n+1) / (2*n))
 	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
 	results = [x]
-	while cond(args, x = x, N = N):
+	while cond(args, x = x, N = k):
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
 		d = (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.gradient(x[0], x[1])
@@ -218,4 +224,4 @@ def ellipsoid(f, Q, **kwargs):
 		results.append(x)
 	if k >= 100:
 		k = -1
-	return (x, k, results, args)
+	return x, k, results, args
