@@ -129,14 +129,17 @@ import scipy
 from scipy import optimize
 
 class LogSumExp():
-	def __init__(self, list_of_parameters, R1 = 1, R2 = 2):
+	def __init__(self, list_of_parameters, c = None, R1 = 1, R2 = 1):
 		self.a = list_of_parameters
 		a = self.a
-		# self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
+		# self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)])) + np.linalg.norm(x)
 		self.f = lambda x: np.linalg.norm(x)
+		if c is None:
+			c = np.ones(a.shape)
+			c/=np.linalg.norm(c)
 		self.g1 = lambda x: np.linalg.norm(x)**2 - self.R2**2
-		self.g2 = lambda x: -np.linalg.norm(x)**2 + self.R1**2
-		self.phi = lambda l1, l2: lambda x: self.f(x) + l1 * self.g1(x) + l2 * self.g2(x)
+		self.g2 = lambda x: np.linalg.norm(x-c)**2 - self.R1**2
+		self.phi = lambda l1, l2: lambda x: -(self.f(x) + l1 * self.g1(x) + l2 * self.g2(x))
 		self.R1 = R1
 		self.R2 = R2
 		self.L = None
@@ -155,38 +158,46 @@ class LogSumExp():
 
 	def lipschitz_gradient(self, Q):
 		if self.M is None:
-			self.M = 10000
-			# There should be code
-			print('There is not code')
+			self.M = (2 * self.R2 * np.sqrt(self.a.shape[0] * 2))**2 / 2
 		return self.M
 
 	def calculate_function(self, l1, l2):
 		a = self.a
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(phi(l1, l2), 
-			np.zeros(self.a.shape)).x
-		#M = (a*x_cur).max()
-		#x = x_cur - M*np.ones(x_cur.shape)
-		return phi(l1, l2)(x_cur)
-	
+		if l1<l2:
+			x_cur = scipy.optimize.minimize(lambda x: -phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			#M = (a*x_cur).max()
+			#x = x_cur - M*np.ones(x_cur.shape)
+			return phi(l1, l2)(x_cur)
+		elif l1 > l2:
+			return np.inf
+		else:
+			return 0.
 	def der_x(self, l1, l2):
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(phi(l1, l2), 
-			np.zeros(self.a.shape)).x
-		return -self.g1(x_cur)
+		if l1<l2:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x) , 
+				np.zeros(self.a.shape)).x
+			return -self.g1(x_cur)
+		else:
+			return -np.inf
 	
 	def der_y(self, l1, l2):
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(phi(l1, l2), 
-			np.zeros(self.a.shape)).x
-		return -self.g2(x_cur)
+		if l1<l2:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			return -self.g2(x_cur)
+		else:
+			return -np.inf
 
 	def gradient(self, x, y):
 		return np.array([self.der_x(x,y), self.der_y(x,y)])
 
 	def sol_prime(self, l1 = None, l2 = None):
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(phi(l1, l2), 
+		x_cur = scipy.optimize.minimize(lambda x: -phi(l1, l2)(x), 
 			np.zeros(self.a.shape)).x
 		return f(x_cur)
 
