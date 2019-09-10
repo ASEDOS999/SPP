@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from test_functions import sinuses
-from test_functions import LSM_exp
 from test_functions import quadratic_function as qf
+from test_functions import LogSumExp
 from method_functions import main_solver
 from method_functions import gradient_descent
 from method_functions import ellipsoid
@@ -98,6 +98,28 @@ def comparison(f, Q, eps):
 	res_3 = ellipsoid(f, Q, eps = eps)
 	m4 = time()
 	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
+
+def comparison_LogSumExp(N):
+	res = dict()
+	a = np.random.uniform(-0.1, 0.1, N)
+	f = LogSumExp(a)
+	Q = f.get_square()
+	print(Q)
+	f.lipschitz_function(Q)
+	f.lipschitz_gradient(Q)
+	t = gradient_descent(f.calculate_function, Q, f.gradient, f.M, get_time = True)
+	res['GD'] = (t[2], t[3])
+	solver = main_solver(f, Q)
+	solver.init_help_function()
+	t = solver.halving_square(get_time= True)
+	res['Halving Square CurEst'] = (t[2], t[3])
+	solver = main_solver(f, Q)
+	solver.init_help_function(stop_func = 'const_est')
+	t = solver.halving_square(get_time = True)
+	res['Halving Square ConstEst'] = (t[2], t[3])
+	t = ellipsoid(f, Q, get_time = True, time = True)
+	res['Ellipsoid Method'] = (t[2], t[3])
+	return res, f
 
 if __name__ == "__main__":
 	eps = [0.1**(i) for i in range(7)]

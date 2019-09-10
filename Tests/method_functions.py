@@ -11,6 +11,7 @@ def get_cond(**kwargs):
 			kwargs['max_time'] = 0.1
 		def _(list_, T = kwargs['max_time'], **kwargs):
 			list_.append(time.time())
+			# print(T, list_[-1] - list_[0])
 			return list_[-1] - list_[0] < T
 		args = (_, [time.time()])
 		return args
@@ -163,23 +164,22 @@ class main_solver(solver_segment):
 			x_0 = self.solve()
 			if self.add_cond(x_0, y_0):
 				return ((x_0, y_0), N, results)
-			der = self.f.der_y(x_0, y_0)
-			if der > 0:
-				Q[2], Q[3] = Q[2],  y_0
-			else:
-				Q[3], Q[2] = Q[3],  y_0
+			dery = self.f.der_y(x_0, y_0)
 			
 			x_0 = (Q[0] + Q[1]) / 2
 			self.axis, self.value, self.segm = 'y', x_0, [Q[2], Q[3]]
 			y_0 = self.solve()
 			if self.add_cond(x_0, y_0):
 				return ((x_0, y_0), N, results)
-			der = self.f.der_x(x_0, y_0)
-			if der > 0:
+			derx = self.f.der_x(x_0, y_0)
+			if derx > 0:
 				Q[0], Q[1] = Q[0],  x_0
 			else:
 				Q[1], Q[0] = Q[1],  x_0
-
+			if dery > 0:
+				Q[2], Q[3] = Q[2],  y_0
+			else:
+				Q[3], Q[2] = Q[3],  y_0
 			N += 1
 			x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 			results.append((x_0, y_0))
@@ -198,6 +198,7 @@ def gradient_descent(f, Q, grad, L, **kwargs):
 		x[1], x_prev[1] = min(max(x[1] - 1. / L * der[1], Q[2]), Q[3]), x[1]
 		N += 1
 		results.append(x.copy())
+		print(results[-1])
 	if N >= 100:
 		N = -1
 	return x, N, results, args
@@ -225,3 +226,4 @@ def ellipsoid(f, Q, **kwargs):
 	if k >= 100:
 		k = -1
 	return x, k, results, args
+

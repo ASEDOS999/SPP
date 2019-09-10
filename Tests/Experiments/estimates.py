@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from test_functions import quadratic_function as qf
+from test_functions import LogSumExp
 from method_functions import main_solver
 import math
 

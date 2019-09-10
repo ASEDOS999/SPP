@@ -125,9 +125,6 @@ class quadratic_function():
 
 
 # LOG-SUM-EXP
-import scipy
-from scipy import optimize
-
 class LogSumExp():
 	def __init__(self, list_of_parameters, c = None, R1 = 1, R2 = 1):
 		self.a = list_of_parameters
@@ -164,33 +161,22 @@ class LogSumExp():
 	def calculate_function(self, l1, l2):
 		a = self.a
 		phi = self.phi
-		if l1<l2:
-			x_cur = scipy.optimize.minimize(lambda x: -phi(l1, l2)(x), 
-				np.zeros(self.a.shape)).x
-			#M = (a*x_cur).max()
-			#x = x_cur - M*np.ones(x_cur.shape)
-			return phi(l1, l2)(x_cur)
-		elif l1 > l2:
-			return np.inf
-		else:
-			return 0.
+		x_cur = scipy.optimize.minimize(lambda x: -phi(l1, l2)(x), 
+			np.zeros(self.a.shape)).x
+		#M = (a*x_cur).max()
+		#x = x_cur - M*np.ones(x_cur.shape)
+		return phi(l1, l2)(x_cur)
 	def der_x(self, l1, l2):
 		phi = self.phi
-		if l1<l2:
-			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x) , 
-				np.zeros(self.a.shape)).x
-			return -self.g1(x_cur)
-		else:
-			return -np.inf
+		x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x) , 
+			np.zeros(self.a.shape)).x
+		return -self.g1(x_cur)
 	
 	def der_y(self, l1, l2):
 		phi = self.phi
-		if l1<l2:
-			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-				np.zeros(self.a.shape)).x
-			return -self.g2(x_cur)
-		else:
-			return -np.inf
+		x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+			np.zeros(self.a.shape)).x
+		return -self.g2(x_cur)
 
 	def gradient(self, x, y):
 		return np.array([self.der_x(x,y), self.der_y(x,y)])
