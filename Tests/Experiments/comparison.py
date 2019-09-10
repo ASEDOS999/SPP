@@ -53,11 +53,14 @@ def qf_test(eps):
 	plt.semilogy([i for i in range(len(res))], [norm_gradient(i) for i in res])
 	plt.semilogy([i for i in range(len(res))], [(i[0] -x_1)**2 + (i[1]-y_1)**2 for i in res])
 	plt.grid()
-	plt.legend([r"$f(x)-f^*$", r"$\|x-x^*\|$"])
+	n = 13
+	plt.legend([r"$f(x)-f^*$", r"$\|x-x^*\|$"], fontsize = n)
 	q_2 = 1./2 * np.log(f.M * a**2/(4 * eps)) / np.log(2)
 	q_1 = np.log(f.L * a/(np.sqrt(2) * eps)) / np.log(2)
-	plt.xlabel("Iterations Number")
-	plt.ylabel("Value of Error")
+	plt.xlabel("Iterations Number", fontsize = n)
+	plt.ylabel("Value of Error", fontsize = n)
+	plt.xticks(fontsize = n)
+	plt.yticks(fontsize = n)
 	print('Theoretical Iteration Number through function constant', np.ceil(q_1))
 	print('Theoretical Iteration Number through gradient constant', np.ceil(q_2))
 	return res
@@ -71,7 +74,7 @@ def qf_test_2(eps):
 	f.solution[0], f.solution[1] = x_1, y_1
 	f.min = 5
 	Q = [1, 2, 1, 2]
-	f.lipschitz_function(Q), f.lispchitz_gradient(Q)
+	f.lipschitz_function(Q), f.lipschitz_gradient(Q)
 	solver = main_solver(f, Q, eps)
 	solver.init_help_function()
 	res = solver.halving_square()[2]
@@ -79,9 +82,12 @@ def qf_test_2(eps):
 	plt.semilogy([i for i in range(len(res))], [norm_gradient(i) for i in res])
 	plt.semilogy([i for i in range(len(res))], [(i[0] -x_1)**2 + (i[1]-y_1)**2 for i in res])
 	plt.grid()
-	plt.xlabel("Iterations Number")
-	plt.ylabel("Value of Error")
-	plt.legend([r"$f(x)-f^*$", r"$\|x-x^*\|$"])
+	n = 13
+	plt.xlabel("Iterations Number", fontsize = 13)
+	plt.ylabel("Value of Error", fontsize = 13)
+	plt.legend([r"$f(x)-f^*$", r"$\|x-x^*\|$"], fontsize = 13)
+	plt.xticks(fontsize = 13)
+	plt.yticks(fontsize = 13)
 	q_2 = 1./2 * np.log(f.M * a**2/(4 * eps)) / np.log(2)
 	q_1 = np.log(f.L * a/(np.sqrt(2) * eps)) / np.log(2)
 	print('Theoretical Iteration Number through function constant', np.ceil(q_1))
