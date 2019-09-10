@@ -50,7 +50,7 @@ In this paper we want to continue this research. In the next section there is de
 
 Section Tests include different tests that show some theoretical results in practice and include comparison of this method with gradient descent. 
 
-\section{Description Of Method}
+\section{Method Description}
 
 Let's consider a following task:
 
@@ -319,7 +319,7 @@ One minimize this function on square that involve global solution. We took param
 \textbf{Theoretical Iteration Number through gradient constant equals 20}
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/In_point.png}}
+\center{\includegraphics[scale=0.5]{Tests/Images/In_point.pdf}}
 \label{fig:image2}
  \caption{Test for iterations number when the estimate \ref{NI3} is reached}
 \end{figure}
@@ -334,7 +334,7 @@ $$\min\limits_{(x,y)\in Q}f(x,y)$$
 \textbf{Theoretical Iteration Number through gradient constant 14}
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/Out_point.png}}
+\center{\includegraphics[scale=0.5]{Tests/Images/Out_point.pdf}}
 \label{fig:image1}
  \caption{Test for iterations number when the estimate \ref{NI3} is not reached}
 \end{figure}
@@ -353,17 +353,13 @@ In current section we will compare different stop conditions for the solving tas
 
 Obviously, that in practic we can not use the second strategy because to calculate this estimate for one segment is harder than to solve all task. This estimate is the improved the third estimate. And there is interesting question: how much better does the second strategy work than the third?
 
-We will test on the simple quadratic functions. Parameters for this functions will be generated randomly. We will research dependence of work time on required accuracy $\epsilon$. For each epsilon we will generate $N$ tested functions and measure work time of each method. In our expirements $N$ is equal to 1000 times. Results of experimetns you can see in the table \ref{table:res}.
-\begin{table}[h!]
-\centering
-\begin{tabular}{||c |c |c|c||} 
- \hline
-  $\epsilon$& \textbf{Const} & \textbf{ConstGrad}&\textbf{CurGrad}\\
- \hline
-\end{tabular}
-\caption{Work time}
-\label{table:res}
-\end{table}
+We will test on the simple quadratic functions. Parameters for this functions will be generated randomly. We will research dependence of work time on required accuracy $\epsilon$. For each epsilon we will generate $N$ tested functions and measure work time of each method. In our expirements $N$ is equal to 1000 times. Results of experimetns you can see on the picture \ref{res}.
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.4]{Tests/Images/Stop_compare.pdf}}
+\label{res}
+ \caption{Comparison of different optimization method}
+\end{figure}
 
 \subsection{Comparison With Other Methods}
 
@@ -452,9 +448,9 @@ Nesterov U.E.  Methods of convex optimization // M.MCNMO --- 2010, 262 p.
 \bibitem{conda}
 Anaconda[site]. At available: \href{https://www.anaconda.com}{https://www.anaconda.com}
 \bibitem{DDR-theorem}
-ADDD
+Danskin, J.M.: The theory of Max-Min, with applications. J. SIAM Appl. Math.14(4) (1966)
 \bibitem{Stonykin}
-ADDD
+Fedor S. Stonyakin, Mohammad S. Alkousa, Alexander A. Titov,and Victoria V. Piskunova1 On Some Methods for Strongly ConvexOptimization Problems with OneFunctional Constraint // ...
 \bibitem{my_git}
 Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
