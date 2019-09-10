@@ -16,6 +16,7 @@ def get_tests_estimates(epsilon, mean_input = True, num_compare = False):
 	N = 1000
 	name = ['True gradient', 'Constant estimate', 'Current gradient']
 	full_results = []
+	dict_results = dict()
 	for eps in epsilon:
 		results = []
 		for j in range(N):
@@ -42,20 +43,23 @@ def get_tests_estimates(epsilon, mean_input = True, num_compare = False):
 			results.append((eps, res_1[1], m2-m1, res_2[1], m3-m2, res_3[1], m4 - m3))
 		if mean_input:
 			print('eps = ', "{:.1e}".format(eps))
+			_ = dict()
 			for j in range(3):
 				list = [i[2 + j * 2] for i in results if i[1 + j * 2] >= 0]
+				_[name[j]] = np.mean(list)*1000
 				print('Mean time (%s) = %.2fms'%(name[j], 1000 * np.mean(list)))
 				list = [i[2 + j * 2] for i in results if i[1 + j * 2] <  0]
 				q = len(list)
 				if q > 0:
 					print("%s: Number of failed tests equals %d"%(name[j], q))
+			dict_results[eps] = _
 		if num_compare:
 			list_n = [(i, j, k) for i in range(3) for j in range(3) for k in range(3) if i != j and j != k and i != k]
 			for n in list_n:
 				ind = len([i for i in results if i[2 + n[0] * 2] <= i[2 + n[1] * 2] <= i[2 + n[2] * 2]])
 				print("'%s' <= '%s' <= '%s': %d"%(name[n[0]], name[n[1]], name[n[2]], ind))
 		full_results += results
-
+	return dict_results
 if __name__ == "__main__":
 	eps = [0.1**(i) for i in range(7)]
 	get_tests_estimates(eps, num_compare = True)
