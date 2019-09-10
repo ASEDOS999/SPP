@@ -165,6 +165,7 @@ Analogically, for a vertical segment:
 
 
 \begin{theorem}
+\label{ConstGrad}
 Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
 
 The current segment is horizontal and $\exists M>0  : \Rightarrow|f_y'(\textbf{x}_0)| \geq M$ or the current segment is vertical and $\exists M>0  : \Rightarrow|f_x'(\textbf{x}_0)| \geq M$. Then rectangle is defined correctly if the possible value of error is less than $\frac{M}{L}$.
@@ -189,6 +190,7 @@ Statement for vertical segment is proved similarly.
 In written above theorem the estimate needs some lower bound for derivatibe in point-solution on segment and this task can be hard in practise. Using other interpretation of the condition \eqref{MCH} one can take more useful result.
 
 \begin{theorem}
+\label{CurGrad}
 Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
 
 The current segment is horizontal and $M = |f_y'(\textbf{x}_{current})|$ or the current segment is vertical and $M = |f_y'(\textbf{x}_{current})|$. Then rectangle is defined correctly if a distance between $\textbf{x}_{cur}$ and accurate solution on segment is less than $\frac{M}{L}$.
@@ -298,7 +300,7 @@ In this section we show estimate on number iterations of practice and compare wo
 
 \subsection{About function $solve$}
 
-If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use golden search selection.
+If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use golden search selection. It is the best method for one-dimension task in our case because on each iteration the GSS need to calcualted value of function in only one new point. It is important because we will use this method for dual tasks and calculating function in such tasks are hard enough.
 
 \subsection{Tests for iterations number}
 
@@ -341,29 +343,103 @@ And we see on \ref{fig:image1} that the estimate \ref{NI3} is not reached in thi
 
 \subsection{Comparison Of Stop Conditions}
 
+In current section we will compare different stop conditions for the solving task on separating segments. Fistly, let's define all stop conditions.
+
+\begin{itemize}
+	\item Constant estimate (\textbf{Const}): $\delta \leq \frac{\epsilon}{2La\sqrt{5}\log_2\frac{2Ma\sqrt{2}}{\epsilon}}$ from \cite{Ston_Pas},
+	\item Constant gradient estimate (\textbf{ConstGrad}): $\delta \leq \frac{M_{der}}{L}$ from \ref{ConstGrad},
+	\item Estimate through current gradient (\textbf{CurGrad}): $\frac{|f'(\textbf{x}_{cur})|}{L}$ from \ref{CurGrad}.
+\end{itemize}
+
+Obviously, that in practic we can not use the second strategy because to calculate this estimate for one segment is harder than to solve all task. This estimate is the improved the third estimate. And there is interesting question: how much better does the second strategy work than the third?
+
+We will test on the simple quadratic functions. Parameters for this functions will be generated randomly. We will research dependence of work time on required accuracy $\epsilon$. For each epsilon we will generate $N$ tested functions and measure work time of each method. In our expirements $N$ is equal to 1000 times. Results of experimetns you can see in the table \ref{table:res}.
+\begin{table}[h!]
+\centering
+\begin{tabular}{||c |c |c|c||} 
+ \hline
+  $\epsilon$& \textbf{Const} & \textbf{ConstGrad}&\textbf{CurGrad}\\
+ \hline
+\end{tabular}
+\caption{Work time}
+\label{table:res}
+\end{table}
+
 \subsection{Comparison With Other Methods}
 
-Let's compare out method with ellipsoid method and gradient descent (with step $\frac{1}{L_g}$) for some quadric function on square that involves point with zero condition.
+Let's compare out method with ellipsoid method and gradient descent with optimal constant step $\frac{1}{L_g}$ on some dual task.
+
+We consider following prime task:
+
+\begin{gather}
+\label{prime}
+f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{a_kx_k}\right) + \|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
+\text{s.t.}\,g_1(\textbf{x}) = \|\textbf{x}\|_2-R_1\leq0\\
+g_2(\textbf{x}) = \|\textbf{x}\|_2-R_2\leq0
+\end{gather}
+
+We introduce the following notation:
+
+\begin{equation}
+\label{phi}
+\phi(\lambda_1, \lambda_2) = -\min\limits_{\textbf{x}}\left(f(\textbf{x}) +\lambda_1 g_1(\textbf{x}) +\lambda_2g_2(\textbf{x})\right)
+\end{equation}
+
+In such notations the dual task for the task \ref{prime} looks like:
+
+\begin{gather}
+\phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2}\\
+\text{s.t}\, \lambda_1, \lambda_2 \geq 0
+\end{gather}
+
+According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variavles:
+
+$$\|{\lambda}\|_1 \leq \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),$$
+$$ \text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_ig_i(\overline{\textbf{x}})$}$$
+
+Obviously, $\min\limits_{\textbf{x}}f(\textbf{x}) \geq 0$. Therefore, we have following condition on the dual variables:
+
+$$|\lambda_k| \leq \lambda_{\text{max}}=\frac{f(\overline{\textbf{x}})}{\gamma}, k=1,2$$
+
+And we understand that there is the dual task's solution in a square $Q = [0, \lambda_{\text{max}}]^2$. And we have following optimization task:
+\begin{gather}
+\label{dual}
+\phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2} \\
+\text{s.t.} \lambda\in Q
+\end{gather}
+
+The gradient of function $\phi$ will be calculated according well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem1}.
+
+\begin{theorem}
+Let $\phi(\lambda)=\min\limits_{x\in X}F(x,\lambda)$ for all $\lambda\geq0$, where $F$ is a smooth convex function with respect to $\lambda$ and $x(\lambda)$ is the only maximimum point. Then
+$$\nabla \phi(\lambda) = F'_\lambda\left(x(\lambda),\lambda\right)$$
+\end{theorem}
+
+In the our case:
+
+\begin{equation}
+\phi'_{\lambda_k}(\lambda) = g_k\left(\textbf{x}(\lambda)\right)
+\end{equation}
+
+Additionally we need a Lipschitz constant for gradient. In the work \cite{Stonykin} there is following theorem:
+\begin{theorem}
+Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies the Lipschitz condition with a constant $M_g$. Then the function $\phi(\lambda)$ defined in \ref{phi}, where $x(\lambda) = \arg\min\limits_x(f(x)+\lambda g(x))$, has Lipschitz smooth gradient with constant $L_\phi = \frac{M_g^2}{\mu_f}$
+\end{theorem}
+
+This theorem can be proved easy for the second dimension. In this case $g$ is a vector-function. Obviously, in the our task function $f$ is 2-strongly convex. 
+
+And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. Parameters $\textbf{a}$ we will generate randomly. 
 
 \begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.png}}
+\center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.pdf}}
 \label{fig:image}
- \caption{Comparison with gradient descent and ellipsoid method}
+ \caption{Comparison of different optimization method}
 \end{figure}
 
-We can see on \ref{fig:image} that gradient descent is more slow than ellipsoid method and our method. Moreover, our method is faster twice than ellipoid method on iterations.
+We can see on \ref{fig:image} following results. Firstly, gradient descent is the slowest method in this test. Our method with estimate through current gradient is faster than method with constanst estimate. And our method approached more little value of dual task than ellipsoid method on suct time interval.
 
-Work time for this methods is following:
+This experiment showed that our method is more effective on some dual task than some classic methods. Additionally, our method an estimate through current gradient is faster than with constant estimate.
 
-\begin{center}
-Gradiend Descent 4.5 ms
-
-Halving Square 20.9 ms
-
-Ellipsoid 28.3 ms
-\end{center}
-
-And our method is faster than method ellipsoid and gradient descent.
 \section{Conclusion}
 \newpage
 \begin{thebibliography}{3}
@@ -375,6 +451,10 @@ Pasechnyk D.A., Stonyakin F.S.  One method for minimization a convex Lipchitz co
 Nesterov U.E.  Methods of convex optimization // M.MCNMO --- 2010, 262 p.
 \bibitem{conda}
 Anaconda[site]. At available: \href{https://www.anaconda.com}{https://www.anaconda.com}
+\bibitem{DDR-theorem}
+ADDD
+\bibitem{Stonykin}
+ADDD
 \bibitem{my_git}
 Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
