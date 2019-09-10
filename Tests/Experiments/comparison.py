@@ -8,8 +8,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from test_functions import sinuses
-from test_functions import quadratic_function as qf
 from test_functions import LogSumExp
+from test_functions import quadratic_function as qf
 from method_functions import main_solver
 from method_functions import gradient_descent
 from method_functions import ellipsoid
@@ -45,6 +45,7 @@ def qf_test(eps):
 	size_1, size_2 = random.uniform(0.5 *a, a), random.uniform(0.5*a, a)
 	x_1, y_1 = f.solution[0], f.solution[1]
 	Q = [x_1 - (a-size_1), x_1 + (a+size_1), y_1 - (a-size_2), y_1 + (a+size_2)]
+	f.lipschitz_function(Q), f.lipschitz_gradient(Q)
 	solver = main_solver(f, Q, eps)
 	solver.init_help_function()
 	res = solver.halving_square()[2]
@@ -70,6 +71,7 @@ def qf_test_2(eps):
 	f.solution[0], f.solution[1] = x_1, y_1
 	f.min = 5
 	Q = [1, 2, 1, 2]
+	f.lipschitz_function(Q), f.lispchitz_gradient(Q)
 	solver = main_solver(f, Q, eps)
 	solver.init_help_function()
 	res = solver.halving_square()[2]
@@ -99,28 +101,25 @@ def comparison(f, Q, eps):
 	m4 = time()
 	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
 
-def comparison_LogSumExp(N):
-	res = dict()
-	a = np.random.uniform(-0.1, 0.1, N)
+def comparison_LogSumExp(N = 2, time_max = 100):
+	a = np.random.uniform(-100, 100, size=(N,))
 	f = LogSumExp(a)
 	Q = f.get_square()
-	print(Q)
-	f.lipschitz_function(Q)
-	f.lipschitz_gradient(Q)
-	t = gradient_descent(f.calculate_function, Q, f.gradient, f.M, get_time = True)
-	res['GD'] = (t[2], t[3])
-	solver = main_solver(f, Q)
-	solver.init_help_function()
-	t = solver.halving_square(get_time= True)
-	res['Halving Square CurEst'] = (t[2], t[3])
-	solver = main_solver(f, Q)
-	solver.init_help_function(stop_func = 'const_est')
-	t = solver.halving_square(get_time = True)
-	res['Halving Square ConstEst'] = (t[2], t[3])
-	t = ellipsoid(f, Q, get_time = True, time = True)
-	res['Ellipsoid Method'] = (t[2], t[3])
-	return res, f
+	L, M = f.lipschitz_function(Q), f.lipschitz_gradient(Q)
+	solver = main_solver(f, Q, eps = None)
+	res = dict()
+	print('Ellipsoids')
+	res['Ellipsoids'] = ellipsoid(f,Q, time_max = time_max, time = True)
 
+	print('Const_est')
+	solver.init_help_function('const_est')
+	res['HalvingSquare-Const']= solver.halving_square(eps = 1e-2)
+	print('CurGrad')
+	solver.init_help_function()
+	res['HalvingSquare-CurGrad']= solver.halving_square(time_max = time_max, time = True)
+	print('GD')
+	res['GD'] = gradient_descent(f.calculate_function, Q, f.gradient, M, time= True, time_max = time_max)
+	return res, f
 if __name__ == "__main__":
 	eps = [0.1**(i) for i in range(7)]
 	num_iter_tests(eps)

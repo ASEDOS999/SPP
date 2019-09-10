@@ -125,15 +125,21 @@ class quadratic_function():
 
 
 # LOG-SUM-EXP
+import scipy
+from scipy import optimize
+
+# LOG-SUM-EXP
 class LogSumExp():
 	def __init__(self, list_of_parameters, c = None, R1 = 1, R2 = 1):
 		self.a = list_of_parameters
 		a = self.a
-		# self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)])) + np.linalg.norm(x)
-		self.f = lambda x: np.linalg.norm(x)
+		self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)])) + np.linalg.norm(x)
+		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
+		# self.f = lambda x: np.linalg.norm(x)
 		if c is None:
 			c = np.ones(a.shape)
 			c/=np.linalg.norm(c)
+		self.c = c
 		self.g1 = lambda x: np.linalg.norm(x)**2 - self.R2**2
 		self.g2 = lambda x: np.linalg.norm(x-c)**2 - self.R1**2
 		self.phi = lambda l1, l2: lambda x: -(self.f(x) + l1 * self.g1(x) + l2 * self.g2(x))
@@ -142,6 +148,7 @@ class LogSumExp():
 		self.L = None
 		self.M = None
 		self.x_cur = None
+		self.values = dict()
 
 	def lipschitz_function(self, Q):
 		if self.L is None:
@@ -161,35 +168,58 @@ class LogSumExp():
 	def calculate_function(self, l1, l2):
 		a = self.a
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(lambda x: -phi(l1, l2)(x), 
-			np.zeros(self.a.shape)).x
+		if (l1,l2) in self.values:
+			x_cur = self.values[(l1,l2)]
+		else:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			self.values[(l1,l2)] = x_cur
 		#M = (a*x_cur).max()
 		#x = x_cur - M*np.ones(x_cur.shape)
 		return phi(l1, l2)(x_cur)
 	def der_x(self, l1, l2):
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x) , 
-			np.zeros(self.a.shape)).x
+		if (l1,l2) in self.values:
+			x_cur = self.values[(l1,l2)]
+		else:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			self.values[(l1,l2)] = x_cur
 		return -self.g1(x_cur)
 	
 	def der_y(self, l1, l2):
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-			np.zeros(self.a.shape)).x
+		if (l1,l2) in self.values:
+			x_cur = self.values[(l1,l2)]
+		else:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			self.values[(l1,l2)] = x_cur
 		return -self.g2(x_cur)
 
-	def gradient(self, x, y):
-		return np.array([self.der_x(x,y), self.der_y(x,y)])
+	def gradient(self, l1, l2):
+		phi = self.phi
+		if (l1,l2) in self.values:
+			x_cur = self.values[(l1,l2)]
+		else:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			self.values[(l1,l2)] = x_cur
+		return np.array([-self.g1(x_cur), -self.g2(x_cur)])
 
 	def sol_prime(self, l1 = None, l2 = None):
 		phi = self.phi
-		x_cur = scipy.optimize.minimize(lambda x: -phi(l1, l2)(x), 
-			np.zeros(self.a.shape)).x
+		if (l1,l2) in self.values:
+			x_cur = self.values[(l1,l2)]
+		else:
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape)).x
+			self.values[(l1,l2)] = x_cur
 		return f(x_cur)
 
 	def get_square(self):
-		x = np.zeros(len(self.a))
-		x[0] = self.R1 + (self.R2-self.R1)/10
+		c = self.c/np.linalg.norm(self.c)
+		x= (c * self.R1 + (self.c-c*self.R2))/2
 		gamma = min(-self.g1(x), -self.g2(x))
 		q = self.f(x) / gamma
 		self.Q = [0, q, 0, q]

@@ -4,26 +4,26 @@ import math
 import numpy as np
 import time
 def get_cond(**kwargs):
-	print(kwargs)
 	f = kwargs['f']
-	if kwargs.__contains__('get_time') and kwargs['get_time']:
-		if not kwargs.__contains__('max_time'):
-			kwargs['max_time'] = 0.1
-		def _(list_, T = kwargs['max_time'], **kwargs):
-			list_.append(time.time())
-			# print(T, list_[-1] - list_[0])
-			return list_[-1] - list_[0] < T
+	if kwargs.__contains__('time') and kwargs['time']:
+		def _(list_time, T = kwargs['time_max'], **kwargs):
+			list_time.append(time.time())
+			return (list_time[-1]-list_time[0] > T)
 		args = (_, [time.time()])
 		return args
 	if kwargs.__contains__('eps'):
-		def _(args, **kwargs):
+		def _(list_time, **kwargs):
 			x, N = kwargs['x'], kwargs['N']
-			return not ((abs(f(x[0], x[1]) - kwargs['minimum']) > kwargs['eps'] and N < 100) or N == 0)
-		args = (_, None)
+			list_time.append(time.time())
+			if kwargs.__contains__('minimum') and not kwargs['minimum'] is None:
+				return not ((abs(f(x[0], x[1]) - kwargs['minimum']) > kwargs['eps'] and N < 100) or N == 0)
+			else:
+				return kwargs['size_Q'] < kwargs['eps']
+		args = (_, [time.time()])
 		return args
 
 class solver_segment:
-	def __init__(self, f, Q, eps = None):
+	def __init__(self, f, Q, eps):
 		self.f = f
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
@@ -34,8 +34,8 @@ class solver_segment:
 		self.axis = 'x'
 		self.segm = [Q[0], Q[1]]
 		self.est = None
-		self.f_L = self.f.lipschitz_function(self.Q)
-		self.f_M = self.f.lipschitz_gradient(self.Q)
+		self.f_L = self.f.L
+		self.f_M = self.f.M
 
 
 	def init_help_function(self, stop_func = 'cur_grad', solve_segm = 'gss'):
@@ -61,8 +61,6 @@ class solver_segment:
 	def ConstEst(self, a, b):
 		if self.est is None:
 			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
-			if L == -0.0:
-				L = 1
 			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
 		return ((b - a) / 2 <= self.est)
 
@@ -81,8 +79,6 @@ class solver_segment:
 		if self.type_stop == 'true_grad':
 			return self.TrueGrad
 		if self.type_stop == 'const_est':
-			if self.eps is None:
-				self.eps = 1e-5
 			return self.ConstEst
 		if self.type_stop == 'cur_grad':
 			return self.CurGrad
@@ -117,7 +113,7 @@ class solver_segment:
 		a, b = self.segm
 		gr = (math.sqrt(5) + 1) / 2
 		c = b - (b - a) / gr
-		d = a + (b - a) / gr 
+		d = a + (b - a) / gr
 		f_c, f_d = f(c), f(d)
 		N = 0
 		mystop = self.stop()
@@ -146,45 +142,50 @@ class main_solver(solver_segment):
 		return False
 
 	def halving_square(self, **kwargs):
+		if kwargs.__contains__('eps'):
+			self.eps = kwargs['eps']
+			del kwargs['eps']
 		eps = self.eps
 		m = self.f.min if hasattr(self.f, 'min') else None
-		if not kwargs.__contains__('get_time'):
-			kwargs['get_time'] = False
-		cond, args = get_cond(f = self.f.calculate_function, eps = eps, minimum = m, get_time = kwargs['get_time'])
+		cond, args = get_cond(f = self.f.calculate_function, eps = eps, minimum = m, **kwargs)
 		Q = self.Q.copy()
 		N = 0
 		x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 		results = [(x_0, y_0)]
 		if self.add_cond(x_0, y_0):
-			return ((x_0, y_0), N, results)
+			return ((x_0, y_0), N, results, args)
 		f_opt = self.f.calculate_function(x_0, y_0)
-		while cond(args, x = (x_0, y_0), N = N, minimum = m, eps = eps):
+		while True:
 			y_0 = (Q[2] + Q[3]) / 2
 			self.axis, self.value, self.segm = 'x', y_0, [Q[0], Q[1]]
 			x_0 = self.solve()
 			if self.add_cond(x_0, y_0):
-				return ((x_0, y_0), N, results)
-			dery = self.f.der_y(x_0, y_0)
+				return ((x_0, y_0), N, results,args)
+			der = self.f.der_y(x_0, y_0)
+			if der > 0:
+				Q[2], Q[3] = Q[2],  y_0
+			else:
+				Q[3], Q[2] = Q[3],  y_0
 			
 			x_0 = (Q[0] + Q[1]) / 2
 			self.axis, self.value, self.segm = 'y', x_0, [Q[2], Q[3]]
 			y_0 = self.solve()
 			if self.add_cond(x_0, y_0):
-				return ((x_0, y_0), N, results)
-			derx = self.f.der_x(x_0, y_0)
-			if derx > 0:
+				return ((x_0, y_0), N, results, args)
+			der = self.f.der_x(x_0, y_0)
+			if der > 0:
 				Q[0], Q[1] = Q[0],  x_0
 			else:
 				Q[1], Q[0] = Q[1],  x_0
-			if dery > 0:
-				Q[2], Q[3] = Q[2],  y_0
-			else:
-				Q[3], Q[2] = Q[3],  y_0
+
 			N += 1
 			x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 			results.append((x_0, y_0))
 			f_opt = self.f.calculate_function(x_0, y_0) 
-		return (x_0, y_0), N,results, args
+			if cond(args, x = (x_0, y_0), N = N, minimum = m, eps = eps, size_Q = Q[1]-Q[0]):
+				if N >= 100:
+					N = -1
+				return (x_0, y_0), N,results, args
 
 def gradient_descent(f, Q, grad, L, **kwargs):
 	N = 0
@@ -192,29 +193,27 @@ def gradient_descent(f, Q, grad, L, **kwargs):
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	results = [x.copy()]
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
-	while cond(args, x = x, N = N):
+	while True:
 		der = grad(x[0], x[1])
 		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
 		x[1], x_prev[1] = min(max(x[1] - 1. / L * der[1], Q[2]), Q[3]), x[1]
 		N += 1
 		results.append(x.copy())
-		print(results[-1])
-	if N >= 100:
-		N = -1
-	return x, N, results, args
+		if cond(args, x=x, N=N, size_Q = Q[1]-Q[0]):
+			return (x, N, results, args)
 
-def ellipsoid(f, Q, **kwargs):
+def ellipsoid(f, Q, eps = None, **kwargs):
 	n = 2
 	cond, args = get_cond(f=f, **kwargs)
-	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if not kwargs.__contains__('x_0') or kwargs['x_0'] is None else kwargs['x_0']
-	eps = 5e-3 if not kwargs.__contains__('x_0') or eps is None else kwargs['x_0']
+	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if not kwargs.__contains__('x_0') else kwargs['x_0']
+	eps = 5e-3 if eps is None else eps
 	rho = (Q[1] - Q[0]) * np.sqrt(2) / 2
 	H = np.identity(n)
 	q = n * (n - 1) ** (-(n-1) / (2*n)) * (n + 1) ** (-(n+1) / (2*n))
 	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
 	results = [x]
-	while cond(args, x = x, N = k):
+	while True:
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
 		d = (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.gradient(x[0], x[1])
@@ -223,7 +222,5 @@ def ellipsoid(f, Q, **kwargs):
 		H = H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H)
 		k += 1
 		results.append(x)
-	if k >= 100:
-		k = -1
-	return x, k, results, args
-
+		if cond(args, x=x, N=k, size_Q = Q[1]-Q[0]):
+			return (x,k,results,args)
