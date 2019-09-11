@@ -358,8 +358,14 @@ We will test on the simple quadratic functions. Parameters for this functions wi
 \begin{figure}[h!]
 \center{\includegraphics[scale=0.4]{Tests/Images/Stop_compare.pdf}}
 \label{res}
- \caption{Comparison of different optimization method}
+ \caption{Comparison of different strategies for a segment}
 \end{figure}
+
+Firstly, we see that the first strategy is the slowest strategy from three strategy. There is good explonation for it. The estimate for the separatable segments is proportional to $\epsilon$. The method GSS makes the steps number proportional to the logarithm of estimate. Therefore, the number of iteration on segment for the first strategy is proportional to $\ln \epsilon$. It decreases speed of this strategy.
+
+Secondly, we can see that the second and the third stratagies have similar results. That's why we can state that the second estimate is good replacement for the third. Of course, it it the simple tasks. But if we will talk about dual tasks the main complexity is from calculating an objective function and the number of calculating is similar for both strategy. That's why we can state that the second estimate is good estimate for dual task too.
+
+From this part we сonclude that the second strategy for segment is optimal.
 
 \subsection{Comparison With Other Methods}
 
@@ -434,7 +440,7 @@ And now we can compare speed of different methods for the dual task. We will com
 
 We can see on \ref{fig:image} following results. Firstly, gradient descent is the slowest method in this test. Our method with estimate through current gradient is faster than method with constanst estimate. And our method approached more little value of dual task than ellipsoid method on suct time interval.
 
-This experiment showed that our method is more effective on some dual task than some classic methods. Additionally, our method an estimate through current gradient is faster than with constant estimate.
+This experiment showed that our method is more effective on some dual task than the classic methods such as gradient descent and ellipsoid method. Additionally, our method an estimate through current gradient is faster than with constant estimate.
 
 \section{Conclusion}
 \newpage
