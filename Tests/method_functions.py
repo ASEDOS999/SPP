@@ -252,11 +252,11 @@ class halving_square:
 		cond = ((b - a) / 2 <= grad/self.f_M)
 		return cond
 
-	def num_step(self):
+	def num_step(self, delta, lambda1, R):
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		mu = 2 * (1 + lamba1 + self.value)
 		M = L/mu
-		n = np.log(delta/L) / np.log((M-1)/(M+1))
+		n = np.log(delta/(L*R)) / np.log((M-1)/(M+1))
 		return n
 
 	def GD(self, lambda1, lambda2, N, x0):
@@ -265,15 +265,24 @@ class halving_square:
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		for i in range(N):
 			x = x - 1/L * grad(x)
-		return phi(lambda1, lamba2)(x)
+		return phi(lambda1, lamba2)(x), x
 
-	def get_delta(self, lambda1, lambda2):
-		x1, x2 = np.zeros(f.a.shape), np.zeros(f.a.shape)
-		delta = self.f_l * abs(lambda1-lambda2) / self.f.R0
-		n1, n2 = num_step(delta, lambda1), num_step(delta, lambda2)
-		f1 = self.GD(lambda1, lambda2, n1, x1)
-		f2 = self.GD(lambda1, lambda2, n2, x2)
-		return f1-f2
+	def get_delta(self, lambda1, lambda2, x1 = None, x2 = None, R = None):
+		if x1 is None:
+			x1 = np.zeros(f.a.shape)
+			R1 = self.f.R0
+		else:
+			R1 = R
+		if x2 is None:
+			x2 = np.zeros(f.a.shape)
+			R2 = self.f.R0
+		else:
+			R2 = R
+		delta = self.f_l * abs(lambda1-lambda2)
+		n1, n2 = num_step(delta, lambda1, R1), num_step(delta, lambda2, R2)
+		f1, x1 = self.GD(lambda1, lambda2, n1, x1)
+		f2, x2 = self.GD(lambda1, lambda2, n2, x2)
+		return f1-f2, x1, x2, delta/2
 	def gss(self):
 		if self.axis == 'x':
 			f = lambda x: self.f.calculate_function(x, self.value)
@@ -287,17 +296,19 @@ class halving_square:
 		f_c, f_d = f(c), f(d)
 		N = 0
 		mystop = self.CurGrad
+		x1,x2,R = None, None, None
 		while not mystop(a, b):
-			if f(c) - f(d) < 0:
+			delta, x1, x2, R = get_delta(c,d, x1, x2, R) 
+			if delta  < 0:
 				b = d
 				d, f_d = c, f_c
+				x1, x2 = None, x1
 				c = b - (b- a) / gr
-				f_c = f(c)
 			else:
 				a = c
 				c, f_c = d, f_d
+				x1,x2 = x2, None
 				d = a + (b - a) / gr
-				f_d = f(d)
 			N+=1
 			if N >= 200:
 				return (b+a)/2

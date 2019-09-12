@@ -152,8 +152,13 @@ class LogSumExp():
 		self.values = dict()
 		self.fL, self.g1L, self.g2L = None, None, None
 		self.get_lipshitz_contants()
+		self.R0 = self.get_R0()
 
-	def get_lipshitz_constants():
+	def get_R0(self):
+		x = scipy.optimize.minimize(self.f, np.zeros(self.a.shape)).x
+		return np.linalg.norm(x)
+
+	def get_lipshitz_constants(self):
 		grad = lambda x: -(a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
 		self.fL = -scipy.optimize.minimize(grad, np.zeros(self.a.shape))['fun']
 		self.g1L = 2
