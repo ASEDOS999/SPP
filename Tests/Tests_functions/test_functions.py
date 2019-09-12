@@ -150,19 +150,25 @@ class LogSumExp():
 		self.M = None
 		self.x_cur = None
 		self.values = dict()
-		self.fL, self.g1L, self.g2L = None, None, None
-		self.get_lipshitz_contants()
 		self.R0 = self.get_R0()
+		self.fL, self.g1L, self.g2L = None, None, None
+		self.get_lipschitz_constants()
 
 	def get_R0(self):
 		x = scipy.optimize.minimize(self.f, np.zeros(self.a.shape)).x
 		return np.linalg.norm(x)
 
-	def get_lipshitz_constants(self):
-		grad = lambda x: -(a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
-		self.fL = -scipy.optimize.minimize(grad, np.zeros(self.a.shape))['fun']
-		self.g1L = 2
-		self.g2L = 2
+	def get_lipschitz_constants(self):
+		a = self.a
+		m = lambda x: (a*x).max()
+		grad = lambda x: a *np.exp(a*x - m(x)*np.ones(a.shape))/(1/np.exp(m(x))+np.exp(a*x-m(x)*np.ones(a.shape)).sum()) + 2*x
+		norm_grad = lambda x: -np.linalg.norm(grad(x))
+		x0 = np.zeros(self.a.shape)
+		self.fL = -scipy.optimize.minimize(norm_grad, x0,
+						   bounds = [(-self.R0*1.1, self.R0*1.1) for i in range(a.shape[0])])['fun']
+		print(self.fL, self.R0)
+		self.g1L = 2.2 * self.R0
+		self.g2L = 2.2 * self.R0
 
 	def f_der(self, x):
 		grad = lambda x: (a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
