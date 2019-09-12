@@ -254,12 +254,13 @@ class halving_square:
 
 	def num_step(self, delta, lambda1, R):
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
-		mu = 2 * (1 + lamba1 + self.value)
+		mu = 2 * (1 + lambda1 + self.value)
 		M = L/mu
-		n = np.log(delta/(L*R)) / np.log((M-1)/(M+1))
-		return n
+		n = np.ceil(np.log(delta/(L*R)) / np.log((M-1)/(M+1)))
+		return int(n)
 
 	def GD(self, lambda1, lambda2, N, x0):
+		a = self.f.a
 		x = x0
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
@@ -268,18 +269,17 @@ class halving_square:
 		return phi(lambda1, lamba2)(x), x
 
 	def get_delta(self, lambda1, lambda2, x1 = None, x2 = None, R = None):
+		R1, R2 = self.f.R0, self.f.R0
 		if x1 is None:
-			x1 = np.zeros(f.a.shape)
-			R1 = self.f.R0
-		else:
+			x1 = np.zeros(self.f.a.shape)
+		elif not R is None:
 			R1 = R
 		if x2 is None:
-			x2 = np.zeros(f.a.shape)
-			R2 = self.f.R0
-		else:
+			x2 = np.zeros(self.f.a.shape)
+		elif not R is None:
 			R2 = R
-		delta = self.f_l * abs(lambda1-lambda2)
-		n1, n2 = num_step(delta, lambda1, R1), num_step(delta, lambda2, R2)
+		delta = self.f_L * abs(lambda1-lambda2)
+		n1, n2 = self.num_step(delta, lambda1, R1), self.num_step(delta, lambda2, R2)
 		f1, x1 = self.GD(lambda1, lambda2, n1, x1)
 		f2, x2 = self.GD(lambda1, lambda2, n2, x2)
 		return f1-f2, x1, x2, delta/2
@@ -298,7 +298,7 @@ class halving_square:
 		mystop = self.CurGrad
 		x1,x2,R = None, None, None
 		while not mystop(a, b):
-			delta, x1, x2, R = get_delta(c,d, x1, x2, R) 
+			delta, x1, x2, R = self.get_delta(c,d, x1, x2, R) 
 			if delta  < 0:
 				b = d
 				d, f_d = c, f_c

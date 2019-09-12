@@ -171,6 +171,7 @@ class LogSumExp():
 		self.g2L = 2.2 * self.R0
 
 	def f_der(self, x):
+		a = self.a
 		grad = lambda x: (a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
 		return grad(x)
 
