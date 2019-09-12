@@ -266,7 +266,7 @@ class halving_square:
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		for i in range(N):
 			x = x - 1/L * grad(x)
-		return phi(lambda1, lamba2)(x), x
+		return self.f.phi(lambda1, lambda2)(x), x
 
 	def get_delta(self, lambda1, lambda2, x1 = None, x2 = None, R = None):
 		R1, R2 = self.f.R0, self.f.R0
