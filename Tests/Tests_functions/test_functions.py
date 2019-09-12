@@ -134,7 +134,7 @@ class LogSumExp():
 	def __init__(self, list_of_parameters, c = None, R1 = 1, R2 = 1):
 		self.a = list_of_parameters
 		a = self.a
-		self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)])) + np.linalg.norm(x)
+		self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)])) + np.linalg.norm(x)**2
 		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
 		# self.f = lambda x: np.linalg.norm(x)
 		if c is None:
@@ -150,6 +150,24 @@ class LogSumExp():
 		self.M = None
 		self.x_cur = None
 		self.values = dict()
+		self.fL, self.g1L, self.g2L = None, None, None
+		self.get_lipshitz_contants()
+
+	def get_lipshitz_constants():
+		grad = lambda x: -(a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
+		self.fL = -scipy.optimize.minimize(grad, np.zeros(self.a.shape))['fun']
+		self.g1L = 2
+		self.g2L = 2
+
+	def f_der(self, x):
+		grad = lambda x: (a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
+		return grad(x)
+
+	def g1_der(self, x):
+		return x
+
+	def g2_der(self, x):
+		return 2* (x-self.c)
 
 	def lipschitz_function(self, Q):
 		if self.L is None:

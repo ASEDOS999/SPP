@@ -241,74 +241,39 @@ class halving_square:
 		self.est = None
 		self.f_L = self.f.L
 		self.f_M = self.f.M
-
-
-	def init_help_function(self, stop_func = 'cur_grad', solve_segm = 'gss'):
-		self.type_stop = stop_func
-		if solve_segm == 'gss':
-			self.solve = self.gss
-		if solve_segm == 'grad_desc':
-			self.solve = self.grad_descent_segment
-
-	def TrueGrad(self, a, b):
-		if self.est is None:
-			f = self.f
-			arg = self.value
-			if self.axis == 'x':
-				self.est = abs(f.der_y(f.get_sol_hor(self.segm, arg), arg)) / self.f_M
-			if self.axis == 'y':
-				self.est = abs(f.der_x(arg, f.get_sol_vert(self.segm, arg))) / self.f_M
-		cond = ((b - a) / 2 <= self.est)
-		if cond:
-			self.est = None
-		return cond
-
-	def ConstEst(self, a, b):
-		if self.est is None:
-			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
-			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
-		return ((b - a) / 2 <= self.est)
-
+		self.solve = self.gss
+		self.type_stop = 'gss'
+	
 	def CurGrad(self, a, b):
 		if self.axis == 'y':
 			grad = abs(self.f.der_x(self.value, (b+a) / 2))
 		if self.axis == 'x':
 			grad = abs(self.f.der_y((b+a) / 2, self.value))
-		cond_TG = ((b - a) / 2 <= grad/self.f_M)
-		return cond_TG
+		cond = ((b - a) / 2 <= grad/self.f_M)
+		return cond
 
-	def AlwaysTrue(self, a, b):
-		return True
+	def num_step(self):
+		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
+		mu = 2 * (1 + lamba1 + self.value)
+		M = L/mu
+		n = np.log(delta/L) / np.log((M-1)/(M+1))
+		return n
 
-	def stop(self):
-		if self.type_stop == 'true_grad':
-			return self.TrueGrad
-		if self.type_stop == 'const_est':
-			return self.ConstEst
-		if self.type_stop == 'cur_grad':
-			return self.CurGrad
-		if self.type_stop == 'true':
-			return self.AlwaysTrue
+	def GD(self, lambda1, lambda2, N, x0):
+		x = x0
+		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
+		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
+		for i in range(N):
+			x = x - 1/L * grad(x)
+		return phi(lambda1, lamba2)(x)
 
-	def grad_descent_segment(self):
-		segm = self.segm
-		if self.axis == 'x':
-			deriv = lambda x: self.f.der_x(x, self.value)
-			x_opt = self.f.get_sol_hor(self.segm, self.value)
-		else:
-			deriv = lambda y: self.f.der_y(self.value, y)
-			x_opt = self.f.get_sol_vert(self.segm, self.value)
-		N = 0
-		x, alpha_0 = (segm[0] + segm[1]) / 2, (segm[0] + segm[1]) / 4
-		mystop = stop()
-		while not mystop(x, x_opt) and N < 200:
-			x = x - alpha_0 / math.sqrt(N + 1) * deriv(x)
-			x = min(max(x, segm[0]), segm[1])
-			N += 1
-		if N >= 200:
-			N = -1
-		return x
-	
+	def get_delta(self, lambda1, lambda2):
+		x1, x2 = np.zeros(f.a.shape), np.zeros(f.a.shape)
+		delta = self.f_l * abs(lambda1-lambda2) / self.f.R0
+		n1, n2 = num_step(delta, lambda1), num_step(delta, lambda2)
+		f1 = self.GD(lambda1, lambda2, n1, x1)
+		f2 = self.GD(lambda1, lambda2, n2, x2)
+		return f1-f2
 	def gss(self):
 		if self.axis == 'x':
 			f = lambda x: self.f.calculate_function(x, self.value)
@@ -321,9 +286,9 @@ class halving_square:
 		d = a + (b - a) / gr
 		f_c, f_d = f(c), f(d)
 		N = 0
-		mystop = self.stop()
+		mystop = self.CurGrad
 		while not mystop(a, b):
-			if f(c) < f(d):
+			if f(c) - f(d) < 0:
 				b = d
 				d, f_d = c, f_c
 				c = b - (b- a) / gr
