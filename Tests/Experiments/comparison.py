@@ -11,6 +11,7 @@ from test_functions import sinuses
 from test_functions import LogSumExp
 from test_functions import quadratic_function as qf
 from method_functions import main_solver
+from method_functions import halving_square as HS
 from method_functions import gradient_descent
 from method_functions import ellipsoid
 import math
@@ -106,6 +107,33 @@ def comparison(f, Q, eps):
 	res_3 = ellipsoid(f, Q, eps = eps)
 	m4 = time()
 	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
+
+def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
+	if a is None:
+		a = np.random.uniform(-100, 100, size=(N,))
+	f = LogSumExp(a)
+	Q = f.get_square()
+	L, M = f.lipschitz_function(Q), f.lipschitz_gradient(Q)
+	res = dict()
+	fdict = dict()
+	
+	print('Ellipsoids')
+	res['Ellipsoids'] = ellipsoid(f,Q, time_max = time_max, time = True)
+	fdict = {**fdict, **f.values}
+	f.values = dict()
+	
+	print('CurGrad')
+	res['HalvingSquare-CurGrad']= HS(f,Q, None).halving_square(time_max = time_max, time = True)
+	fdict = {**fdict, **f.values}
+	f.values = dict()
+	
+	print('GD')
+	res['GD'] = gradient_descent(f.calculate_function, Q, f.gradient, M, time= True, time_max = time_max)
+	fdict = {**fdict, **f.values}
+	f.values = fdict
+	
+	return res, f
+
 
 def comparison_LogSumExp(N = 2, time_max = 100, a = None):
 	if a is None:

@@ -256,7 +256,8 @@ class halving_square:
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		mu = 2 * (1 + lambda1 + self.value)
 		M = L/mu
-		n = np.ceil(np.log(delta/(L*R)) / np.log((M-1)/(M+1)))
+		print(M)
+		n = np.ceil(np.log(delta/(L*R)) / np.log((M-1)/(M+1)))/2
 		return int(n)
 
 	def GD(self, lambda1, lambda2, N, x0):
