@@ -256,8 +256,9 @@ class halving_square:
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		mu = 2 * (1 + lambda1 + self.value)
 		M = L/mu
-		print(M)
 		n = np.ceil(np.log(delta/(L*R)) / np.log((M-1)/(M+1)))/2
+		if np.isnan(np.array(n)).any():
+			return 0
 		return int(n)
 
 	def GD(self, lambda1, lambda2, N, x0):
@@ -343,7 +344,7 @@ class halving_square:
 			x_0 = self.solve()
 			if self.add_cond(x_0, y_0):
 				return ((x_0, y_0), N, results,args)
-			der = self.f.der_y(x_0, y_0)
+			der = self.f.der_y(x_0, y_0, False)
 			if der > 0:
 				Q[2], Q[3] = Q[2],  y_0
 			else:
@@ -354,7 +355,7 @@ class halving_square:
 			y_0 = self.solve()
 			if self.add_cond(x_0, y_0):
 				return ((x_0, y_0), N, results, args)
-			der = self.f.der_x(x_0, y_0)
+			der = self.f.der_x(x_0, y_0, False)
 			if der > 0:
 				Q[0], Q[1] = Q[0],  x_0
 			else:

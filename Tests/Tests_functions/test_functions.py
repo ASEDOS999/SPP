@@ -210,28 +210,47 @@ class LogSumExp():
 		#M = (a*x_cur).max()
 		#x = x_cur - M*np.ones(x_cur.shape)
 		return phi(l1, l2)(x_cur)
-	def der_x(self, l1, l2):
-		phi = self.phi
-		if (l1,l2) in self.values:
-			x_cur = self.values[(l1,l2)]
+	def GD(self, l1, l2, L1, der):
+		f = lambda x: self.phi(l1,l2)(x)
+		grad = lambda x: self.f_der(x) + l1*self.g1_der(x) + l2*self.g2_der(x)
+		L = self.fL +l1*self.g1L + l2*self.g2L
+		mu = 2 * (1+ l1+l2)
+		M = L/mu
+		q = (M-1)/(M+1)
+		R = self.R0 * L/2
+		x = np.zeros(self.a.shape)
+		while abs(der(x)) < R:
+			R *= q
+			x = x - 1/L * grad(x)
+		return x
+	def der_x(self, l1, l2, acc = True):
+		if acc:
+			phi = self.phi
+			if (l1,l2) in self.values:
+				x_cur = self.values[(l1,l2)]
+			else:
+				s = time.time()
+				x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+					np.zeros(self.a.shape)).x
+				#print('TimeDerX', time.time()-s)
+				self.values[(l1,l2)] = x_cur
 		else:
-			s = time.time()
-			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-				np.zeros(self.a.shape)).x
-			#print('TimeDerX', time.time()-s)
-			self.values[(l1,l2)] = x_cur
+			x_cur = self.GD(l1, l2, self.g1L, self.g1)
 		return -self.g1(x_cur)
 	
-	def der_y(self, l1, l2):
-		phi = self.phi
-		if (l1,l2) in self.values:
-			x_cur = self.values[(l1,l2)]
+	def der_y(self, l1, l2, acc = True):
+		if acc:
+			phi = self.phi
+			if (l1,l2) in self.values:
+				x_cur = self.values[(l1,l2)]
+			else:
+				s = time.time()
+				x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+					np.zeros(self.a.shape)).x
+				#print('TimeDerY',time.time()-s)
+				self.values[(l1,l2)] = x_cur
 		else:
-			s = time.time()
-			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-				np.zeros(self.a.shape)).x
-			#print('TimeDerY',time.time()-s)
-			self.values[(l1,l2)] = x_cur
+			x_cur = self.GD(l1, l2, self.g2L, self.g2)
 		return -self.g2(x_cur)
 
 	def gradient(self, l1, l2):
