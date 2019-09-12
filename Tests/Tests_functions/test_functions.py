@@ -129,6 +129,7 @@ import scipy
 from scipy import optimize
 
 # LOG-SUM-EXP
+import time
 class LogSumExp():
 	def __init__(self, list_of_parameters, c = None, R1 = 1, R2 = 1):
 		self.a = list_of_parameters
@@ -157,7 +158,7 @@ class LogSumExp():
 				bounds = [(Q[0], Q[1]),
 				(Q[2], Q[3])])
 			self.L = -L['fun']
-			print(self.L)
+			#print(self.L)
 		return self.L
 
 	def lipschitz_gradient(self, Q):
@@ -171,9 +172,11 @@ class LogSumExp():
 		if (l1,l2) in self.values:
 			x_cur = self.values[(l1,l2)]
 		else:
+			s = time.time()
 			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
 				np.zeros(self.a.shape)).x
 			self.values[(l1,l2)] = x_cur
+			#print('Func', time.time()-s)
 		#M = (a*x_cur).max()
 		#x = x_cur - M*np.ones(x_cur.shape)
 		return phi(l1, l2)(x_cur)
@@ -182,8 +185,10 @@ class LogSumExp():
 		if (l1,l2) in self.values:
 			x_cur = self.values[(l1,l2)]
 		else:
+			s = time.time()
 			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
 				np.zeros(self.a.shape)).x
+			#print('TimeDerX', time.time()-s)
 			self.values[(l1,l2)] = x_cur
 		return -self.g1(x_cur)
 	
@@ -192,8 +197,10 @@ class LogSumExp():
 		if (l1,l2) in self.values:
 			x_cur = self.values[(l1,l2)]
 		else:
+			s = time.time()
 			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
 				np.zeros(self.a.shape)).x
+			#print('TimeDerY',time.time()-s)
 			self.values[(l1,l2)] = x_cur
 		return -self.g2(x_cur)
 
@@ -202,8 +209,10 @@ class LogSumExp():
 		if (l1,l2) in self.values:
 			x_cur = self.values[(l1,l2)]
 		else:
+			s = time.time()
 			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
 				np.zeros(self.a.shape)).x
+			#print('TimeGrad', time.time()-s)
 			self.values[(l1,l2)] = x_cur
 		return np.array([-self.g1(x_cur), -self.g2(x_cur)])
 
