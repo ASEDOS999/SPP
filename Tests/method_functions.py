@@ -232,7 +232,7 @@ class halving_square:
 		self.f = f
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
-		self.eps = eps
+		self.eps = 0.5
 		self.solve = self.gss
 		self.type_stop = 'true_grad'
 		self.value = 0
@@ -243,15 +243,38 @@ class halving_square:
 		self.f_M = self.f.M
 		self.solve = self.gss
 		self.type_stop = 'gss'
-	
-	def CurGrad(self, a, b):
+		self.stop = self.CurGrad
+	def estimate_grad(self, a, b):
 		if self.axis == 'y':
-			grad = abs(self.f.der_x(self.value, (b+a) / 2))
+			l1, l2 = self.value, (b+a)/2
+			g = self.f.g1
+			L_gk = self.f.g1L
 		if self.axis == 'x':
-			grad = abs(self.f.der_y((b+a) / 2, self.value))
-		cond = ((b - a) / 2 <= grad/self.f_M)
-		return cond
+			l1, l2 = (b+a)/2, self.value
+			g = self.f.g2
+			L_gk = self.f.g2L
+		delta = (b-a)/2
 
+		a = self.f.a
+		x = np.zeros(a.shape)
+		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*l1 + self.f.g2_der(x)*l2
+		L = self.f.fL+ l1* self.f.g1L + l2 * self.f.g2L
+		R = self.f.R0
+		mu = 2*(1+l1+l2)
+		M = L/ mu
+		q = (M-1)/(M+1)
+		print(q)
+		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
+			x = x - 1/L * grad(x)
+			R *= q
+		return delta-abs(g(x))/self.f_M<=0
+	def CurGrad(self, a, b):
+		return self.estimate_grad(a,b)
+	def ConstEst(self, a, b):
+		if self.est is None:
+			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
+			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
+		return ((b - a) / 2 <= self.est)
 	def num_step(self, delta, lambda1, R):
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		mu = 2 * (1 + lambda1 + self.value)
@@ -297,7 +320,7 @@ class halving_square:
 		d = a + (b - a) / gr
 		f_c, f_d = f(c), f(d)
 		N = 0
-		mystop = self.CurGrad
+		mystop = self.stop
 		x1,x2,R = None, None, None
 		while not mystop(a, b):
 			delta, x1, x2, R = self.get_delta(c,d, x1, x2, R) 
