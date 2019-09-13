@@ -1,0 +1,111 @@
+ \documentclass[12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}       
+
+\usepackage[english]{babel}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,amsbsy,amstext,amscd,amsxtra,multicol}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+\usepackage[stable]{footmisc}
+\usepackage{ dsfont }
+\usepackage{wrapfig}
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{bm}
+\usepackage{color}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+	
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{linkcolor}{HTML}{799B03} % цвет гиперссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+ 
+%\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}[section]
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\intt}{int}
+\DeclareMathOperator{\conv}{conv}
+\begin{document}
+
+\section{О вычислении функции}
+Пусть $f$ - вычисляемая функция, $\tilde f$ - ее приближение. Определим следующие функии:
+
+$$\epsilon(x) = \Big|f(x)-\tilde{f}(x)\Big|\text{-- ошибка приближения}$$
+$$\delta_f(x_1,x_2) = f(x_1)-f(x_2)$$
+
+Для GSS, дихотомии и им подобных методов одномерной оптимизации интересен знак $\delta_f$. Поэтому когда мы используем ее приближение, нам достаточно:
+
+$$\sign\left(\delta_f(x_1,x_2)\right) = \sign\left(\delta_{\tilde{f}}(x_1,x_2)\right)$$
+
+Более сильное условие:
+
+$$\Big|\delta_f(x_1,x_2) - \delta_{\tilde{f}}(x_1,x_2)\Big|\leq \Big|\delta_{f}(x_1,x_2)\Big|$$
+
+Но как его достичь? 
+
+\begin{gather}
+\Big|\delta_f(x_1,x_2) - \delta_{\tilde{f}}(x_1,x_2)\Big| \leq\\
+\epsilon(x_1)+\epsilon(x_2)
+\end{gather}
+
+Таким образом получаем следующее условие на точность вычисления функции:
+
+$$\epsilon(x_1)+\epsilon(x_2)\leq \Big|\delta_{f}(x_1,x_2)\Big|$$
+
+Если $f$ -- $L$-липшецева функция, то получаем удобное неравенство:
+
+$$\boxed{\epsilon(x_1)+\epsilon(x_2)\leq L\Big|x_1-x_2\Big|}$$
+
+\section{О вычислении производных}
+
+\subsection{В решении на отрезке}
+
+Лагранжиан прямой задачи:
+
+$$\Phi(\textbf{x}, \lambda) = f(\textbf{x}) + \lambda_1g_1(\textbf{x})+\lambda_2g_2(\textbf{x})$$
+
+Пусть нас интересует производная по $\lambda_2$ в точке $\lambda$ функции $\phi(\lambda) = \min \Phi(\textbf{x}, \lambda)$ (для упрощения записи $\phi'$). Мы хотим вычислить её приближение $\tilde{\phi'}$ так, чтобы знак совпадал. Для этого достаточно:
+
+$$|\phi' - \tilde{\phi}'|\leq |\tilde{\phi}'|$$
+
+$$|g_2(\textbf{x}^*)-g_2(\textbf{x})|\leq |\tilde{\phi}'|$$
+
+Пользуясь липшецевостью $g_2$ получаем достаточное условие:
+
+$$\boxed{L_{g_k}\|\textbf{x}^*-\textbf{x}\|\leq |g_k(\textbf{x})|}$$
+
+Аналогично для производной по $\lambda_1$.
+
+\subsection{В current point on segment}
+
+У нас есть условие на точность решения на отрезке:
+
+$$\|\lambda_1-\lambda_2\|=\delta = \leq \frac{\phi'(\lambda_{cur})}{L}=\epsilon,$$
+
+где $\lambda_cur\in[\lambda_1, \lambda_2]$ -текущее приближение решения, производная берется по соответствующей координате в зависимости от отрезка. Пока что выбирается как центр отрезка.
+
+По другому это условие выглядит так:
+
+$$\delta-\epsilon<0$$
+
+Мы можем вычислить $\epsilon$ приблизительно и получить $\tilde{\epsilon}$. По этому приближению мы должны проверить выше написанное условие, т.е. знаки выражений $\delta-\epsilon$ и $\delta - \tilde{\epsilon}$ должны совпадать. Для этого достаточно:
+
+$$\Big|(\delta-\epsilon)-(\delta - \tilde{\epsilon})\Big|\leq |\delta - \tilde{\epsilon}|$$
+
+$$|\epsilon-\tilde{\epsilon}|\leq |\delta - \tilde{\epsilon}|$$
+
+С учетом того, что для двойственных задач $\phi_{\lambda_k}'(\lambda)=g_k\left(\textbf{x}(\lambda)\right)$ и если $g_k$ $L_{g_k}$-липшецева получаем следующее достаточное условие:
+
+$$\boxed{L_{g_k}\|\textbf{x}^*-\textbf{x}\|}\leq \Big||\lambda_1-\lambda_2| - \frac{g_k(\textbf{x})}{L}\Big|$$
+
+\end{document}
