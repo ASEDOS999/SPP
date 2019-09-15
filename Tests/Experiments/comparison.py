@@ -151,7 +151,7 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	for key in keys:
 		fdict = {**fdict, **res[key][-1]}
 		res[key] = tuple([i for i in res[key][:-1]])
-    f.values = fdict
+	f.values = fdict
 	return res, f
 
 def comparison_LogSumExp(N = 2, time_max = 100, a = None):
