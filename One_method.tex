@@ -294,6 +294,121 @@ $$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L}{4}\left(\frac{a}{2^N}\right)^2$$
 Using it we have estimate \eqref{NI3}.
 \end{proof}
 
+\section{Details}
+\label{details}
+This method was created to solve dual task. Namely, following task:
+
+\begin{gather}
+-\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda\geq 0},\\
+\text{where } \phi = \min_\textbf{x}\left(f(\textbf{x}) + \lambda_1 g_1(\textbf{x}) + \lambda_2 g_2(\textbf{x})\right)
+\end{gather}
+
+According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variables:
+
+\begin{gather}
+\label{restr:dual}
+\|{\lambda}\|_1 \leq \lambda_{\text{max}} = \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),\\
+\text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_ig_i(\overline{\textbf{x}})$}
+\end{gather}
+And we understand that there is the dual task's solution in a square $Q = [0, \lambda_{\text{max}}]^2$. And we have following optimization task:
+\begin{gather}
+\label{dual}
+\phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2} \\
+\text{s.t.} \lambda\in Q
+\end{gather}
+
+The gradient of function $\phi$ will be calculated according well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem}.
+
+\begin{theorem}
+Let $\phi(\lambda)=\min\limits_{x\in X}\Phi(x,\lambda)$ for all $\lambda\geq0$, where $\Phi$ is a smooth convex function with respect to $\lambda$ and $x(\lambda)$ is the only maximum point. Then
+$$\nabla \phi(\lambda) = F'_\lambda\left(x(\lambda),\lambda\right)$$
+\end{theorem}
+
+If theorem's conditions is met for our case then we have derivative value:
+
+\begin{equation}
+\phi'_{\lambda_k}(\lambda) = g_k\left(\textbf{x}(\lambda)\right)
+\end{equation}
+
+Additionally we need a Lipschitz constant for gradient. In the work \cite{Stonykin} there is following theorem:
+\begin{theorem}
+Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies the Lipschitz condition with a constant $M_g$. Then the function $\phi(\lambda) = \min_\textbf{x}\left(f(\textbf{x}+\lambda_1g_1(\textbf{x}) + \lambda_2g_2(\textbf{x})\right)$ defined in \ref{phi}, where $x(\lambda) = \arg\min\limits_x(f(x)+\lambda g(x))$, has Lipschitz smooth gradient with constant $L_{\phi'} = \frac{M_g^2}{\mu_f}$
+\end{theorem}
+
+This theorem can be proved easy for the 2-dimensional space. In this case $g$ is a vector-function.
+
+In the following subsection we can use following notations:
+
+$$\Phi(\textbf{x},\lambda) = f(\textbf{x}) + \lambda_1g_1(\textbf{x}) + \lambda_2g_2(\textbf{x})$$
+$$\textbf{x}(\lambda) = \arg\min_\textbf{x}\Phi(\textbf{x}, \lambda)$$
+$$\phi(\lambda) = \min_\textbf{x} \Phi(\textbf{x}, \lambda) = \Phi(\textbf{x}(\lambda), \lambda)$$
+
+\subsection{Function calcularting}
+Let $\phi(\lambda) = \Phi(x(\lambda),\lambda)$ is our object function, $\tilde \phi(\lambda) = \Phi(\textbf{x}, \lambda)$ is its approximation. We define following error function:
+
+$$\epsilon(\lambda) = \Big|\phi(\lambda)-\tilde{\phi}(\lambda)\Big|\text{-- approximation error}$$
+$$\delta_\phi(\lambda_1,\lambda_2) = \phi(\lambda_1)-\phi(\lambda_2)$$
+
+
+The GSS method and the dichotomy method are worked using signum of $\delta_\phi$ for two points. Therefore, when we use approximation for it the signum of $\delta_{\tilde{\phi}}$ must match with the signum of $\delta_{\tilde{\phi}}$. It is met if following sufficient condition was met:
+
+\begin{equation}
+\label{cond:calcphi}
+\Big|\delta_\phi(\lambda_1,\lambda_2) - \delta_{\tilde{\phi}}(\lambda_1,\lambda_2)\Big|\leq \Big|\delta_{\phi}(\lambda_1,\lambda_2)\Big|
+\end{equation}
+
+Obviously, we can not calculate left part. But we have following obvious inequallity:
+
+\begin{gather}
+\Big|\delta_\phi(\lambda_1, \lambda_2) - \delta_{\tilde{\phi}}(\lambda_1, \lambda_2)\Big| \leq\\
+\epsilon(\lambda_1)+\epsilon(\lambda_2)
+\end{gather}
+
+Therefore for \ref{cond:calcphi} the following condition is sufficient:
+
+$$\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq \Big|\delta_{f}(\lambda_1,\lambda_2)\Big|$$
+
+Let $\phi$ is $L_\phi$-lipschitz continious. Then if the condition
+
+$$\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq L_\phi\Big|\lambda_1-\lambda_2\Big|$$
+was met we can use the signum of $\delta_{\tilde{\phi}}$ for our one dimensional methods.
+
+If functions $f$, $g_1$ and $g_2$ are lipschitz continious then $\Phi$ is $L_\Phi$-lipschitz continious too and there is following estimate for error $\epsilon$:
+$$\epsilon(\lambda)\leq L_\Phi \Big|\textbf{x}(\lambda) - \textbf{x}\Big|$$
+
+\subsection{The Derivative Value: Segment Solution}
+
+Let $\lambda$ is segment solution. And in this point it should to calculate the derivative with respect to $\lambda_k$ for to define what rectangle must be selected. If we used its approximation it is important that signum of approximation $\phi'_{\lambda_k}$ and of $\widetilde{\phi'_{\lambda_k}}$ are match. Analogically to previous subsection, we have following sufficient condition for it:
+
+$$|\phi'_{\lambda_k} - \widetilde{\phi'_{\lambda_k}}|\leq |\widetilde{\phi'_{\lambda_k}}|$$
+
+$$|g_k(\textbf{x}(\lambda))-g_k(\textbf{x})|\leq |g_k(\textbf{x})|$$
+
+If $g_k$ is $L_{g_k}$-lipschitz continious function:
+
+$$L_{g_k}\|\textbf{x}(\lambda)-\textbf{x}\|\leq |g_k(\textbf{x})|$$
+
+\subsection{The Derivative Value: Current Point On Segment}
+
+We have following condition for segment solution accuracy (see theorem \ref{CurGrad}):
+
+$$\|\lambda_{cur}-\lambda^*\|=\delta \leq \frac{|\phi'_{\lambda_k}(\lambda_{cur})|}{L_{\phi'}}=\epsilon,$$
+where $\lambda_{cur}$ current approximation. In other notation:
+
+$$\delta-\epsilon<0$$
+
+If we calculate approximation $\tilde \epsilon$ instead $\epsilon$ the signum of $\delta-\epsilon$ will match with the signum of $\delta-\tilde{\epsilon}$. The following condtion is sufficient for it:
+
+$$\Big|(\delta-\epsilon)-(\delta - \tilde{\epsilon})\Big|\leq |\delta - \tilde{\epsilon}|$$
+
+$$|\epsilon-\tilde{\epsilon}|\leq |\delta - \tilde{\epsilon}|$$
+
+For our task $\phi_{\lambda_k}'(\lambda)$ is equal to $g_k\left(\textbf{x}(\lambda)\right)$ and $\widetilde {\phi_{\lambda_k}'(\lambda)}$ is equal to $g_k\left(\textbf{x}\right)$. Then if $g_k$ is $L_{g_k}$-lipschitz continious function we have following condition:
+
+$$\frac{L_{g_k}}{L_{\phi'}}\|\textbf{x}^*-\textbf{x}\|\leq \Big||\lambda_1-\lambda_2| - \frac{|g_k(\textbf{x})|}{L_{\phi'}}\Big|$$
+$$L_{g_k}\|\textbf{x}^*-\textbf{x}\|\leq \Big|L_{\phi'}|\lambda_1-\lambda_2| - |g_k(\textbf{x})|\Big|$$
+
+
 \section{Tests}
 
 In this section we show estimate on number iterations of practice and compare work time our new method with work time classic methods of optimization such as gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
@@ -376,9 +491,11 @@ We consider following prime task:
 \begin{gather}
 \label{prime}
 f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{a_kx_k}\right) + \|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
-\text{s.t.}\,g_1(\textbf{x}) = \|\textbf{x}\|_2-R_1\leq0\\
-g_2(\textbf{x}) = \|\textbf{x}\|_2-R_2\leq0
+\text{s.t.}\,g_1(\textbf{x}) = \|\textbf{x}\|_2^2-R_1\leq0\\
+g_2(\textbf{x}) = \|\textbf{x}-\textbf{c}\|_2^2-R_2\leq0
 \end{gather}
+
+It is task to minimize LogSumExp-function on the intersection of sphere with center in zero-point and radius $R_1$ and of spere with center $\textbf{c}$ and radius $R_2$. Parameter $\textbf{a}$ is generated randomly.
 
 We introduce the following notation:
 
@@ -393,44 +510,18 @@ In such notations the dual task for the task \ref{prime} looks like:
 \phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2}\\
 \text{s.t}\, \lambda_1, \lambda_2 \geq 0
 \end{gather}
-
-According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variavles:
-
-$$\|{\lambda}\|_1 \leq \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),$$
-$$ \text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_ig_i(\overline{\textbf{x}})$}$$
-
-Obviously, $\min\limits_{\textbf{x}}f(\textbf{x}) \geq 0$. Therefore, we have following condition on the dual variables:
+ 
+Obviously, $\min\limits_{\textbf{x}}f(\textbf{x}) \geq 0$. Therefore, according to \ref{restr:dual} we can add following conditions on the dual variables:
 
 $$|\lambda_k| \leq \lambda_{\text{max}}=\frac{f(\overline{\textbf{x}})}{\gamma}, k=1,2$$
 
-And we understand that there is the dual task's solution in a square $Q = [0, \lambda_{\text{max}}]^2$. And we have following optimization task:
-\begin{gather}
-\label{dual}
-\phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2} \\
-\text{s.t.} \lambda\in Q
-\end{gather}
+And we have following task:
 
-The gradient of function $\phi$ will be calculated according well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem1}.
+$$\phi(\lambda_1, \lambda_2) \rightarrow \min_{0\leq\lambda_k\leq\lambda_{max}}$$
 
-\begin{theorem}
-Let $\phi(\lambda)=\min\limits_{x\in X}F(x,\lambda)$ for all $\lambda\geq0$, where $F$ is a smooth convex function with respect to $\lambda$ and $x(\lambda)$ is the only maximimum point. Then
-$$\nabla \phi(\lambda) = F'_\lambda\left(x(\lambda),\lambda\right)$$
-\end{theorem}
+How to calculate function and derivatave value for such task was discussed in the section \ref{details}.
 
-In the our case:
-
-\begin{equation}
-\phi'_{\lambda_k}(\lambda) = g_k\left(\textbf{x}(\lambda)\right)
-\end{equation}
-
-Additionally we need a Lipschitz constant for gradient. In the work \cite{Stonykin} there is following theorem:
-\begin{theorem}
-Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies the Lipschitz condition with a constant $M_g$. Then the function $\phi(\lambda)$ defined in \ref{phi}, where $x(\lambda) = \arg\min\limits_x(f(x)+\lambda g(x))$, has Lipschitz smooth gradient with constant $L_\phi = \frac{M_g^2}{\mu_f}$
-\end{theorem}
-
-This theorem can be proved easy for the second dimension. In this case $g$ is a vector-function. Obviously, in the our task function $f$ is 2-strongly convex. 
-
-And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. Parameters $\textbf{a}$ we will generate randomly. 
+And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. We will compare for different $N = 10^k, k = \overline{1, 4}$.
 
 \begin{figure}[h!]
 \center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.pdf}}
@@ -438,9 +529,7 @@ And now we can compare speed of different methods for the dual task. We will com
  \caption{Comparison of different optimization method}
 \end{figure}
 
-We can see on \ref{fig:image} following results. Firstly, gradient descent is the slowest method in this test. Our method with estimate through current gradient is faster than method with constanst estimate. And our method approached more little value of dual task than ellipsoid method on suct time interval.
-
-This experiment showed that our method is more effective on some dual task than the classic methods such as gradient descent and ellipsoid method. Additionally, our method an estimate through current gradient is faster than with constant estimate.
+We can see on \ref{fig:image} following results. Firstly, gradient descent is the slowest method in this test. Secondly, our method is better than ellipsoid method for this task. Thirdly, the time gain of our method in comparison with ellipsoid method increases when $N$ increases.
 
 \section{Conclusion}
 \newpage
