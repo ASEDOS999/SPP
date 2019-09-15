@@ -17,7 +17,8 @@
 \usepackage{ifthen}
 \usepackage{bm}
 \usepackage{color}
-
+ \usepackage{subfigure}
+ 
 \usepackage{algorithm}
 \usepackage{algpseudocode}
 	
@@ -294,6 +295,11 @@ $$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L}{4}\left(\frac{a}{2^N}\right)^2$$
 Using it we have estimate \eqref{NI3}.
 \end{proof}
 
+Estimate \ref{NI1} works in all cases and better then estimate \ref{NI3} when following condition is met:
+
+$$\frac{2L_f^2}{L_g}\leq \epsilon,$$
+где $L_f, L_g$ is Lipschitz constants for function and for gradient. On the other hand, the estimate \ref{NI3} works if point with zero gradient exists in the square. 
+
 \section{Details}
 \label{details}
 This method was created to solve dual task. Namely, following task:
@@ -303,7 +309,9 @@ This method was created to solve dual task. Namely, following task:
 \text{where } \phi = \min_\textbf{x}\left(f(\textbf{x}) + \lambda_1 g_1(\textbf{x}) + \lambda_2 g_2(\textbf{x})\right)
 \end{gather}
 
-According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variables:
+In the section we will discuss how transform this task to task of the task of minimization on square, what is derivative and lipschitz constants and how to calculate its fastly.
+
+Fitstly, let's transform this task to the task of minimization on square. According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variables:
 
 \begin{gather}
 \label{restr:dual}
@@ -313,11 +321,10 @@ According to \cite{task} (see ex. 4.1), we can add following restraint for the d
 And we understand that there is the dual task's solution in a square $Q = [0, \lambda_{\text{max}}]^2$. And we have following optimization task:
 \begin{gather}
 \label{dual}
-\phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2} \\
-\text{s.t.} \lambda\in Q
+-\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda \in Q}
 \end{gather}
 
-The gradient of function $\phi$ will be calculated according well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem}.
+Secondly, the gradient of function $\phi$ will be calculated according well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem}.
 
 \begin{theorem}
 Let $\phi(\lambda)=\min\limits_{x\in X}\Phi(x,\lambda)$ for all $\lambda\geq0$, where $\Phi$ is a smooth convex function with respect to $\lambda$ and $x(\lambda)$ is the only maximum point. Then
@@ -330,7 +337,7 @@ If theorem's conditions is met for our case then we have derivative value:
 \phi'_{\lambda_k}(\lambda) = g_k\left(\textbf{x}(\lambda)\right)
 \end{equation}
 
-Additionally we need a Lipschitz constant for gradient. In the work \cite{Stonykin} there is following theorem:
+Additionally, we need a Lipschitz constant for gradient. In the work \cite{Stonykin} there is following theorem:
 \begin{theorem}
 Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies the Lipschitz condition with a constant $M_g$. Then the function $\phi(\lambda) = \min_\textbf{x}\left(f(\textbf{x}+\lambda_1g_1(\textbf{x}) + \lambda_2g_2(\textbf{x})\right)$ defined in \ref{phi}, where $x(\lambda) = \arg\min\limits_x(f(x)+\lambda g(x))$, has Lipschitz smooth gradient with constant $L_{\phi'} = \frac{M_g^2}{\mu_f}$
 \end{theorem}
@@ -343,14 +350,16 @@ $$\Phi(\textbf{x},\lambda) = f(\textbf{x}) + \lambda_1g_1(\textbf{x}) + \lambda_
 $$\textbf{x}(\lambda) = \arg\min_\textbf{x}\Phi(\textbf{x}, \lambda)$$
 $$\phi(\lambda) = \min_\textbf{x} \Phi(\textbf{x}, \lambda) = \Phi(\textbf{x}(\lambda), \lambda)$$
 
+The next subsections are devoted to efficient calculation of function's and derivative's values.
+
 \subsection{Function calcularting}
-Let $\phi(\lambda) = \Phi(x(\lambda),\lambda)$ is our object function, $\tilde \phi(\lambda) = \Phi(\textbf{x}, \lambda)$ is its approximation. We define following error function:
+Let $\phi(\lambda) = \Phi(x(\lambda),\lambda)$ is our object function, $\tilde \phi(\lambda) = \Phi(\textbf{x}, \lambda)$ is its approximation. We define following error functions:
 
 $$\epsilon(\lambda) = \Big|\phi(\lambda)-\tilde{\phi}(\lambda)\Big|\text{-- approximation error}$$
 $$\delta_\phi(\lambda_1,\lambda_2) = \phi(\lambda_1)-\phi(\lambda_2)$$
 
 
-The GSS method and the dichotomy method are worked using signum of $\delta_\phi$ for two points. Therefore, when we use approximation for it the signum of $\delta_{\tilde{\phi}}$ must match with the signum of $\delta_{\tilde{\phi}}$. It is met if following sufficient condition was met:
+The GSS method and the dichotomy method are worked using signum of $\delta_\phi$. Therefore, when we use approximation for $\delta_\phi$ the signum of $\delta_{\tilde{\phi}}$ must match with the signum of $\delta_{\phi}$. It is met if following sufficient condition was met:
 
 \begin{equation}
 \label{cond:calcphi}
@@ -360,17 +369,21 @@ The GSS method and the dichotomy method are worked using signum of $\delta_\phi$
 Obviously, we can not calculate left part. But we have following obvious inequallity:
 
 \begin{gather}
-\Big|\delta_\phi(\lambda_1, \lambda_2) - \delta_{\tilde{\phi}}(\lambda_1, \lambda_2)\Big| \leq\\
-\epsilon(\lambda_1)+\epsilon(\lambda_2)
+\Big|\delta_\phi(\lambda_1, \lambda_2) - \delta_{\tilde{\phi}}(\lambda_1, \lambda_2)\Big| \leq \nonumber \\
+\epsilon(\lambda_1)+\epsilon(\lambda_2) \nonumber
 \end{gather}
 
 Therefore for \ref{cond:calcphi} the following condition is sufficient:
 
-$$\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq \Big|\delta_{f}(\lambda_1,\lambda_2)\Big|$$
+\begin{equation}
+\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq \Big|\delta_\phi(\lambda_1,\lambda_2)\Big|
+\end{equation}
 
 Let $\phi$ is $L_\phi$-lipschitz continious. Then if the condition
 
-$$\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq L_\phi\Big|\lambda_1-\lambda_2\Big|$$
+\begin{equation}
+\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq L_\phi\Big|\lambda_1-\lambda_2\Big|
+\end{equation}
 was met we can use the signum of $\delta_{\tilde{\phi}}$ for our one dimensional methods.
 
 If functions $f$, $g_1$ and $g_2$ are lipschitz continious then $\Phi$ is $L_\Phi$-lipschitz continious too and there is following estimate for error $\epsilon$:
@@ -378,7 +391,7 @@ $$\epsilon(\lambda)\leq L_\Phi \Big|\textbf{x}(\lambda) - \textbf{x}\Big|$$
 
 \subsection{The Derivative Value: Segment Solution}
 
-Let $\lambda$ is segment solution. And in this point it should to calculate the derivative with respect to $\lambda_k$ for to define what rectangle must be selected. If we used its approximation it is important that signum of approximation $\phi'_{\lambda_k}$ and of $\widetilde{\phi'_{\lambda_k}}$ are match. Analogically to previous subsection, we have following sufficient condition for it:
+Let $\lambda$ is a solution of one-dimensional minimization task for current segment. And in this point it should to calculate the derivative with respect to $\lambda_k$ for to define what rectangle must be selected. If we used its approximation it is important that signum of approximation $\phi'_{\lambda_k}$ and of $\widetilde{\phi'_{\lambda_k}}$ are match. Analogically to previous subsection, we have following sufficient condition for it:
 
 $$|\phi'_{\lambda_k} - \widetilde{\phi'_{\lambda_k}}|\leq |\widetilde{\phi'_{\lambda_k}}|$$
 
@@ -419,42 +432,45 @@ If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This 
 
 \subsection{Tests for iterations number}
 
-Estimate \ref{NI1} works in all cases and better then estimate \ref{NI3} when following condition is met:
+There is results of tests for iterations number. We consider task when global solution is internal point and external point. In \ref{table:est} you can find values of estimates (see theorems \ref{NI1}, \ref{NI3}) for this expirements.
 
-$$\frac{2L_f^2}{L_g}\leq \epsilon,$$
-где $L_f, L_g$ is Lipschitz constants for function and for gradient. On the other hand, the estimate \ref{NI3} works if point with zero gradient exists in the square. 
+\begin{table}[h!]
+\centering
+\begin{tabular}{||c|c|c||}
+\hline
+Estimate& Internal & External \\
+\hline
+Through $L_f$ & 40& 30\\
+\hline
+Through $L_{f'}$ & 20& 14\\
+\hline
+\end{tabular}
+\caption{Value for estimates through function's and gradient's lipschitz constant}
+\label{table:est}
+\end{table}
 
 Let's consider some quadratic form:
 $$f(x,y) = (Ax+By)^2+Cy^2+Dx+Ey+F,\,C>0.$$
 
-One minimize this function on square that involve global solution. We took parameteres randomly. Then we have following values of the estimates \ref{NI1} and \ref{NI3}:
+One minimize this function on square that involves global solution. We took parameteres randomly.
 
-\textbf{Theoretical Iteration Number through function constant equals 40}
-
-\textbf{Theoretical Iteration Number through gradient constant equals 20}
-
-\begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/In_point.pdf}}
-\label{fig:image2}
- \caption{Test for iterations number when the estimate \ref{NI3} is reached}
+\begin{figure}[ht!]  
+\vspace{-4ex} \centering \subfigure[]{
+\includegraphics[width=0.45\linewidth]{Tests/Images/In_point.pdf} \label{InPoint} }  
+\hspace{1ex}
+\subfigure[]{
+\includegraphics[width=0.45\linewidth]{Tests/Images/Out_point.pdf} \label{OutPoint} }
+\caption{Test for iterations number \subref{InPoint}  when the estimate \ref{NI3} is reached; \subref{OutPoint} when the estimate \ref{NI3} is not reached.} \label{fig:threeDMcases}
 \end{figure}
 
-We can see on \ref{fig:image2} that the estimate \ref{NI3} is reached in this case. But let's consider following task:
+
+
+We can see on \ref{InPoint} that the estimate \ref{NI3} is reached in this case. But let's consider following task:
 
 $$f(x,y) = (x+y)^2+x^2, Q = [1,2]^2,\,(x^*, y^*) = (1,1)$$
 $$\min\limits_{(x,y)\in Q}f(x,y)$$
 
-\textbf{Theoretical Iteration Number through function constant 30}
-
-\textbf{Theoretical Iteration Number through gradient constant 14}
-
-\begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/Out_point.pdf}}
-\label{fig:image1}
- \caption{Test for iterations number when the estimate \ref{NI3} is not reached}
-\end{figure}
-
-And we see on \ref{fig:image1} that the estimate \ref{NI3} is not reached in this case and in this case we should use estimate \ref{NI1}.
+And we see on \ref{OutPoint} that the estimate \ref{NI3} is not reached in this case and in this case we should use estimate \ref{NI1}.
 
 \subsection{Comparison Of Stop Conditions}
 
@@ -483,6 +499,12 @@ Secondly, we can see that the second and the third stratagies have similar resul
 From this part we сonclude that the second strategy for segment is optimal.
 
 \subsection{Comparison With Other Methods}
+
+\begin{figure}[h!]
+\center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.pdf}}
+\label{fig:image}
+ \caption{Comparison of different optimization method}
+\end{figure}
 
 Let's compare out method with ellipsoid method and gradient descent with optimal constant step $\frac{1}{L_g}$ on some dual task.
 
@@ -522,12 +544,6 @@ $$\phi(\lambda_1, \lambda_2) \rightarrow \min_{0\leq\lambda_k\leq\lambda_{max}}$
 How to calculate function and derivatave value for such task was discussed in the section \ref{details}.
 
 And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. We will compare for different $N = 10^k, k = \overline{1, 4}$.
-
-\begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.pdf}}
-\label{fig:image}
- \caption{Comparison of different optimization method}
-\end{figure}
 
 We can see on \ref{fig:image} following results. Firstly, gradient descent is the slowest method in this test. Secondly, our method is better than ellipsoid method for this task. Thirdly, the time gain of our method in comparison with ellipsoid method increases when $N$ increases.
 
