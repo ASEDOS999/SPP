@@ -108,6 +108,7 @@ def comparison(f, Q, eps):
 	m4 = time()
 	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
 
+import threading
 def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	if a is None:
 		a = np.random.uniform(-100, 100, size=(N,))
@@ -117,23 +118,41 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	res = dict()
 	fdict = dict()
 	
-	print('Ellipsoids')
-	res['Ellipsoids'] = ellipsoid(f,Q, time_max = time_max, time = True)
-	fdict = {**fdict, **f.values}
-	f.values = dict()
 	
+	print('Ellipsoids')
+	t1 = threading.Thread(target = ellipsoid, 
+						args = (f,Q.copy()),
+						kwargs = {'time_max':time_max, 'time': True, 'res':(res,'Ellipsoids')})
+	
+	solver = HS(f,Q,None)
 	print('CurGrad')
-	res['HalvingSquare-CurGrad']= HS(f,Q, None).halving_square(time_max = time_max, time = True)
-	fdict = {**fdict, **f.values}
-	f.values = dict()
+	t2 = threading.Thread(target = solver.halving_square, 
+						kwargs = {'time_max':time_max, 'time': True, 'res':(res, 'HalvingSquare-CurGrad')})
+	res['HalvingSquare-CurGrad']= None
+
+	print('ConstEst')
+	solver.stop = solver.ConstEst
+	t3 = threading.Thread(target = solver.halving_square,
+						kwargs = {'time_max':time_max, 'time': True, 'res':(res,'HalvingSquare-ConstEst')})
 	
 	print('GD')
-	res['GD'] = gradient_descent(f.calculate_function, Q, f.gradient, M, time= True, time_max = time_max)
-	fdict = {**fdict, **f.values}
-	f.values = fdict
+	t4 = threading.Thread(target = gradient_descent, 
+						args = (f.calculate_function, Q, f.gradient, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'GD')})
 	
+	t1.start()
+	t2.start()
+	t3.start()
+	t4.start()
+	t1.join()
+	t2.join()
+	t3.join()
+	t4.join()
+	keys =res.keys()
+	for key in keys:
+		fdict = {**fdict, **res[key][-1]}
+		res[key] = tuple([i for i in res[key][:-1]])
+    f.values = fdict
 	return res, f
-
 
 def comparison_LogSumExp(N = 2, time_max = 100, a = None):
 	if a is None:
