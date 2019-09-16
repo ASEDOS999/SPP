@@ -200,6 +200,8 @@ def gradient_descent(f, Q, grad, L, **kwargs):
 		N += 1
 		results.append(x.copy())
 		if cond(args, x=x, N=N, size_Q = Q[1]-Q[0]):
+			if kwargs.__contains__('res'):
+				kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, {})
 			return (x, N, results, args)
 
 def ellipsoid(f, Q, eps = None, **kwargs):
@@ -223,6 +225,8 @@ def ellipsoid(f, Q, eps = None, **kwargs):
 		k += 1
 		results.append(x)
 		if cond(args, x=x, N=k, size_Q = Q[1]-Q[0]):
+			if kwargs.__contains__('res'):
+				kwargs['res'][0][kwargs['res'][1]] = (x, k, results, args, f.values)
 			return (x,k,results,args)
 
 
@@ -263,7 +267,6 @@ class halving_square:
 		mu = 2*(1+l1+l2)
 		M = L/ mu
 		q = (M-1)/(M+1)
-		print(q)
 		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
 			x = x - 1/L * grad(x)
 			R *= q
@@ -391,4 +394,6 @@ class halving_square:
 			if cond(args, x = (x_0, y_0), N = N, minimum = m, eps = eps, size_Q = Q[1]-Q[0]):
 				if N >= 100:
 					N = -1
+				if kwargs.__contains__('res'):
+					kwargs['res'][0][kwargs['res'][1]] = ((x_0, y_0), N, results, args, self.f.values)
 				return (x_0, y_0), N,results, args

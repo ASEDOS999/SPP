@@ -449,15 +449,12 @@ Through $L_{f'}$ & 20& 14\\
 \label{table:est}
 \end{table}
 
-Let's consider some quadratic form:
-$$f(x,y) = (Ax+By)^2+Cy^2+Dx+Ey+F,\,C>0.$$
-
-One minimize this function on square that involves global solution. We took parameteres randomly.
+Let's consider task of minimization semi-positive definite quadratic function with randomly generated parameters. We took such square that it involve global solution of this task.
 
 \begin{figure}[ht!]  
 \vspace{-4ex} \centering \subfigure[]{
 \includegraphics[width=0.45\linewidth]{Tests/Images/In_point.pdf} \label{InPoint} }  
-\hspace{1ex}
+\hspace{1.2ex}
 \subfigure[]{
 \includegraphics[width=0.45\linewidth]{Tests/Images/Out_point.pdf} \label{OutPoint} }
 \caption{Test for iterations number \subref{InPoint}  when the estimate \ref{NI3} is reached; \subref{OutPoint} when the estimate \ref{NI3} is not reached.} \label{fig:threeDMcases}
@@ -465,12 +462,12 @@ One minimize this function on square that involves global solution. We took para
 
 
 
-We can see on \ref{InPoint} that the estimate \ref{NI3} is reached in this case. But let's consider following task:
+We can see on \ref{InPoint} that the estimate \ref{NI3} (see table \ref{table:est}) is reached in this case. But let's consider following task:
 
 $$f(x,y) = (x+y)^2+x^2, Q = [1,2]^2,\,(x^*, y^*) = (1,1)$$
 $$\min\limits_{(x,y)\in Q}f(x,y)$$
 
-And we see on \ref{OutPoint} that the estimate \ref{NI3} is not reached in this case and in this case we should use estimate \ref{NI1}.
+And we see on \ref{OutPoint} that the estimate \ref{NI3} (see table \ref{table:est}) is not reached in this case and in this case we should use estimate \ref{NI1}.
 
 \subsection{Comparison Of Stop Conditions}
 
@@ -492,7 +489,7 @@ We will test on the simple quadratic functions. Parameters for this functions wi
  \caption{Comparison of different strategies for a segment}
 \end{figure}
 
-Firstly, we see that the first strategy is the slowest strategy from three strategy. There is good explonation for it. The estimate for the separatable segments is proportional to $\epsilon$. The method GSS makes the steps number proportional to the logarithm of estimate. Therefore, the number of iteration on segment for the first strategy is proportional to $\ln \epsilon$. It decreases speed of this strategy.
+Firstly, we see that the first strategy is the slowest strategy from three strategy. There is good explonation for it. The estimate for the iterations number is proportional to $\epsilon$. The method GSS makes the steps number proportional to the logarithm of epsilon. Therefore, the number of iteration on segment for the first strategy is proportional to $(\ln \frac{1}{\epsilon})^2$. It decreases speed of this strategy. 
 
 Secondly, we can see that the second and the third stratagies have similar results. That's why we can state that the second estimate is good replacement for the third. Of course, it it the simple tasks. But if we will talk about dual tasks the main complexity is from calculating an objective function and the number of calculating is similar for both strategy. That's why we can state that the second estimate is good estimate for dual task too.
 

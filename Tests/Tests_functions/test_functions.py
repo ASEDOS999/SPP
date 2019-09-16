@@ -151,6 +151,7 @@ class LogSumExp():
 		self.x_cur = None
 		self.values = dict()
 		self.R0 = self.get_R0()
+		print('R0', self.R0)
 		self.fL, self.g1L, self.g2L = None, None, None
 		self.get_lipschitz_constants()
 
@@ -166,9 +167,9 @@ class LogSumExp():
 		x0 = np.zeros(self.a.shape)
 		self.fL = -scipy.optimize.minimize(norm_grad, x0,
 						   bounds = [(-self.R0*1.1, self.R0*1.1) for i in range(a.shape[0])])['fun']
-		print(self.fL, self.R0)
-		self.g1L = 2.2 * self.R0
-		self.g2L = 2.2 * self.R0
+		print('L_f',self.fL)
+		self.g1L = 2. * self.R0
+		self.g2L = 2. * (self.R0 + np.linalg.norm(self.c))
 
 	def f_der(self, x):
 		a = self.a
@@ -176,24 +177,26 @@ class LogSumExp():
 		return grad(x)
 
 	def g1_der(self, x):
-		return x
+		return 2*x
 
 	def g2_der(self, x):
 		return 2* (x-self.c)
 
 	def lipschitz_function(self, Q):
 		if self.L is None:
-			L = scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), 
-				np.array([Q[0], Q[2]]),
-				bounds = [(Q[0], Q[1]),
-				(Q[2], Q[3])])
-			self.L = -L['fun']
+			#L = scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), 
+			#	np.array([Q[0], Q[2]]),
+			#	bounds = [(Q[0], Q[1]),
+			#	(Q[2], Q[3])])
+			#self.L = -L['fun']
 			#print(self.L)
+			self.L = 2*np.sqrt(max(abs(self.R0**2 - self.R1), self.R1)**2 + 
+					+max(abs(self.R0**2+np.linalg.norm(self.c)**2-self.R2), self.R2)**2)
 		return self.L
 
 	def lipschitz_gradient(self, Q):
 		if self.M is None:
-			self.M = (2 * self.R2 * np.sqrt(self.a.shape[0] * 2))**2 / 2
+			self.M = (self.g1L + self.g2L)**2 / 2
 		return self.M
 
 	def calculate_function(self, l1, l2):
