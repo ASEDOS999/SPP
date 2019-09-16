@@ -187,21 +187,22 @@ class main_solver(solver_segment):
 					N = -1
 				return (x_0, y_0), N,results, args
 
-def gradient_descent(f, Q, grad, L, **kwargs):
+def gradient_descent(f, Q, L, **kwargs):
 	N = 0
 	cond, args = get_cond(f=f, **kwargs)
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	results = [x.copy()]
+	grad = lambda x: f.gradient(x[0], x[1])
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	while True:
-		der = grad(x[0], x[1])
+		der = grad(x)
 		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
 		x[1], x_prev[1] = min(max(x[1] - 1. / L * der[1], Q[2]), Q[3]), x[1]
 		N += 1
 		results.append(x.copy())
 		if cond(args, x=x, N=N, size_Q = Q[1]-Q[0]):
 			if kwargs.__contains__('res'):
-				kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, {})
+				kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, f.values)
 			return (x, N, results, args)
 
 def ellipsoid(f, Q, eps = None, **kwargs):
@@ -260,15 +261,18 @@ class halving_square:
 		delta = (b-a)/2
 
 		a = self.f.a
-		x = np.zeros(a.shape)
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*l1 + self.f.g2_der(x)*l2
 		L = self.f.fL+ l1* self.f.g1L + l2 * self.f.g2L
 		R = self.f.R0
 		mu = 2*(1+l1+l2)
 		M = L/ mu
-		q = (M-1)/(M+1)
+		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
+		beta = q**2
+		x = np.zeros(a.shape)
+		x, x_prev = x - alpha*grad(x), x
 		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
-			x = x - 1/L * grad(x)
+			x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
 			R *= q
 		return delta-abs(g(x))/self.f_M<=0
 	def CurGrad(self, a, b):
@@ -278,24 +282,23 @@ class halving_square:
 			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
 			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
 		return ((b - a) / 2 <= self.est)
-	def num_step(self, delta, lambda1, R):
-		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
-		mu = 2 * (1 + lambda1 + self.value)
-		M = L/mu
-		n = np.ceil(np.log(delta/(L*R)) / np.log((M-1)/(M+1)))/2
-		if np.isnan(np.array(n)).any():
-			return 0
-		return int(n)
 
-	def GD(self, lambda1, lambda2, N, x0):
+	def heavy_ball(self, lambda1, lambda2, x0, R0, eps):
 		a = self.f.a
-		x = x0
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
-		for i in range(N):
-			x = x - 1/L * grad(x)
-		return self.f.phi(lambda1, lambda2)(x), x
-
+		mu = 2 * (1+lambda1 + lambda2)
+		M = L/mu
+		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+		R = R0
+		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
+		beta = q**2
+		x_prev = x0
+		x = x_prev - alpha*grad(x_prev)
+		while L * R >= eps:
+			R *= q
+			x,x_prev = x - alpha*grad(x)+beta*(x-x_prev), x
+		return self.f.phi(lambda1, lambda2)(x), x, R
 	def get_delta(self, lambda1, lambda2, x1 = None, x2 = None, R = None):
 		R1, R2 = self.f.R0, self.f.R0
 		if x1 is None:
@@ -307,10 +310,9 @@ class halving_square:
 		elif not R is None:
 			R2 = R
 		delta = self.f_L * abs(lambda1-lambda2)
-		n1, n2 = self.num_step(delta, lambda1, R1), self.num_step(delta, lambda2, R2)
-		f1, x1 = self.GD(lambda1, lambda2, n1, x1)
-		f2, x2 = self.GD(lambda1, lambda2, n2, x2)
-		return f1-f2, x1, x2, delta/2
+		f1, x1, R1 = self.heavy_ball(lambda1, lambda2, x1, R1, delta)
+		f2, x2, R2 = self.heavy_ball(lambda1, lambda2, x2, R2, delta)
+		return f1-f2, x1, x2, max(R1,R2)
 	def gss(self):
 		if self.axis == 'x':
 			f = lambda x: self.f.calculate_function(x, self.value)
