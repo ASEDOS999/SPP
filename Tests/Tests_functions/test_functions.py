@@ -207,11 +207,8 @@ class LogSumExp():
 		else:
 			s = time.time()
 			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-				np.zeros(self.a.shape)).x
+				np.zeros(self.a.shape), method = 'CG').x
 			self.values[(l1,l2)] = x_cur
-			#print('Func', time.time()-s)
-		#M = (a*x_cur).max()
-		#x = x_cur - M*np.ones(x_cur.shape)
 		return phi(l1, l2)(x_cur)
 	def GD(self, l1, l2, L1, der):
 		f = lambda x: self.phi(l1,l2)(x)
@@ -234,8 +231,7 @@ class LogSumExp():
 			else:
 				s = time.time()
 				x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-					np.zeros(self.a.shape)).x
-				#print('TimeDerX', time.time()-s)
+					np.zeros(self.a.shape), method = 'CG').x
 				self.values[(l1,l2)] = x_cur
 		else:
 			x_cur = self.GD(l1, l2, self.g1L, self.g1)
@@ -249,8 +245,7 @@ class LogSumExp():
 			else:
 				s = time.time()
 				x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-					np.zeros(self.a.shape)).x
-				#print('TimeDerY',time.time()-s)
+					np.zeros(self.a.shape), method = 'CG').x
 				self.values[(l1,l2)] = x_cur
 		else:
 			x_cur = self.GD(l1, l2, self.g2L, self.g2)
@@ -261,10 +256,8 @@ class LogSumExp():
 		if (l1,l2) in self.values:
 			x_cur = self.values[(l1,l2)]
 		else:
-			s = time.time()
 			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-				np.zeros(self.a.shape)).x
-			#print('TimeGrad', time.time()-s)
+				np.zeros(self.a.shape), method = 'CG').x
 			self.values[(l1,l2)] = x_cur
 		return np.array([-self.g1(x_cur), -self.g2(x_cur)])
 
