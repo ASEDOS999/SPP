@@ -461,7 +461,9 @@ And we will use this model for our task in the next subsection.
 \caption{Comparison of different optimization methods on saddle point task for prime task with dimension: \subref{10}  $N=10$; \subref{100} $N=100$.} \label{fig:image}
 \end{figure}
 
-Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task. Of course, we can not calculate gradient of dual function accurately and ellipsoid method needs it. But we will calculate $x(\lambda)$ with little accuracy $\epsilon = 10^{-5}$. We have not proves that such method will converge. For to find $x(\lambda)$ we will use conjugate gradients method.
+Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task. Of course, we can not calculate gradient of dual function accurately and ellipsoid method needs it. But we will calculate $x(\lambda)$ with little accuracy $\epsilon = 10^{-5}$. We have not proves that such method will converge. 
+
+For to find $\textbf{x}(\lambda)$ we will use conjugate gradients method. Additionally, our method with constant estimate for one-dimensional task and PGM with $(\delta, L,\mu)$ oracle need an accuracy for $\textbf{x}(\lambda)$. In our tests we chose the accuracy $\epsilon_\textbf{x} = 0.01$.
 
 We consider following prime task:
 
@@ -499,7 +501,7 @@ How to calculate function and derivatave value for such task was discussed in th
 
 And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. We will compare for different $N = 10^k, k = \overline{1, 4}$.
 
-We can see on \ref{fig:image} following results. Firstly, the different strategies for one-dimensional task have the approximately results on time but the strategy \textbf{CurGrad} is faster. Secondly, the our method is the fastest from all been be compared methods.
+We can see on \ref{fig:image} the following results. Firstly, the different strategies for one-dimensional task have the approximately results on time but the strategy \textbf{CurGrad} is faster. Secondly, the our method is the fastest from all been be compared methods.
 
 \section{Conclusion}
 \newpage
@@ -517,9 +519,7 @@ Danskin, J.M.: The theory of Max-Min, with applications. J. SIAM Appl. Math.14(4
 \bibitem{Stonykin}
 Fedor S. Stonyakin, Mohammad S. Alkousa, Alexander A. Titov,and Victoria V. Piskunova1 On Some Methods for Strongly ConvexOptimization Problems with OneFunctional Constraint // ...
 \bibitem{PGM}
-
 Olivier Devolder Exactness, Inexactness and Stochasticityin First-Order Methods for Large-ScaleConvex Optimization // UCL --- 2013,
-
 \bibitem{my_git}
 Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
