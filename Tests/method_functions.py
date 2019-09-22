@@ -187,13 +187,35 @@ class main_solver(solver_segment):
 					N = -1
 				return (x_0, y_0), N,results, args
 
+from scipy.optimize import minimize
+def get_grad(f,lambda_, eps):
+	grad_l = lambda x: np.array([-f.g1(x), -f.g2(x)])
+	l1, l2 = lambda_[0], lambda_[1]
+	obj = lambda x: f.f(x) + lambda_[0]*f.g1(x)+lambda_[1]*f.g2(x)
+	grad = lambda x: f.f_der(x) + f.g1_der(x)*l1 + f.g2_der(x)*l2
+	x = minimize(obj, np.zeros(f.a.shape), bounds = [(-f.R0, f.R0) for i in range(f.a.shape[0])], tol = eps, method = 'CG')['x']
+	#L = f.fL+ l1* f.g1L + l2 * f.g2L
+	#R = f.R0
+	#mu = 2*(1+l1+l2)
+	#M = L/ mu
+	#q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+	#alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
+	#beta = q**2
+	#x = np.zeros(f.a.shape)
+	#x, x_prev = x - alpha*grad(x), x
+	#while L*R >= eps:
+	#	x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
+	#	R *= q
+	return grad_l(x)
 def gradient_descent(f, Q, L, **kwargs):
 	N = 0
+	eps = 0.01
 	cond, args = get_cond(f=f, **kwargs)
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	results = [x.copy()]
-	grad = lambda x: f.gradient(x[0], x[1])
+	grad = lambda x: get_grad(f, x, eps)
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
+	L = 1
 	while True:
 		der = grad(x)
 		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
