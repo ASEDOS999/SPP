@@ -283,7 +283,8 @@ class halving_square:
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*l1 + self.f.g2_der(x)*l2
 		L = self.f.fL+ l1* self.f.g1L + l2 * self.f.g2L
 		R = R0
-		mu = 2*(1+l1+l2)
+		#mu = 2*(1+l1+l2)
+		mu = 2
 		M = L/ mu
 		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
 		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
@@ -308,7 +309,8 @@ class halving_square:
 		a = self.f.a
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
-		mu = 2 * (1+lambda1 + lambda2)
+		#mu = 2 * (1+lambda1 + lambda2)
+		mu = 2
 		M = L/mu
 		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
 		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2

@@ -141,8 +141,8 @@ class LogSumExp():
 			c = np.ones(a.shape)
 			c/=np.linalg.norm(c)
 		self.c = c
-		self.g1 = lambda x: np.linalg.norm(x)**2 - self.R2**2
-		self.g2 = lambda x: np.linalg.norm(x-c)**2 - self.R1**2
+		self.g1 = lambda x: x[0] - self.R2**2
+		self.g2 = lambda x: x[1] - self.R1**2
 		self.phi = lambda l1, l2: lambda x: -(self.f(x) + l1 * self.g1(x) + l2 * self.g2(x))
 		self.R1 = R1
 		self.R2 = R2
@@ -168,8 +168,8 @@ class LogSumExp():
 		self.fL = -scipy.optimize.minimize(norm_grad, x0,
 						   bounds = [(-self.R0*1.1, self.R0*1.1) for i in range(a.shape[0])])['fun']
 		print('L_f',self.fL)
-		self.g1L = 2. * self.R0
-		self.g2L = 2. * (self.R0 + np.linalg.norm(self.c))
+		self.g1L = 1
+		self.g2L = 1
 
 	def f_der(self, x):
 		a = self.a
@@ -177,10 +177,14 @@ class LogSumExp():
 		return grad(x)
 
 	def g1_der(self, x):
-		return 2*x
+		g = np.zeros(x.shape)
+		g[0] = 1
+		return g
 
 	def g2_der(self, x):
-		return 2* (x-self.c)
+		g = np.zeros(x.shape)
+		g[1] = 1
+		return g
 
 	def lipschitz_function(self, Q):
 		if self.L is None:
