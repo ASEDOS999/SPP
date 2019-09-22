@@ -461,7 +461,7 @@ And we will use this model for our task in the next subsection.
 \caption{Comparison of different optimization methods on saddle point task for prime task with dimension: \subref{10}  $N=10$; \subref{100} $N=100$.} \label{fig:image}
 \end{figure}
 
-Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task.
+Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task. Of course, we can not calculate gradient of dual function accurately and ellipsoid method needs it. But we will calculate $x(\lambda)$ with little accuracy $\epsilon = 10^{-5}$. We have not proves that such method will converge. For to find $x(\lambda)$ we will use conjugate gradients method.
 
 We consider following prime task:
 
