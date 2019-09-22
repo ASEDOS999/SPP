@@ -302,6 +302,8 @@ $$\frac{2L_f^2}{L_g}\leq \epsilon,$$
 
 \section{Details}
 \label{details}
+\subsection{Function Parameters}
+
 This method was created to solve dual task. Namely, following task:
 
 \begin{gather}
@@ -352,46 +354,11 @@ $$\phi(\lambda) = \min_\textbf{x} \Phi(\textbf{x}, \lambda) = \Phi(\textbf{x}(\l
 
 The next subsections are devoted to efficient calculation of function's and derivative's values.
 
-\subsection{Function calcularting}
-Let $\phi(\lambda) = \Phi(x(\lambda),\lambda)$ is our object function, $\tilde \phi(\lambda) = \Phi(\textbf{x}, \lambda)$ is its approximation. We define following error functions:
+\subsection{Calcularting $\textbf{x}(\lambda)$}
 
-$$\epsilon(\lambda) = \Big|\phi(\lambda)-\tilde{\phi}(\lambda)\Big|\text{-- approximation error}$$
-$$\delta_\phi(\lambda_1,\lambda_2) = \phi(\lambda_1)-\phi(\lambda_2)$$
+We should have solution approximation on a segment for the one iteration. We will search it through the following dichotomy method: take a center of current segment and select such subsegment as antigradient looks at it. Obviously, that for to make one step on segment or on square we need the signum of derivative approximation matches with the derivative signum.
 
-
-The GSS method and the dichotomy method are worked using signum of $\delta_\phi$. Therefore, when we use approximation for $\delta_\phi$ the signum of $\delta_{\tilde{\phi}}$ must match with the signum of $\delta_{\phi}$. It is met if following sufficient condition was met:
-
-\begin{equation}
-\label{cond:calcphi}
-\Big|\delta_\phi(\lambda_1,\lambda_2) - \delta_{\tilde{\phi}}(\lambda_1,\lambda_2)\Big|\leq \Big|\delta_{\phi}(\lambda_1,\lambda_2)\Big|
-\end{equation}
-
-Obviously, we can not calculate left part. But we have following obvious inequallity:
-
-\begin{gather}
-\Big|\delta_\phi(\lambda_1, \lambda_2) - \delta_{\tilde{\phi}}(\lambda_1, \lambda_2)\Big| \leq \nonumber \\
-\epsilon(\lambda_1)+\epsilon(\lambda_2) \nonumber
-\end{gather}
-
-Therefore for \ref{cond:calcphi} the following condition is sufficient:
-
-\begin{equation}
-\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq \Big|\delta_\phi(\lambda_1,\lambda_2)\Big|
-\end{equation}
-
-Let $\phi$ is $L_\phi$-lipschitz continious. Then if the condition
-
-\begin{equation}
-\epsilon(\lambda_1)+\epsilon(\lambda_2)\leq L_\phi\Big|\lambda_1-\lambda_2\Big|
-\end{equation}
-was met we can use the signum of $\delta_{\tilde{\phi}}$ for our one dimensional methods.
-
-If functions $f$, $g_1$ and $g_2$ are lipschitz continious then $\Phi$ is $L_\Phi$-lipschitz continious too and there is following estimate for error $\epsilon$:
-$$\epsilon(\lambda)\leq L_\Phi \Big|\textbf{x}(\lambda) - \textbf{x}\Big|$$
-
-\subsection{The Derivative Value: Segment Solution}
-
-Let $\lambda$ is a solution of one-dimensional minimization task for current segment. And in this point it should to calculate the derivative with respect to $\lambda_k$ for to define what rectangle must be selected. If we used its approximation it is important that signum of approximation $\phi'_{\lambda_k}$ and of $\widetilde{\phi'_{\lambda_k}}$ are match. Analogically to previous subsection, we have following sufficient condition for it:
+Let $\lambda$ is a point which we want calculate derivative for the step on a segment or on the square. One should to calculate the derivative with respect to $\lambda_k$ for to define what rectangle must be selected. If we used its approximation it is important that signum of approximation $\phi'_{\lambda_k}$ and of $\widetilde{\phi'_{\lambda_k}}$ are match. We have following sufficient condition for it:
 
 $$|\phi'_{\lambda_k} - \widetilde{\phi'_{\lambda_k}}|\leq |\widetilde{\phi'_{\lambda_k}}|$$
 
@@ -401,34 +368,9 @@ If $g_k$ is $L_{g_k}$-lipschitz continious function:
 
 $$L_{g_k}\|\textbf{x}(\lambda)-\textbf{x}\|\leq |g_k(\textbf{x})|$$
 
-\subsection{The Derivative Value: Current Point On Segment}
-
-We have following condition for segment solution accuracy (see theorem \ref{CurGrad}):
-
-$$\|\lambda_{cur}-\lambda^*\|=\delta \leq \frac{|\phi'_{\lambda_k}(\lambda_{cur})|}{L_{\phi'}}=\epsilon,$$
-where $\lambda_{cur}$ current approximation. In other notation:
-
-$$\delta-\epsilon<0$$
-
-If we calculate approximation $\tilde \epsilon$ instead $\epsilon$ the signum of $\delta-\epsilon$ will match with the signum of $\delta-\tilde{\epsilon}$. The following condtion is sufficient for it:
-
-$$\Big|(\delta-\epsilon)-(\delta - \tilde{\epsilon})\Big|\leq |\delta - \tilde{\epsilon}|$$
-
-$$|\epsilon-\tilde{\epsilon}|\leq |\delta - \tilde{\epsilon}|$$
-
-For our task $\phi_{\lambda_k}'(\lambda)$ is equal to $g_k\left(\textbf{x}(\lambda)\right)$ and $\widetilde {\phi_{\lambda_k}'(\lambda)}$ is equal to $g_k\left(\textbf{x}\right)$. Then if $g_k$ is $L_{g_k}$-lipschitz continious function we have following condition:
-
-$$\frac{L_{g_k}}{L_{\phi'}}\|\textbf{x}^*-\textbf{x}\|\leq \Big||\lambda_1-\lambda_2| - \frac{|g_k(\textbf{x})|}{L_{\phi'}}\Big|$$
-$$L_{g_k}\|\textbf{x}^*-\textbf{x}\|\leq \Big|L_{\phi'}|\lambda_1-\lambda_2| - |g_k(\textbf{x})|\Big|$$
-
-
 \section{Tests}
 
-In this section we show estimate on number iterations of practice and compare work time our new method with work time classic methods of optimization such as gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
-
-\subsection{About function $solve$}
-
-If you look at pseudocode~\ref{alg:Example} you can find function $solve$. This function solves task of minimization on segment. A cost of one iteration depends on a choice of its implementation. In our tests we will use golden search selection. It is the best method for one-dimension task in our case because on each iteration the GSS need to calcualted value of function in only one new point. It is important because we will use this method for dual tasks and calculating function in such tasks are hard enough.
+In this section we show estimate on number iterations of practice. ALso there is comparison work time our new method with work time of other optimization methods such as inexact gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
 
 \subsection{Tests for iterations number}
 
@@ -495,23 +437,39 @@ Secondly, we can see that the second and the third stratagies have similar resul
 
 From this part we сonclude that the second strategy for segment is optimal.
 
+
+\subsection{Primal Gradient Method}
+\label{PGM}
+
+We will compare the our method with primal gradient method with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that for the task of minimization 
+$$f(\textbf{x}) = \max \Psi(\textbf{x}, \textbf{u}) =\max_\textbf{u}\left(G(\textbf{u})+(A\textbf{u}, \textbf{x})\right)$$
+there is following $(\delta, L,\mu)$ oracle:
+$$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
+$$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
+with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
+
+And primal gradient method with $(\delta, L,\mu)$ oracle converges to the solution with accuracy $\delta$ on a function with a linear speed.
+
 \subsection{Comparison With Other Methods}
 
-\begin{figure}[h!]
-\center{\includegraphics[scale=0.5]{Tests/Images/GD_HS_EL.pdf}}
-\label{fig:image}
- \caption{Comparison of different optimization method}
+
+\begin{figure}[h!]  
+\vspace{-4ex} \centering \subfigure[]{
+\includegraphics[width=0.45\linewidth]{Tests/Images/Comparison10.pdf} \label{10} }  
+\hspace{1.2ex}
+\subfigure[]{
+\includegraphics[width=0.45\linewidth]{Tests/Images/Comparison100.pdf} \label{100} }
+\caption{Comparison of different optimization methods on saddle point task for prime task with dimension: \subref{10}  $N=10$; \subref{100} $N=10$.} \label{fig:image}
 \end{figure}
 
-Let's compare out method with ellipsoid method and gradient descent with optimal constant step $\frac{1}{L_g}$ on some dual task.
+Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task.
 
 We consider following prime task:
 
 \begin{gather}
 \label{prime}
 f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{a_kx_k}\right) + \|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
-\text{s.t.}\,g_1(\textbf{x}) = \|\textbf{x}\|_2^2-R_1\leq0\\
-g_2(\textbf{x}) = \|\textbf{x}-\textbf{c}\|_2^2-R_2\leq0
+\text{s.t.}\,g_k(\textbf{x}) = x_1-R_1\leq0, k = \overline{1,2}\\
 \end{gather}
 
 It is task to minimize LogSumExp-function on the intersection of sphere with center in zero-point and radius $R_1$ and of spere with center $\textbf{c}$ and radius $R_2$. Parameter $\textbf{a}$ is generated randomly.
@@ -542,7 +500,7 @@ How to calculate function and derivatave value for such task was discussed in th
 
 And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. We will compare for different $N = 10^k, k = \overline{1, 4}$.
 
-We can see on \ref{fig:image} following results. Firstly, gradient descent is the slowest method in this test. Secondly, our method is better than ellipsoid method for this task. Thirdly, the time gain of our method in comparison with ellipsoid method increases when $N$ increases.
+We can see on \ref{fig:image} following results. Firstly, the different strategies for one-dimensional task have the approximately results on time. Secondly, the our method is the fastest from all been be compared methods.
 
 \section{Conclusion}
 \newpage
@@ -559,6 +517,10 @@ Anaconda[site]. At available: \href{https://www.anaconda.com}{https://www.anacon
 Danskin, J.M.: The theory of Max-Min, with applications. J. SIAM Appl. Math.14(4) (1966)
 \bibitem{Stonykin}
 Fedor S. Stonyakin, Mohammad S. Alkousa, Alexander A. Titov,and Victoria V. Piskunova1 On Some Methods for Strongly ConvexOptimization Problems with OneFunctional Constraint // ...
+\bibitem{PGM}
+
+Olivier Devolder Exactness, Inexactness and Stochasticityin First-Order Methods for Large-ScaleConvex Optimization // UCL --- 2013,
+
 \bibitem{my_git}
 Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
