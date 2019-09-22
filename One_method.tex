@@ -431,12 +431,9 @@ We will test on the simple quadratic functions. Parameters for this functions wi
  \caption{Comparison of different strategies for a segment}
 \end{figure}
 
-Firstly, we see that the first strategy is the slowest strategy from three strategy. There is good explonation for it. The estimate for the iterations number is proportional to $\epsilon$. The method GSS makes the steps number proportional to the logarithm of epsilon. Therefore, the number of iteration on segment for the first strategy is proportional to $(\ln \frac{1}{\epsilon})^2$. It decreases speed of this strategy. 
+Firstly, we see that the first strategy is the slowest strategy from the three strategy. There is good explonation for it. The estimate for the iterations number is proportional to $\epsilon$. The dichotomy method makes the steps number proportional to the logarithm of epsilon. Therefore, the number of iteration on segment for the first strategy is proportional to $(\ln \frac{1}{\epsilon})^2$. It decreases speed of this strategy. But for the saddle point problems calculating derivative that the second strategy needs is a hard and this fact can increase speed of the second strategy. But when we will test our method on such tasks that the second strategy is faster then the first too (see results on \ref{fig:image}).
 
-Secondly, we can see that the second and the third stratagies have similar results. That's why we can state that the second estimate is good replacement for the third. Of course, it it the simple tasks. But if we will talk about dual tasks the main complexity is from calculating an objective function and the number of calculating is similar for both strategy. That's why we can state that the second estimate is good estimate for dual task too.
-
-From this part we сonclude that the second strategy for segment is optimal.
-
+Secondly, we can see that the second and the third stratagies have similar results that's why we can state that the second estimate is good replacement for the third. Of course, it is only for the simple tasks when calculating gradients and derivatives is fast procedure. Obviously, when to calculate gradient is the hard procedure we will not have such positive results.
 
 \subsection{Primal Gradient Method}
 \label{PGM}
@@ -450,8 +447,10 @@ with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$,
 
 And primal gradient method with $(\delta, L,\mu)$ oracle converges to the solution with accuracy $\delta$ on a function with a linear speed.
 
-\subsection{Comparison With Other Methods}
+And we will use this model for our task in the next subsection.
 
+\subsection{Comparison With Other Methods}
+\label{Comparison}
 
 \begin{figure}[h!]  
 \vspace{-4ex} \centering \subfigure[]{
@@ -459,7 +458,7 @@ And primal gradient method with $(\delta, L,\mu)$ oracle converges to the soluti
 \hspace{1.2ex}
 \subfigure[]{
 \includegraphics[width=0.45\linewidth]{Tests/Images/Comparison100.pdf} \label{100} }
-\caption{Comparison of different optimization methods on saddle point task for prime task with dimension: \subref{10}  $N=10$; \subref{100} $N=10$.} \label{fig:image}
+\caption{Comparison of different optimization methods on saddle point task for prime task with dimension: \subref{10}  $N=10$; \subref{100} $N=100$.} \label{fig:image}
 \end{figure}
 
 Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task.
@@ -469,10 +468,10 @@ We consider following prime task:
 \begin{gather}
 \label{prime}
 f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{a_kx_k}\right) + \|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
-\text{s.t.}\,g_k(\textbf{x}) = x_1-R_1\leq0, k = \overline{1,2}\\
+\text{s.t.}\,g_k(\textbf{x}) = x_k-R_k\leq0, k = \overline{1,2}\\
 \end{gather}
 
-It is task to minimize LogSumExp-function on the intersection of sphere with center in zero-point and radius $R_1$ and of spere with center $\textbf{c}$ and radius $R_2$. Parameter $\textbf{a}$ is generated randomly.
+It is task to minimize LogSumExp-function on the intersection of halfspaces. Parameter $\textbf{a}$ is generated randomly.
 
 We introduce the following notation:
 
@@ -500,7 +499,7 @@ How to calculate function and derivatave value for such task was discussed in th
 
 And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. We will compare for different $N = 10^k, k = \overline{1, 4}$.
 
-We can see on \ref{fig:image} following results. Firstly, the different strategies for one-dimensional task have the approximately results on time. Secondly, the our method is the fastest from all been be compared methods.
+We can see on \ref{fig:image} following results. Firstly, the different strategies for one-dimensional task have the approximately results on time but the strategy \textbf{CurGrad} is faster. Secondly, the our method is the fastest from all been be compared methods.
 
 \section{Conclusion}
 \newpage
