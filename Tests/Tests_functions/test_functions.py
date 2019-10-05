@@ -131,18 +131,50 @@ from scipy import optimize
 # LOG-SUM-EXP
 import time
 class LogSumExp():
-	def __init__(self, list_of_parameters, c = None, R1 = 1, R2 = 1):
+	def __init__(self, list_of_parameters, c = None, R1 = 2, R2 = 3):
 		self.a = list_of_parameters
 		a = self.a
-		self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)])) + np.linalg.norm(x)**2
+		n = a.shape[0]
+		m = 10000
+		a = np.random.uniform(-1, 1, (m,n))
+		self.A = a
+		self.C = 0.01
+		self.f = lambda x: np.log(1 + np.exp(a.dot(x)).sum()) + np.linalg.norm(x)**2*self.C
 		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
 		# self.f = lambda x: np.linalg.norm(x)
 		if c is None:
-			c = np.ones(a.shape)
+			c = np.ones(self.a.shape)
 			c/=np.linalg.norm(c)
+		n = c.shape[0]
+		A1 = np.random.uniform(-1, 1, (n,n))
+		A1 = A1.T.dot(A1)
+		A1 = np.zeros((n,n))
+		#A1[0,0] = 1
+		b1 = np.zeros((n,))
+		b1[0] = 1
+		self.A1 = A1
+		b1 = np.random.uniform(-1,1,(n,))
+		self.b1 = b1
+		l = list(2*np.linalg.eig(A1)[0])
+		l.sort()
+		self.g1mu, self.g1L = l[0], l[-1] + np.linalg.norm(b1)
+		self.g1 = lambda x: x.dot(A1.dot(x)) - self.R1**2 + b1.dot(x)
+
+		A2 = np.random.uniform(-1, 1, (n,n))
+		A2 = A2.T.dot(A2)
+		self.A2 = A2
+		A2 = np.zeros((n,n))
+		#A2[1,1] = 1
+		b2 = np.zeros((n,))
+		b2[1] = 1
+		b2 = np.random.uniform(-1,1,(n,))
+		self.b2 = b2
+		l = list(2*np.linalg.eig(A2)[0])
+		l.sort()
+		self.g2mu, self.g2L = l[0], l[-1] + np.linalg.norm(b2)
+		self.g2 = lambda x: x.dot(A2.dot(x)) - self.R2**2 + b2.dot(x)
+
 		self.c = c
-		self.g1 = lambda x: x[0] - self.R2**2
-		self.g2 = lambda x: x[1] - self.R1**2
 		self.phi = lambda l1, l2: lambda x: -(self.f(x) + l1 * self.g1(x) + l2 * self.g2(x))
 		self.R1 = R1
 		self.R2 = R2
@@ -150,40 +182,44 @@ class LogSumExp():
 		self.M = None
 		self.x_cur = None
 		self.values = dict()
+		self.Q = self.get_square()
 		self.R0 = self.get_R0()
 		print('R0', self.R0)
-		self.fL, self.g1L, self.g2L = None, None, None
+		self.fL = None
+		self.fmu  = 2*self.C
 		self.get_lipschitz_constants()
 
 	def get_R0(self):
-		x = scipy.optimize.minimize(self.f, np.zeros(self.a.shape)).x
-		return np.linalg.norm(x)
+		l_max = self.Q[1]
+		n = self.a.shape[0]
+		R0 = np.sqrt(2*np.log(n+1))/self.C
+		return R0
 
 	def get_lipschitz_constants(self):
 		a = self.a
 		m = lambda x: (a*x).max()
-		grad = lambda x: a *np.exp(a*x - m(x)*np.ones(a.shape))/(1/np.exp(m(x))+np.exp(a*x-m(x)*np.ones(a.shape)).sum()) + 2*x
+		grad = lambda x: a *np.exp(a*x - m(x)*np.ones(a.shape))/(1/np.exp(m(x))+np.exp(a*x-m(x)*np.ones(a.shape)).sum()) + 2*x*self.C
 		norm_grad = lambda x: -np.linalg.norm(grad(x))
 		x0 = np.zeros(self.a.shape)
+		R = self.a.shape[0]
+		R = np.sqrt(np.log(1+R))
 		self.fL = -scipy.optimize.minimize(norm_grad, x0,
-						   bounds = [(-self.R0*1.1, self.R0*1.1) for i in range(a.shape[0])])['fun']
+						   bounds = [(-self.R0, self.R0) for i in range(a.shape[0])])['fun']
 		print('L_f',self.fL)
-		self.g1L = 1
-		self.g2L = 1
 
 	def f_der(self, x):
-		a = self.a
-		grad = lambda x: (a *np.exp(a*x)/(1+np.exp(a*x).sum()) + 2*x)
+		a = self.A
+		grad = lambda x: ((a.T.dot(np.exp(a*x))).sum()/(1+np.exp(a.dot(x)).sum()) + 2*x*self.C)
 		return grad(x)
 
 	def g1_der(self, x):
 		g = np.zeros(x.shape)
-		g[0] = 1
+		g = 2 * self.A1.dot(x) +self.b1
 		return g
 
 	def g2_der(self, x):
 		g = np.zeros(x.shape)
-		g[1] = 1
+		g = 2*self.A2.dot(x) + self.b2
 		return g
 
 	def lipschitz_function(self, Q):
@@ -214,45 +250,33 @@ class LogSumExp():
 				np.zeros(self.a.shape), method = 'CG').x
 			self.values[(l1,l2)] = x_cur
 		return phi(l1, l2)(x_cur)
-	def GD(self, l1, l2, L1, der):
+
+	def GD(self, l1, l2, L1, der, warm = None):
 		f = lambda x: self.phi(l1,l2)(x)
 		grad = lambda x: self.f_der(x) + l1*self.g1_der(x) + l2*self.g2_der(x)
 		L = self.fL +l1*self.g1L + l2*self.g2L
-		mu = 2 * (1+ l1+l2)
+		mu = (self.fmu+ l1*self.g1mu+l2*self.g2mu)
 		M = L/mu
-		q = (M-1)/(M+1)
-		R = self.R0 * L/2
+		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+		R = self.R0
+		alpha = 4 / (np.sqrt(L)+np.sqrt(mu))**2
+		beta = q**2
 		x = np.zeros(self.a.shape)
+		if not warm is None:
+			x, R = warm
+		R *= L/2
+		x, x_prev= x - 1/L * grad(x), x
 		while abs(der(x)) < R:
 			R *= q
-			x = x - 1/L * grad(x)
+			x, x_prev = x - alpha * grad(x) + beta * (x-x_prev), x
 		return x
-	def der_x(self, l1, l2, acc = True):
-		if acc:
-			phi = self.phi
-			if (l1,l2) in self.values:
-				x_cur = self.values[(l1,l2)]
-			else:
-				s = time.time()
-				x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-					np.zeros(self.a.shape), method = 'CG').x
-				self.values[(l1,l2)] = x_cur
-		else:
-			x_cur = self.GD(l1, l2, self.g1L, self.g1)
+
+	def der_x(self, l1, l2, warm = None):
+		x_cur = self.GD(l1, l2, self.g1L, self.g1, warm)
 		return -self.g1(x_cur)
 	
-	def der_y(self, l1, l2, acc = True):
-		if acc:
-			phi = self.phi
-			if (l1,l2) in self.values:
-				x_cur = self.values[(l1,l2)]
-			else:
-				s = time.time()
-				x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
-					np.zeros(self.a.shape), method = 'CG').x
-				self.values[(l1,l2)] = x_cur
-		else:
-			x_cur = self.GD(l1, l2, self.g2L, self.g2)
+	def der_y(self, l1, l2, warm = None):
+		x_cur = self.GD(l1, l2, self.g2L, self.g2, warm)
 		return -self.g2(x_cur)
 
 	def gradient(self, l1, l2):
@@ -276,8 +300,7 @@ class LogSumExp():
 		return f(x_cur)
 
 	def get_square(self):
-		c = self.c/np.linalg.norm(self.c)
-		x= (c * self.R1 + (self.c-c*self.R2))/2
+		x = np.zeros((self.a.shape))
 		gamma = min(-self.g1(x), -self.g2(x))
 		q = self.f(x) / gamma
 		self.Q = [0, q, 0, q]

@@ -111,7 +111,8 @@ def comparison(f, Q, eps):
 import threading
 def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	if a is None:
-		a = np.random.uniform(-100, 100, size=(N,))
+		k = 1000
+		a = np.random.uniform(-k, k, size=(N,))
 	f = LogSumExp(a)
 	Q = f.get_square()
 	L, M = f.lipschitz_function(Q), f.lipschitz_gradient(Q)

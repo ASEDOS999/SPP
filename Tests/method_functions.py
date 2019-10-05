@@ -193,29 +193,29 @@ def get_grad(f,lambda_, eps):
 	l1, l2 = lambda_[0], lambda_[1]
 	obj = lambda x: f.f(x) + lambda_[0]*f.g1(x)+lambda_[1]*f.g2(x)
 	grad = lambda x: f.f_der(x) + f.g1_der(x)*l1 + f.g2_der(x)*l2
-	x = minimize(obj, np.zeros(f.a.shape), bounds = [(-f.R0, f.R0) for i in range(f.a.shape[0])], tol = eps, method = 'CG')['x']
-	#L = f.fL+ l1* f.g1L + l2 * f.g2L
-	#R = f.R0
-	#mu = 2*(1+l1+l2)
-	#M = L/ mu
-	#q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
-	#alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
-	#beta = q**2
-	#x = np.zeros(f.a.shape)
-	#x, x_prev = x - alpha*grad(x), x
-	#while L*R >= eps:
-	#	x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
-	#	R *= q
+	L = f.fL + l1* f.g1L + l2 * f.g2L
+	R = f.R0
+	mu = f.fmu + l1 * f.g1mu + l2 * f.g2mu
+	M = L / mu
+	q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+	alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
+	beta = q**2
+	x = np.zeros(f.a.shape)
+	x, x_prev = x - alpha*grad(x), x
+	while L*R >= eps:
+		x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
+		R *= q
+		#print(q, R, obj(x), np.linalg.norm(x-x_prev))
 	return grad_l(x)
 def gradient_descent(f, Q, L, **kwargs):
 	N = 0
-	eps = 0.01
+	eps = 1e-10/3
 	cond, args = get_cond(f=f, **kwargs)
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	results = [x.copy()]
 	grad = lambda x: get_grad(f, x, eps)
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
-	L = 1
+	L = 2/f.fmu
 	while True:
 		der = grad(x)
 		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
@@ -233,20 +233,28 @@ def ellipsoid(f, Q, eps = None, **kwargs):
 	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if not kwargs.__contains__('x_0') else kwargs['x_0']
 	eps = 5e-3 if eps is None else eps
 	rho = (Q[1] - Q[0]) * np.sqrt(2) / 2
-	H = np.identity(n)
+	H = rho**2 * np.identity(n)
 	q = n * (n - 1) ** (-(n-1) / (2*n)) * (n + 1) ** (-(n+1) / (2*n))
 	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	k = 0
 	results = [x]
 	while True:
-		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
-		d = (n / np.sqrt(n ** 2 - 1)) ** k
-		_df = f.gradient(x[0], x[1])
+		if (np.clip(x, *domain.T) == x).any():
+			_df = get_grad(f,x, 1e-10)
+		else:
+			if Q[0]<=x[0] <=Q[1]:
+				_df = np.array([Q[1], Q[2]])
+				if x[0] < Q[2]:
+					_df *= -1
+			else:
+				_df = np.array([Q[0], Q[1]])
+				if x[0] < Q[0]:
+					_df *= -1
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
-		x = np.clip(x - gamma * H @ _df, *domain.T)
-		H = H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H)
+		x = x - 1/(n+1) * H @ _df
+		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
 		k += 1
-		results.append(x)
+		results.append((np.clip(x, *domain.T)))
 		if cond(args, x=x, N=k, size_Q = Q[1]-Q[0]):
 			if kwargs.__contains__('res'):
 				kwargs['res'][0][kwargs['res'][1]] = (x, k, results, args, f.values)
@@ -259,7 +267,7 @@ class halving_square:
 		self.f = f
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
-		self.eps = 0.5
+		self.eps = 1e-5
 		self.type_stop = 'true_grad'
 		self.value = 0
 		self.axis = 'x'
@@ -284,13 +292,13 @@ class halving_square:
 		L = self.f.fL+ l1* self.f.g1L + l2 * self.f.g2L
 		R = R0
 		#mu = 2*(1+l1+l2)
-		mu = 2
+		mu = self.f.fmu + l1*self.f.g1mu+l2*self.f.g2mu
 		M = L/ mu
 		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
 		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
 		beta = q**2
 		x = x0
-		x, x_prev = x - alpha*grad(x), x
+		x, x_prev = x - 1/L*grad(x), x
 		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
 			x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
 			R *= q
@@ -310,13 +318,13 @@ class halving_square:
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
 		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
 		#mu = 2 * (1+lambda1 + lambda2)
-		mu = 2
+		mu = self.f.fmu + lambda1 * self.f.g1mu + lambda2 * self.f.g2mu
 		M = L/mu
 		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
 		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
 		beta = q**2
 		x_prev = x
-		x = x_prev - alpha*grad(x_prev)
+		x = x_prev - 1/L*grad(x_prev)
 		while L_g * R >= abs(der(x)):
 			R *= q
 			x,x_prev = x - alpha*grad(x)+beta*(x-x_prev), x
@@ -348,9 +356,6 @@ class halving_square:
 				return c, (x,R)
 		return c
 
-	def add_cond(self, x, y):
-		return False
-
 	def halving_square(self, **kwargs):
 		if kwargs.__contains__('eps'):
 			self.eps = kwargs['eps']
@@ -362,15 +367,11 @@ class halving_square:
 		N = 0
 		x_0, y_0 = (Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2
 		results = [(x_0, y_0)]
-		if self.add_cond(x_0, y_0):
-			return ((x_0, y_0), N, results, args)
 		while True:
 			y_0 = (Q[2] + Q[3]) / 2
 			self.axis, self.value, self.segm = 'x', y_0, [Q[0], Q[1]]
 			x_0, _ = self.solve()
-			if self.add_cond(x_0, y_0):
-				return ((x_0, y_0), N, results,args)
-			der = self.f.der_y(x_0, y_0, False)
+			der = self.f.der_y(x_0, y_0, _)
 			if der > 0:
 				Q[2], Q[3] = Q[2],  y_0
 			else:
@@ -379,9 +380,7 @@ class halving_square:
 			x_0 = (Q[0] + Q[1]) / 2
 			self.axis, self.value, self.segm = 'y', x_0, [Q[2], Q[3]]
 			y_0, _ = self.solve()
-			if self.add_cond(x_0, y_0):
-				return ((x_0, y_0), N, results, args)
-			der = self.f.der_x(x_0, y_0, False)
+			der = self.f.der_x(x_0, y_0, _)
 			if der > 0:
 				Q[0], Q[1] = Q[0],  x_0
 			else:
