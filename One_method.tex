@@ -21,7 +21,7 @@
  
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-	
+
 \usepackage{xcolor}
 \usepackage{hyperref}
 \definecolor{linkcolor}{HTML}{799B03} % цвет гиперссылок
@@ -435,45 +435,68 @@ Firstly, we see that the first strategy is the slowest strategy from the three s
 
 Secondly, we can see that the second and the third stratagies have similar results that's why we can state that the second estimate is good replacement for the third. Of course, it is only for the simple tasks when calculating gradients and derivatives is fast procedure. Obviously, when to calculate gradient is the hard procedure we will not have such positive results.
 
-\subsection{Primal Gradient Method}
-\label{PGM}
+\subsection{Other Inexact Methods}
+\label{Inexact}
 
-We will compare the our method with primal gradient method with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that for the task of minimization 
-$$f(\textbf{x}) = \max \Psi(\textbf{x}, \textbf{u}) =\max_\textbf{u}\left(G(\textbf{u})+(A\textbf{u}, \textbf{x})\right)$$
+Our optimization method can solve the task of minimization function $f$ on square when the function and its gradient can not be calculated accurately but there are other optimization method for such tasks. In each section one describes some of them and in the next section there is comparison of our method and this methods.
+
+The fist method is Primal Gradient Method (PGM) with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that this method converges to the solution with accuracy $\delta$. Moreover, in the \cite{PGM} it is proved that for the function
+$$f(\textbf{x}) = \min\limits_\textbf{u} \left(\Psi(\textbf{x},\textbf{u}) + \textbf{u}^\top A\textbf{x}\right)$$
 there is following $(\delta, L,\mu)$ oracle:
 $$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
 $$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
 with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
 
-And primal gradient method with $(\delta, L,\mu)$ oracle converges to the solution with accuracy $\delta$ on a function with a linear speed.
-
-And we will use this model for our task in the next subsection.
+The second having to be discussed method is inexact ellipsoid method. The ellipsoid method with $\epsilon$-subgradient instead usual subgradient converges to a solution with accuracy $\epsilon$. It is proved in \cite{Ellipsoids}. Moreover, in \cite{Polyak} there is proved that for the function
+$$f(\textbf{x}) = \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})$$
+the following statement is met:
+$$\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon})\in\partial_\epsilon f(\textbf{x}),$$
+if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
 
 \subsection{Comparison With Other Methods}
 \label{Comparison}
 
-\begin{figure}[h!]  
+\begin{figure}[ht!]  
 \vspace{-4ex} \centering \subfigure[]{
-\includegraphics[width=0.45\linewidth]{Tests/Images/Comparison10.pdf} \label{10} }  
-\hspace{1.2ex}
+\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-1.pdf} \label{10_1} }  
+\hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.45\linewidth]{Tests/Images/Comparison100.pdf} \label{100} }
-\caption{Comparison of different optimization methods on saddle point task for prime task with dimension: \subref{10}  $N=10$; \subref{100} $N=100$.} \label{fig:image}
+\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-3.pdf} \label{10_3} }
+\hspace{2ex}
+\subfigure[]{ \includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-10.pdf} \label{10_10} }  
+\vspace{2ex}
+\subfigure[]{
+\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-1.pdf} \label{100_1} }  
+\hspace{2ex}
+\subfigure[]{
+\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-3.pdf} \label{100_3} }
+\hspace{2ex}
+\subfigure[]{ \includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-10.pdf} \label{100_10} }
+\caption{Comparison of different on inexact methods for task with different dimension $N$ and for different required accuracy $\epsilon$: \subref{10_1} $N=10,\epsilon=10^{-1}$; \subref{10_3} $N=10,\epsilon=10^{-3}$; \subref{10_10} $N=10,\epsilon=10^{-10}$; \subref{100_1} $N=10,\epsilon=10^{-1}$; \subref{100_3} $N=100,\epsilon=10^{-3}$; \subref{100_10} $N=100,\epsilon=10^{-10}$. } \label{fig:image}
 \end{figure}
 
-Let's compare out method with ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{PGM}) on some dual task. Of course, we can not calculate gradient of dual function accurately and ellipsoid method needs it. But we will calculate $x(\lambda)$ with little accuracy $\epsilon = 10^{-5}$. We have not proves that such method will converge. 
+Let's compare out method with inexact ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{Inexact}) on a dual task.
 
-For to find $\textbf{x}(\lambda)$ we will use conjugate gradients method. Additionally, our method with constant estimate for one-dimensional task and PGM with $(\delta, L,\mu)$ oracle need an accuracy for $\textbf{x}(\lambda)$. In our tests we chose the accuracy $\epsilon_\textbf{x} = 0.01$.
+For to find $\textbf{x}(\lambda)$ we will use gradients descent. There are theoretical result that can help to manange distance $\|\textbf{x}_k-\textbf{x}^*\|$ from current to optimal points. In particular, there are following results:
+\begin{itemize}
+\item If $f$ is a convex function with $L$-Lipschitz continious gradient then
+$$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \frac{\|\textbf{x}_0-\textbf{x}^*\|}{k}$$
+\item If $f$ is a $\mu$-strong convex function with $L$-Lipschitz continious gradient then
+$$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \left(\frac{M-1}{M+1}\right)^kL\|\textbf{x}_0-\textbf{x}^*\|,$$
+where $M =\frac{L}{\mu}$.
+\end{itemize}
+For all inexact method we will calculate $x(\lambda)$ with such accuracy as the method will converge to the solution with same for all methods accuracy $\epsilon$
 
 We consider following prime task:
 
 \begin{gather}
 \label{prime}
-f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{a_kx_k}\right) + \|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
-\text{s.t.}\,g_k(\textbf{x}) = x_k-R_k\leq0, k = \overline{1,2}\\
+f(\textbf{x}) = \ln \left(1+\sum_{k=1}^me^{\textbf{a}_k^\top\textbf{x}}\right) + C\|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
+\text{s.t.}\,\textbf{x}\in \mathbb{R}\\
+g_k(\textbf{x}) = \textbf{b}_k^\top\textbf{x}-R_k\leq0, k = \overline{1,n}\\
 \end{gather}
 
-It is task to minimize LogSumExp-function on the intersection of halfspaces. Parameter $\textbf{a}$ is generated randomly.
+It is task to minimize LogSumExp-function with $l2$ regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaled 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{n\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to 10 in our experiments and has not changes.
 
 We introduce the following notation:
 
@@ -499,10 +522,7 @@ $$\phi(\lambda_1, \lambda_2) \rightarrow \min_{0\leq\lambda_k\leq\lambda_{max}}$
 
 How to calculate function and derivatave value for such task was discussed in the section \ref{details}.
 
-And now we can compare speed of different methods for the dual task. We will compare ellipsoids method, gradient descent and our method HalvingSquare with two stop-condition for the task on segment. We will compare for different $N = 10^k, k = \overline{1, 4}$.
-
-We can see on \ref{fig:image} the following results. Firstly, the different strategies for one-dimensional task have the approximately results on time but the strategy \textbf{CurGrad} is faster. Secondly, the our method is the fastest from all been be compared methods.
-
+We can see on \ref{fig:image} the following results. Firstly, the halving square method with provided in this work strategy \textbf{CurGrad} are the fastest method in all tests. In particular, this strategy is faster than strategy with constant estimate provided in \cite{Ston_Pas}. It proves that provided by Nesterov method with strategy through gradient is the best method for to solve two dimensional dual task of minimization. Secondly, the gain of this strategy in comparison with other method is increase when the required $\epsilon$ decrease. This fact demonstrated important advantange of this strategy: it does not depend on required accuracy strongly. So, this method with constant estimate has strong dependity on it because there is this accuracy in the constant estimate, PGM and inexact ellipsoid method require that the $x(\lambda)$ is found with accuracy depended on $\epsilon$. But halving square with ellipsoid method has not such dependety.
 \section{Conclusion}
 \newpage
 \begin{thebibliography}{3}
@@ -517,9 +537,13 @@ Anaconda[site]. At available: \href{https://www.anaconda.com}{https://www.anacon
 \bibitem{DDR-theorem}
 Danskin, J.M.: The theory of Max-Min, with applications. J. SIAM Appl. Math.14(4) (1966)
 \bibitem{Stonykin}
-Fedor S. Stonyakin, Mohammad S. Alkousa, Alexander A. Titov,and Victoria V. Piskunova1 On Some Methods for Strongly ConvexOptimization Problems with OneFunctional Constraint // ...
+Fedor S. Stonyakin, Mohammad S. Alkousa, Alexander A. Titov,and Victoria V. Piskunova1 On Some Methods for Strongly Convex Optimization Problems with One Functional Constraint // ...
 \bibitem{PGM}
 Olivier Devolder Exactness, Inexactness and Stochasticityin First-Order Methods for Large-ScaleConvex Optimization // UCL --- 2013,
+\bibitem{Ellipsoids}
+Need Reference To Book with Inexact Ellipsoids
+\bibitem{Polyak}
+Need Reference To Polyak
 \bibitem{my_git}
 Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
