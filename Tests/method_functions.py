@@ -321,7 +321,7 @@ class halving_square:
 	def ConstEst(self, l1, l2, delta, x, r):
 		if self.est is None:
 			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
-			self.est = eps / (2 * M * R * math.sqrt(5) * (math.log((2 * L * R * math.sqrt(2)) / eps, 2)))
+			self.est = eps / (2 * M * R * (math.sqrt(5)+math.sqrt(2)) * (1-eps/(M*R*math.sqrt(2))))
 		return (delta <= self.est)
 
 	def get_delta(self, lambda1, lambda2, der, L_g):
