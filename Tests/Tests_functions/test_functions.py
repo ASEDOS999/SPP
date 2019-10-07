@@ -138,7 +138,7 @@ class LogSumExp():
 		m = 10000
 		a = np.random.uniform(-1, 1, (m,n))
 		self.A = a
-		self.C = 0.01
+		self.C = 10
 		self.f = lambda x: np.log(1 + np.exp(a.dot(x)).sum()) + np.linalg.norm(x)**2*self.C
 		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
 		# self.f = lambda x: np.linalg.norm(x)
@@ -257,18 +257,20 @@ class LogSumExp():
 		L = self.fL +l1*self.g1L + l2*self.g2L
 		mu = (self.fmu+ l1*self.g1mu+l2*self.g2mu)
 		M = L/mu
-		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+		q = (M-1)/(M+1)
 		R = self.R0
-		alpha = 4 / (np.sqrt(L)+np.sqrt(mu))**2
-		beta = q**2
+		alpha = 1/(L+mu)
 		x = np.zeros(self.a.shape)
 		if not warm is None:
 			x, R = warm
 		R *= L/2
 		x, x_prev= x - 1/L * grad(x), x
+		R *= 1/5
+		N = 1
 		while abs(der(x)) < R:
-			R *= q
-			x, x_prev = x - alpha * grad(x) + beta * (x-x_prev), x
+			R *= min(q, (N+4)/(N+5))
+			x = x - alpha *grad(x)
+			N += 1
 		return x
 
 	def der_x(self, l1, l2, warm = None):

@@ -109,7 +109,7 @@ def comparison(f, Q, eps):
 	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
 
 import threading
-def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
+def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None, eps = 0.001):
 	if a is None:
 		k = 1000
 		a = np.random.uniform(-k, k, size=(N,))
@@ -123,14 +123,15 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	print('Ellipsoids')
 	t1 = threading.Thread(target = ellipsoid, 
 						args = (f,Q.copy()),
-						kwargs = {'time_max':time_max, 'time': True, 'res':(res,'Ellipsoids')})
+						kwargs = {'cur_eps':eps, 'time_max':time_max, 'time': True, 'res':(res,'Ellipsoids')})
 	
-	solver = HS(f,Q,None)
+	solver = HS(f,Q,None, cur_eps = eps)
 	print('CurGrad')
 	t2 = threading.Thread(target = solver.halving_square, 
 						kwargs = {'time_max':time_max, 'time': True, 'res':(res, 'HalvingSquare-CurGrad')})
 	res['HalvingSquare-CurGrad']= None
 
+	solver = HS(f,Q,None, cur_eps = eps)
 	print('ConstEst')
 	solver.stop = solver.ConstEst
 	t3 = threading.Thread(target = solver.halving_square,
@@ -138,7 +139,7 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	
 	print('GD')
 	t4 = threading.Thread(target = gradient_descent, 
-						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'GD')})
+						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'GD'), 'cur_eps':eps})
 	
 	t1.start()
 	t2.start()
@@ -148,6 +149,51 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None):
 	t2.join()
 	t3.join()
 	t4.join()
+	keys =res.keys()
+	for key in keys:
+		fdict = {**fdict, **res[key][-1]}
+		res[key] = tuple([i for i in res[key][:-1]])
+	f.values = fdict
+	return res, f
+
+def strategy_LogSumExp(N = 2, time_max = 100, eps = 1e-3, a = None, f = None):
+	if f is None:
+		if a is None:
+			k = 1000
+			a = np.random.uniform(-k, k, size=(N,))
+		f = LogSumExp(a)
+	Q = f.get_square()
+	L, M = f.lipschitz_function(Q), f.lipschitz_gradient(Q)
+	res = dict()
+	fdict = dict()
+	
+	solver = HS(f,Q,None)
+	solver.stop = solver.CurGrad
+	N_max = 10
+	print('CurGrad')
+	t1 = threading.Thread(target = solver.halving_square, 
+						kwargs = {'N_max':N_max, 'time': True, 'res':(res, 'HalvingSquare-CurGrad')})
+	res['HalvingSquare-CurGrad']= None
+
+	print('ConstEst')
+	t2 = list()
+
+	eps_list = [0.1**i for i in range(10)]
+	for eps in eps_list:
+		solver = HS(f,Q,None,cur_eps = eps)
+		solver.stop = solver.ConstEst
+		solver.eps = eps
+		solver.est = None
+		res[eps] = None
+		t2.append(threading.Thread(target = solver.halving_square,
+							kwargs = {'N_max':N_max, 'time': True, 'res':(res,eps)}))
+	
+	t1.start()
+	for t in t2:
+		t.start()
+	t1.join()
+	for t in t2:
+		t.join()
 	keys =res.keys()
 	for key in keys:
 		fdict = {**fdict, **res[key][-1]}
@@ -166,7 +212,7 @@ def comparison_LogSumExp(N = 2, time_max = 100, a = None):
 	fdict = dict()
 	
 	print('Ellipsoids')
-	res['Ellipsoids'] = ellipsoid(f,Q, time_max = time_max, time = True)
+	res['Ellipsoids'] = ellipsoid(f,Q, time_max = time_max, time = True, cur_eps = eps)
 	fdict = {**fdict, **f.values}
 	f.values = dict()
 	

@@ -5,6 +5,13 @@ import numpy as np
 import time
 def get_cond(**kwargs):
 	f = kwargs['f']
+	if kwargs.__contains__('N_max'):
+		def _(list_time, N_max = kwargs['N_max'], **kwargs):
+			list_time.append(time.time())
+			N = kwargs['N']
+			return N > N_max
+		args = (_, [time.time()])
+		return args
 	if kwargs.__contains__('time') and kwargs['time']:
 		def _(list_time, T = kwargs['time_max'], **kwargs):
 			list_time.append(time.time())
@@ -197,19 +204,22 @@ def get_grad(f,lambda_, eps):
 	R = f.R0
 	mu = f.fmu + l1 * f.g1mu + l2 * f.g2mu
 	M = L / mu
-	q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
-	alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
-	beta = q**2
+	#q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
+	q = (M-1)/(M+1)
+	alpha = 1/(L + mu)
 	x = np.zeros(f.a.shape)
 	x, x_prev = x - alpha*grad(x), x
+	R *= 1/5
+	N = 1
 	while L*R >= eps:
-		x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
-		R *= q
+		x = x - alpha * grad(x)
+		R *= min((N+4)/(N+5), q)
+		N+=1
 		#print(q, R, obj(x), np.linalg.norm(x-x_prev))
 	return grad_l(x)
-def gradient_descent(f, Q, L, **kwargs):
+def gradient_descent(f, Q, L, cur_eps = 0.001, **kwargs):
 	N = 0
-	eps = 1e-10/3
+	eps = cur_eps/3
 	cond, args = get_cond(f=f, **kwargs)
 	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
 	results = [x.copy()]
@@ -227,7 +237,7 @@ def gradient_descent(f, Q, L, **kwargs):
 				kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, f.values)
 			return (x, N, results, args)
 
-def ellipsoid(f, Q, eps = None, **kwargs):
+def ellipsoid(f, Q, eps = None, cur_eps = 0.001, **kwargs):
 	n = 2
 	cond, args = get_cond(f=f, **kwargs)
 	x = np.array([(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]) if not kwargs.__contains__('x_0') else kwargs['x_0']
@@ -240,7 +250,7 @@ def ellipsoid(f, Q, eps = None, **kwargs):
 	results = [x]
 	while True:
 		if (np.clip(x, *domain.T) == x).any():
-			_df = get_grad(f,x, 1e-10)
+			_df = get_grad(f,x, cur_eps)
 		else:
 			if Q[0]<=x[0] <=Q[1]:
 				_df = np.array([Q[1], Q[2]])
@@ -263,11 +273,11 @@ def ellipsoid(f, Q, eps = None, **kwargs):
 
 
 class halving_square:
-	def __init__(self, f, Q, eps):
+	def __init__(self, f, Q, eps, cur_eps = 0.001):
 		self.f = f
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
-		self.eps = 1e-5
+		self.eps = cur_eps
 		self.type_stop = 'true_grad'
 		self.value = 0
 		self.axis = 'x'
@@ -285,7 +295,7 @@ class halving_square:
 		if self.axis == 'x':
 			g = self.f.g2
 			L_gk = self.f.g2L
-		delta = (b-a)/2
+		#delta = (b-a)/2
 
 		a = self.f.a
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*l1 + self.f.g2_der(x)*l2
@@ -294,14 +304,17 @@ class halving_square:
 		#mu = 2*(1+l1+l2)
 		mu = self.f.fmu + l1*self.f.g1mu+l2*self.f.g2mu
 		M = L/ mu
-		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
-		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
+		q = (M-1)/(M+1)
+		alpha = 1/(L+mu)
 		beta = q**2
+		N = 1
+		R *= 1/5
 		x = x0
-		x, x_prev = x - 1/L*grad(x), x
+		x = x - alpha * grad(x)
 		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
-			x, x_prev = x - alpha * grad(x) + beta*(x-x_prev), x
-			R *= q
+			x = x - alpha * grad(x)
+			R *= min((N+4)/(N+5), q)
+			N+=1
 		return delta-abs(g(x))/self.f_M<=0
 	def CurGrad(self, l1, l2, delta, x, R):
 		return self.estimate_grad(l1, l2, delta, x, R)
@@ -320,14 +333,16 @@ class halving_square:
 		#mu = 2 * (1+lambda1 + lambda2)
 		mu = self.f.fmu + lambda1 * self.f.g1mu + lambda2 * self.f.g2mu
 		M = L/mu
-		q = (np.sqrt(M)-1)/(np.sqrt(M)+1)
-		alpha = 4/(np.sqrt(L)+np.sqrt(mu))**2
-		beta = q**2
+		q = (M-1)/(M+1)
+		alpha = 1/(L+mu)
 		x_prev = x
 		x = x_prev - 1/L*grad(x_prev)
+		N=1
+		R *= 1/5
 		while L_g * R >= abs(der(x)):
-			R *= q
-			x,x_prev = x - alpha*grad(x)+beta*(x-x_prev), x
+			R *= min((N+4)/(N+5), q)
+			x = x - alpha*grad(x)
+			N += q
 		return x, R
 
 	def dichotomy(self):
@@ -394,4 +409,5 @@ class halving_square:
 					N = -1
 				if kwargs.__contains__('res'):
 					kwargs['res'][0][kwargs['res'][1]] = ((x_0, y_0), N, results, args, self.f.values)
+				print(self.stop, self.est)
 				return (x_0, y_0), N,results, args
