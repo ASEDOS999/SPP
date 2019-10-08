@@ -348,12 +348,12 @@ class halving_square:
 	def dichotomy(self):
 		if self.axis == 'x':
 			f = lambda x: self.f.calculate_function(x, self.value)
-			der = lambda l1: lambda x: self.f.f(x) + self.value*self.f.g2(x) + l1 * self.f.g1(x)
+			der = lambda l1: lambda x: self.f.g1(x)
 			L = self.f.g1L
 			get_lambda = lambda x: (x, self.value)
 		if self.axis == 'y':
 			f = lambda y: self.f.calculate_function(self.value, y)
-			der = lambda l2: lambda x: self.f.f(x) + self.value*self.f.g1(x) + l2*self.f.g2(x)
+			der = lambda l2: lambda x: self.f.g2(x)
 			L = self.f.g2L
 			get_lambda = lambda y: (self.value, y)
 		a, b = self.segm
@@ -411,3 +411,122 @@ class halving_square:
 					kwargs['res'][0][kwargs['res'][1]] = ((x_0, y_0), N, results, args, self.f.values)
 				print(self.stop, self.est)
 				return (x_0, y_0), N,results, args
+"""
+class halving_cube:
+	def __init__(self, f, Q, eps, cur_eps = 0.001):
+		self.f = f
+		self.Q = Q.copy()
+		self.size = Q[1] - Q[0]
+		self.eps = cur_eps
+		self.type_stop = 'true_grad'
+		self.value = 0
+		self.axis = 'x'
+		self.segm = [Q[0], Q[1]]
+		self.est = None
+		self.f_L = self.f.L
+		self.f_M = self.f.M
+
+	def CurGrad(self, delta, lambda_, warm, k):
+		L_gk = self.f.gL[k]
+		x0, R = warm
+		a = self.f.a
+		grad = lambda x: self.f.f_der(x) + (lambda_*np.array([i(x) for i in self.f.der])).sum()
+		mu = self.f.fmu + (lambda_*np.array(self.f.gmu)).sum()
+		L = self.f.fL + (lambda_*np.array(self.f.gL)).sum()
+		M = L/ mu
+		q = (M-1)/(M+1)
+		alpha = 1/(L+mu)
+		N = 1
+		R *= 1/5
+		x = x - alpha * grad(x)
+		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
+			x = x - alpha * grad(x)
+			R *= min((N+4)/(N+5), q)
+			N+=1
+		return delta-abs(g(x))/self.f_M<=0
+	def ConstEst(self, l1, l2, delta, x, r):
+		if self.est is None:
+			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
+			self.est = eps / (2 * M * R * (math.sqrt(5)+math.sqrt(2)) * (1-eps/(M*R*math.sqrt(2))))
+		return (delta <= self.est)
+
+	def get_delta(self, lambda1, lambda2, der, L_g):
+		R = self.f.R0
+		x = np.zeros(self.f.a.shape)
+		a = self.f.a
+		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
+		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
+		#mu = 2 * (1+lambda1 + lambda2)
+		mu = self.f.fmu + lambda1 * self.f.g1mu + lambda2 * self.f.g2mu
+		M = L/mu
+		q = (M-1)/(M+1)
+		alpha = 1/(L+mu)
+		x_prev = x
+		x = x_prev - 1/L*grad(x_prev)
+		N=1
+		R *= 1/5
+		while L_g * R >= abs(der(x)):
+			R *= min((N+4)/(N+5), q)
+			x = x - alpha*grad(x)
+			N += q
+		return x, R
+
+	def dichotomy(self, cur_Q, k):
+		if self.axis == 'x':
+			def get_vector(Q, l):
+				for i, ind in enumerate(Q):
+					if type(i) == type(list()):
+						Q[ind] = l
+				return np.array(Q)
+			der = lambda l1: lambda x: self.f.f(x) + self.value*self.f.g2(x) + l1 * self.f.g1(x)
+			L = self.f.g1L
+			get_lambda = lambda x: (x, self.value)
+		if self.axis == 'y':
+			f = lambda y: self.f.calculate_function(self.value, y)
+			der = lambda l2: lambda x: self.f.f(x) + self.value*self.f.g1(x) + l2*self.f.g2(x)
+			L = self.f.g2L
+			get_lambda = lambda y: (self.value, y)
+		a, b = self.segm
+		mystop = self.stop
+		while True:
+			c = (a+b)/2
+			l1, l2 = get_lambda(c)
+			x,R = self.get_delta(l1, l2, der(c), L) 
+			val = der(c)(x)
+			if val  < 0:
+				a, b = c,b
+			else:
+				a, b = a,c
+			if mystop(l1, l2, b-a,x,R):
+				return c, (x,R)
+		return c
+	def halving_cube(self, Q, k = None):
+		n_list = len([i for i in Q if type(i) == type(list())])
+		N = 0
+		while True:
+			for i,ind in enumerate(Q):
+				if type(i) == type(list()):
+					cur_x = (i[0]+i[1])/2
+					cur_Q = Q.copy()
+					cur_Q[ind] = cur_x
+					if n_list > 2:
+						ans, _ = self.halving_cube(cur_Q, ind)
+					else:
+						ans, _ = self.dichotomy(cur_Q, ind)
+					der, _ = self.f.der[ind](ans, warm = _)
+					if der > 0:
+						Q[ind] = [i[0], cur_x]
+					else:
+						Q[ind] = [cur_x, i[1]]
+					x, warm = ans, _
+			delta = self.get_size(Q)
+			if n_list == len(Q):
+				results.append(x)
+				N+=1
+				if cond(args, x, N=N):
+					if kwargs.__contains__('res'):
+						kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, self.f.values)
+			else:
+				if self.CurGrad(delta, x, warm, k):
+					return x, warm
+"""
