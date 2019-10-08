@@ -475,17 +475,17 @@ if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textb
 \caption{Comparison of different on inexact methods for task with different dimension $N$ and for different required accuracy $\epsilon$: \subref{10_1} $N=10,\epsilon=10^{-1}$; \subref{10_3} $N=10,\epsilon=10^{-3}$; \subref{10_10} $N=10,\epsilon=10^{-10}$; \subref{100_1} $N=10,\epsilon=10^{-1}$; \subref{100_3} $N=100,\epsilon=10^{-3}$; \subref{100_10} $N=100,\epsilon=10^{-10}$. } \label{fig:image}
 \end{figure}
 
-Let's compare out method with inexact ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{Inexact}) on a dual task.
+Let's compare our method with inexact ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{Inexact}) on a dual task.
 
 For to find $\textbf{x}(\lambda)$ we will use gradients descent. There are theoretical result that can help to manange distance $\|\textbf{x}_k-\textbf{x}^*\|$ from current to optimal points. In particular, there are following results:
 \begin{itemize}
-\item If $f$ is a convex function with $L$-Lipschitz continious gradient then
-$$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \frac{\|\textbf{x}_0-\textbf{x}^*\|}{k}$$
-\item If $f$ is a $\mu$-strong convex function with $L$-Lipschitz continious gradient then
+\item If $f$ is a convex function with $L$-Lipschitz continious gradient then gradient descent with step $\alpha_k = \frac{1}{L}$ converges with speed
+$$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \frac{\|\textbf{x}_0-\textbf{x}^*\|}{k+4}$$
+\item If $f$ is a $\mu$-strong convex function with $L$-Lipschitz continious gradient then gradient descent with step $\alpha_k = \frac{1}{L+\mu}$ converges with speed
 $$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \left(\frac{M-1}{M+1}\right)^kL\|\textbf{x}_0-\textbf{x}^*\|,$$
 where $M =\frac{L}{\mu}$.
 \end{itemize}
-For all inexact method we will calculate $x(\lambda)$ with such accuracy as the method will converge to the solution with same for all methods accuracy $\epsilon$
+The proves for this statements one can find in many books of optimization, for example, in the book \cite{Polyak}. For all inexact method we will calculate $x(\lambda)$ with such accuracy as the method will converge to the solution with same for all methods accuracy $\epsilon$
 
 We consider following prime task:
 
@@ -496,7 +496,7 @@ f(\textbf{x}) = \ln \left(1+\sum_{k=1}^me^{\textbf{a}_k^\top\textbf{x}}\right) +
 g_k(\textbf{x}) = \textbf{b}_k^\top\textbf{x}-R_k\leq0, k = \overline{1,n}\\
 \end{gather}
 
-It is task to minimize LogSumExp-function with $l2$ regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaled 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{n\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to 10 in our experiments and has not changes.
+It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaled 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{n\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to 10 in our experiments and has not changes.
 
 We introduce the following notation:
 
@@ -543,7 +543,7 @@ Olivier Devolder Exactness, Inexactness and Stochasticityin First-Order Methods 
 \bibitem{Ellipsoids}
 Need Reference To Book with Inexact Ellipsoids
 \bibitem{Polyak}
-Need Reference To Polyak
+B.T. Polyak. The Introduction to Optimization // Moscow, Science - 1983
 \bibitem{my_git}
 Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
 \end{thebibliography}
