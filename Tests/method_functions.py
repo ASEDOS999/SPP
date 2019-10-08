@@ -411,18 +411,12 @@ class halving_square:
 					kwargs['res'][0][kwargs['res'][1]] = ((x_0, y_0), N, results, args, self.f.values)
 				print(self.stop, self.est)
 				return (x_0, y_0), N,results, args
-"""
+
 class halving_cube:
-	def __init__(self, f, Q, eps, cur_eps = 0.001):
+	def __init__(self, f, Q):
 		self.f = f
 		self.Q = Q.copy()
 		self.size = Q[1] - Q[0]
-		self.eps = cur_eps
-		self.type_stop = 'true_grad'
-		self.value = 0
-		self.axis = 'x'
-		self.segm = [Q[0], Q[1]]
-		self.est = None
 		self.f_L = self.f.L
 		self.f_M = self.f.M
 
@@ -450,14 +444,13 @@ class halving_cube:
 			self.est = eps / (2 * M * R * (math.sqrt(5)+math.sqrt(2)) * (1-eps/(M*R*math.sqrt(2))))
 		return (delta <= self.est)
 
-	def get_delta(self, lambda1, lambda2, der, L_g):
+	def get_delta(self, l, der, L_g):
 		R = self.f.R0
 		x = np.zeros(self.f.a.shape)
 		a = self.f.a
-		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
-		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
-		#mu = 2 * (1+lambda1 + lambda2)
-		mu = self.f.fmu + lambda1 * self.f.g1mu + lambda2 * self.f.g2mu
+		grad = lambda x: self.f.f_der(x) + (l*np.array([i(x) for i in self.f.g_der])).sum()
+		L = self.f.fL+(l*np.array(self.gL)).sum()
+		mu = self.f.fmu+(l*np.array(self.gmu)).sum()
 		M = L/mu
 		q = (M-1)/(M+1)
 		alpha = 1/(L+mu)
@@ -472,32 +465,21 @@ class halving_cube:
 		return x, R
 
 	def dichotomy(self, cur_Q, k):
-		if self.axis == 'x':
-			def get_vector(Q, l):
-				for i, ind in enumerate(Q):
-					if type(i) == type(list()):
-						Q[ind] = l
-				return np.array(Q)
-			der = lambda l1: lambda x: self.f.f(x) + self.value*self.f.g2(x) + l1 * self.f.g1(x)
-			L = self.f.g1L
-			get_lambda = lambda x: (x, self.value)
-		if self.axis == 'y':
-			f = lambda y: self.f.calculate_function(self.value, y)
-			der = lambda l2: lambda x: self.f.f(x) + self.value*self.f.g1(x) + l2*self.f.g2(x)
-			L = self.f.g2L
-			get_lambda = lambda y: (self.value, y)
-		a, b = self.segm
-		mystop = self.stop
+		ind = [ind for ind, i in enumerate(cur_Q) if type(i)==type(list())][0]
+		der = lambda l: lambda x: self.f.g[ind](x)
+		L = self.f.gL[ind]
+		a, b = cur_Q[ind]
 		while True:
 			c = (a+b)/2
-			l1, l2 = get_lambda(c)
-			x,R = self.get_delta(l1, l2, der(c), L) 
+			cur_l = cur_Q
+			cur_l[ind] = c
+			x,R = self.get_delta(cur_l, der(c), L) 
 			val = der(c)(x)
 			if val  < 0:
 				a, b = c,b
 			else:
 				a, b = a,c
-			if mystop(l1, l2, b-a,x,R):
+			if self.CurGrad(b-a, l, (x,R), ind):
 				return c, (x,R)
 		return c
 	def halving_cube(self, Q, k = None):
@@ -529,4 +511,3 @@ class halving_cube:
 			else:
 				if self.CurGrad(delta, x, warm, k):
 					return x, warm
-"""
