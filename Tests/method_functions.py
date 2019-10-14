@@ -225,7 +225,8 @@ def gradient_descent(f, Q, L, cur_eps = 0.001, **kwargs):
 	results = [x.copy()]
 	grad = lambda x: get_grad(f, x, eps)
 	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
-	L = 2/f.fmu
+	norm = lambda x: np.linalg.norm(x)
+	L = 2* f.lmax /f.fmu
 	while True:
 		der = grad(x)
 		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
@@ -236,6 +237,32 @@ def gradient_descent(f, Q, L, cur_eps = 0.001, **kwargs):
 			if kwargs.__contains__('res'):
 				kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, f.values)
 			return (x, N, results, args)
+
+
+def FGM(f, Q, L, cur_eps = 0.001, **kwargs):
+	N = 0
+	eps = cur_eps/3
+	cond, args = get_cond(f=f, **kwargs)
+	x = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
+	results = [x.copy()]
+	grad = lambda x: get_grad(f, x, eps)
+	x_prev = [(Q[0] + Q[1]) / 2, (Q[2] + Q[3]) / 2]
+	L = 2* f.lmax /f.fmu
+	mu = f.lmin / (2*self.f.fL)
+	alpha = 1
+	u = 1
+	while True:
+		der = grad(x)
+		x[0], x_prev[0] = min(max(x[0] - 1. / L * der[0], Q[0]), Q[1]), x[0]
+		x[1], x_prev[1] = min(max(x[1] - 1. / L * der[1], Q[2]), Q[3]), x[1]
+		N += 1
+		results.append(x.copy())
+		if cond(args, x=x, N=N, size_Q = Q[1]-Q[0]):
+			if kwargs.__contains__('res'):
+				kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, f.values)
+			return (x, N, results, args)
+
+
 
 def ellipsoid(f, Q, eps = None, cur_eps = 0.001, **kwargs):
 	n = 2
@@ -411,103 +438,3 @@ class halving_square:
 					kwargs['res'][0][kwargs['res'][1]] = ((x_0, y_0), N, results, args, self.f.values)
 				print(self.stop, self.est)
 				return (x_0, y_0), N,results, args
-
-class halving_cube:
-	def __init__(self, f, Q):
-		self.f = f
-		self.Q = Q.copy()
-		self.size = Q[1] - Q[0]
-		self.f_L = self.f.L
-		self.f_M = self.f.M
-
-	def CurGrad(self, delta, lambda_, warm, k):
-		L_gk = self.f.gL[k]
-		x0, R = warm
-		a = self.f.a
-		grad = lambda x: self.f.f_der(x) + (lambda_*np.array([i(x) for i in self.f.der])).sum()
-		mu = self.f.fmu + (lambda_*np.array(self.f.gmu)).sum()
-		L = self.f.fL + (lambda_*np.array(self.f.gL)).sum()
-		M = L/ mu
-		q = (M-1)/(M+1)
-		alpha = 1/(L+mu)
-		N = 1
-		R *= 1/5
-		x = x - alpha * grad(x)
-		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
-			x = x - alpha * grad(x)
-			R *= min((N+4)/(N+5), q)
-			N+=1
-		return delta-abs(g(x))/self.f_M<=0
-	def ConstEst(self, l1, l2, delta, x, r):
-		if self.est is None:
-			M, R, L, eps = self.f_M, self.size, self.f_L, self.eps
-			self.est = eps / (2 * M * R * (math.sqrt(5)+math.sqrt(2)) * (1-eps/(M*R*math.sqrt(2))))
-		return (delta <= self.est)
-
-	def get_delta(self, l, der, L_g):
-		R = self.f.R0
-		x = np.zeros(self.f.a.shape)
-		a = self.f.a
-		grad = lambda x: self.f.f_der(x) + (l*np.array([i(x) for i in self.f.g_der])).sum()
-		L = self.f.fL+(l*np.array(self.gL)).sum()
-		mu = self.f.fmu+(l*np.array(self.gmu)).sum()
-		M = L/mu
-		q = (M-1)/(M+1)
-		alpha = 1/(L+mu)
-		x_prev = x
-		x = x_prev - 1/L*grad(x_prev)
-		N=1
-		R *= 1/5
-		while L_g * R >= abs(der(x)):
-			R *= min((N+4)/(N+5), q)
-			x = x - alpha*grad(x)
-			N += q
-		return x, R
-
-	def dichotomy(self, cur_Q, k):
-		ind = [ind for ind, i in enumerate(cur_Q) if type(i)==type(list())][0]
-		der = lambda l: lambda x: self.f.g[ind](x)
-		L = self.f.gL[ind]
-		a, b = cur_Q[ind]
-		while True:
-			c = (a+b)/2
-			cur_l = cur_Q
-			cur_l[ind] = c
-			x,R = self.get_delta(cur_l, der(c), L) 
-			val = der(c)(x)
-			if val  < 0:
-				a, b = c,b
-			else:
-				a, b = a,c
-			if self.CurGrad(b-a, l, (x,R), ind):
-				return c, (x,R)
-		return c
-	def halving_cube(self, Q, k = None):
-		n_list = len([i for i in Q if type(i) == type(list())])
-		N = 0
-		while True:
-			for i,ind in enumerate(Q):
-				if type(i) == type(list()):
-					cur_x = (i[0]+i[1])/2
-					cur_Q = Q.copy()
-					cur_Q[ind] = cur_x
-					if n_list > 2:
-						ans, _ = self.halving_cube(cur_Q, ind)
-					else:
-						ans, _ = self.dichotomy(cur_Q, ind)
-					der, _ = self.f.der[ind](ans, warm = _)
-					if der > 0:
-						Q[ind] = [i[0], cur_x]
-					else:
-						Q[ind] = [cur_x, i[1]]
-					x, warm = ans, _
-			delta = self.get_size(Q)
-			if n_list == len(Q):
-				results.append(x)
-				N+=1
-				if cond(args, x, N=N):
-					if kwargs.__contains__('res'):
-						kwargs['res'][0][kwargs['res'][1]] = (x, N, results, args, self.f.values)
-			else:
-				if self.CurGrad(delta, x, warm, k):
-					return x, warm

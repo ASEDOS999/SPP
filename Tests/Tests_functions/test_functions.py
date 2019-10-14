@@ -146,34 +146,18 @@ class LogSumExp():
 			c = np.ones(self.a.shape)
 			c/=np.linalg.norm(c)
 		n = c.shape[0]
-		A1 = np.random.uniform(-1, 1, (n,n))
-		A1 = A1.T.dot(A1)
-		A1 = np.zeros((n,n))
-		#A1[0,0] = 1
-		b1 = np.zeros((n,))
-		b1[0] = 1
-		self.A1 = A1
 		b1 = np.random.uniform(-1,1,(n,))
 		self.b1 = b1
-		l = list(2*np.linalg.eig(A1)[0])
-		l.sort()
-		self.g1mu, self.g1L = l[0], l[-1] + np.linalg.norm(b1)
-		self.g1 = lambda x: x.dot(A1.dot(x)) - self.R1**2 + b1.dot(x)
+		self.g1mu, self.g1L = 0, np.linalg.norm(b1)
+		self.g1 = lambda x: - self.R1**2 + b1.dot(x)
 
-		A2 = np.random.uniform(-1, 1, (n,n))
-		A2 = A2.T.dot(A2)
-		self.A2 = A2
-		A2 = np.zeros((n,n))
-		#A2[1,1] = 1
-		b2 = np.zeros((n,))
-		b2[1] = 1
 		b2 = np.random.uniform(-1,1,(n,))
 		self.b2 = b2
-		l = list(2*np.linalg.eig(A2)[0])
-		l.sort()
-		self.g2mu, self.g2L = l[0], l[-1] + np.linalg.norm(b2)
-		self.g2 = lambda x: x.dot(A2.dot(x)) - self.R2**2 + b2.dot(x)
-
+		self.g2mu, self.g2L = 0, np.linalg.norm(b2)
+		self.g2 = lambda x: - self.R2**2 + b2.dot(x)
+		B = np.vstack((b1, b2))
+		l = np.linalg.eig(B.T.dot(B))[0]
+		slef.lmin, self.lmax = l.min(), l.max()
 		self.c = c
 		self.phi = lambda l1, l2: lambda x: -(self.f(x) + l1 * self.g1(x) + l2 * self.g2(x))
 		self.R1 = R1
@@ -196,47 +180,33 @@ class LogSumExp():
 		return R0
 
 	def get_lipschitz_constants(self):
-		a = self.a
-		m = lambda x: (a*x).max()
-		grad = lambda x: a *np.exp(a*x - m(x)*np.ones(a.shape))/(1/np.exp(m(x))+np.exp(a*x-m(x)*np.ones(a.shape)).sum()) + 2*x*self.C
-		norm_grad = lambda x: -np.linalg.norm(grad(x))
-		x0 = np.zeros(self.a.shape)
-		R = self.a.shape[0]
-		R = np.sqrt(np.log(1+R))
-		self.fL = -scipy.optimize.minimize(norm_grad, x0,
-						   bounds = [(-self.R0, self.R0) for i in range(a.shape[0])])['fun']
+		self.fL = np.sqrt(np.linalg.eig(self.A.T.dot(self.A))[0].max())+ 2 * self.R0 * self.C
 		print('L_f',self.fL)
 
 	def f_der(self, x):
 		a = self.A
-		grad = lambda x: ((a.T.dot(np.exp(a*x))).sum()/(1+np.exp(a.dot(x)).sum()) + 2*x*self.C)
+		grad = lambda x: a.T.dot(np.exp(a.dot(x))) /(1+np.exp(a.dot(x)).sum()) + 2*x*self.C
 		return grad(x)
 
 	def g1_der(self, x):
 		g = np.zeros(x.shape)
-		g = 2 * self.A1.dot(x) +self.b1
+		g = self.b1
 		return g
 
 	def g2_der(self, x):
 		g = np.zeros(x.shape)
-		g = 2*self.A2.dot(x) + self.b2
+		g = self.b2
 		return g
 
 	def lipschitz_function(self, Q):
 		if self.L is None:
-			#L = scipy.optimize.minimize(lambda x: -np.linalg.norm(self.gradient(x[0], x[1])), 
-			#	np.array([Q[0], Q[2]]),
-			#	bounds = [(Q[0], Q[1]),
-			#	(Q[2], Q[3])])
-			#self.L = -L['fun']
-			#print(self.L)
-			self.L = 2*np.sqrt(max(abs(self.R0**2 - self.R1), self.R1)**2 + 
-					+max(abs(self.R0**2+np.linalg.norm(self.c)**2-self.R2), self.R2)**2)
+			norm = lambda x: np.linalg.norm(x)
+			self.L = (norm(self.b1) + norm(self.b2)) * self.R0
 		return self.L
 
 	def lipschitz_gradient(self, Q):
 		if self.M is None:
-			self.M = (self.g1L + self.g2L)**2 / 2
+			self.M = (self.g1L + self.g2L)**2 / self.C
 		return self.M
 
 	def calculate_function(self, l1, l2):
@@ -307,3 +277,4 @@ class LogSumExp():
 		q = self.f(x) / gamma
 		self.Q = [0, q, 0, q]
 		return self.Q
+
