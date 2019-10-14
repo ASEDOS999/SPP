@@ -14,6 +14,7 @@ from method_functions import main_solver
 from method_functions import halving_square as HS
 from method_functions import gradient_descent
 from method_functions import ellipsoid
+from method_functions import FGM
 import math
 
 def qf_comparison(epsilon = 1e-6, out = True):
@@ -137,18 +138,24 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None, eps = 0.001):
 	t3 = threading.Thread(target = solver.halving_square,
 						kwargs = {'time_max':time_max, 'time': True, 'res':(res,'HalvingSquare-ConstEst')})
 	
-	print('GD')
+	print('PGM')
 	t4 = threading.Thread(target = gradient_descent, 
-						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'GD'), 'cur_eps':eps})
+						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'PGM'), 'cur_eps':eps})
+
+	print('FGM')
+	t5 = threading.Thread(target = gradient_descent, 
+						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'FGM'), 'cur_eps':eps})
 	
 	t1.start()
 	t2.start()
 	t3.start()
 	t4.start()
+	t5.start()
 	t1.join()
 	t2.join()
 	t3.join()
 	t4.join()
+	t5.join()
 	keys =res.keys()
 	for key in keys:
 		fdict = {**fdict, **res[key][-1]}
