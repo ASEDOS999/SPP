@@ -157,7 +157,7 @@ class LogSumExp():
 		self.g2 = lambda x: - self.R2**2 + b2.dot(x)
 		B = np.vstack((b1, b2))
 		l = np.linalg.eig(B.T.dot(B))[0]
-		slef.lmin, self.lmax = l.min(), l.max()
+		self.lmin, self.lmax = l.min(), l.max()
 		self.c = c
 		self.phi = lambda l1, l2: lambda x: -(self.f(x) + l1 * self.g1(x) + l2 * self.g2(x))
 		self.R1 = R1
