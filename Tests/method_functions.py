@@ -247,8 +247,9 @@ def FGM(f, Q, L, cur_eps = 0.001, **kwargs):
 	x = np.array(x)
 	results = [x.copy()]
 	grad = lambda x: get_grad(f, x, eps)
+	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
 	L = 2* f.lmax /f.fmu
-	mu = f.lmin / (2*self.f.fL)
+	mu = f.lmin / (2*f.fL)
 	alpha, A = 1, 1
 	u, v = L, np.zeros(x.shape)
 	while True:
@@ -256,16 +257,16 @@ def FGM(f, Q, L, cur_eps = 0.001, **kwargs):
 		np.array(der)
 
 		y = x - 1/L * der
-		y = np.clip(y, *np.array(Q).T)
+		y = np.clip(y, *domain.T)
 
 		u += mu * alpha
 		v += alpha * (mu * x - der)
 		z = u/v
-
+		z = np.clip(y, *domain.T)
 		tau = alpha/A
 		x = tau * z + (1 - tau) * y
 
-		alpha = (L+mu*A)/(2*L) * (1 + np.sqrt(1 + (4*L*A)/(L+mu*A)) )
+		alpha = (L+mu*A)/(2*L) * (1 + np.sqrt(abs(1 + (4*L*A)/(L+mu*A))) )
 
 		N += 1
 		results.append(x.copy())

@@ -143,7 +143,7 @@ def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None, eps = 0.001):
 						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'PGM'), 'cur_eps':eps})
 
 	print('FGM')
-	t5 = threading.Thread(target = gradient_descent, 
+	t5 = threading.Thread(target = FGM, 
 						args = (f, Q, M), kwargs={'time':True, 'time_max':time_max, 'res':(res,'FGM'), 'cur_eps':eps})
 	
 	t1.start()
