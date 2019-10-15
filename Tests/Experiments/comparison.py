@@ -110,11 +110,11 @@ def comparison(f, Q, eps):
 	return res_1[2], m2-m1, res_2[2], m3-m2, res_3[2], m4-m3
 
 import threading
-def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None, eps = 0.001):
+def NEWcomparison_LogSumExp(N = 2, time_max = 100, a = None, eps = 0.001, C = 1):
 	if a is None:
 		k = 1000
 		a = np.random.uniform(-k, k, size=(N,))
-	f = LogSumExp(a)
+	f = LogSumExp(a, C = C)
 	Q = f.get_square()
 	L, M = f.lipschitz_function(Q), f.lipschitz_gradient(Q)
 	res = dict()
