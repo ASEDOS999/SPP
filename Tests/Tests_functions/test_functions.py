@@ -131,14 +131,14 @@ from scipy import optimize
 # LOG-SUM-EXP
 import time
 class LogSumExp():
-	def __init__(self, list_of_parameters, c = None, R1 = 2, R2 = 3):
+	def __init__(self, list_of_parameters, c = None, R1 = 2, R2 = 3, C = 1):
 		self.a = list_of_parameters
 		a = self.a
 		n = a.shape[0]
 		m = 10000
 		a = np.random.uniform(-1, 1, (m,n))
 		self.A = a
-		self.C = 10
+		self.C = C
 		self.f = lambda x: np.log(1 + np.exp(a.dot(x)).sum()) + np.linalg.norm(x)**2*self.C
 		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
 		# self.f = lambda x: np.linalg.norm(x)
