@@ -243,14 +243,15 @@ Thirdly, all theorems in this section use $f'_y$ on horizontal segment and $f'_x
 
 \section{Number of iterations}
 
-Following estimates are correct if each iterations was correct (a rectangle is selected correctly on each iterations).
+Below proved estimates are correct if each iterations was correct, i.e. after each iteration there is the solution in the selected rectangle. It is important condition
 
 \begin{theorem}
-If function $f$ is convex and $L_f$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
-\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{L_fa}{\sqrt{2}\epsilon}\right\rceil\end{equation}
+If function $f$ is convex and $L_f$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
+\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{\sqrt{2}L_fa}{\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
-This estimate is a little improved estimate from \cite{Ston_Pas} because of we use a center of a current square as approximate  solution. The prove is similar to prove of not improved estimate.
+
+This estimate is trivial consequence of the function is Lipschitz continuous.
 
 There are functions which estimates from written above theorem are very accurate for.
 
@@ -265,7 +266,7 @@ But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. 
 \begin{theorem}
 If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
 \begin{equation}\label{NI2}
-N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{L_fa}{\sqrt{2}\epsilon}\right\}\right\rceil
+N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{\sqrt{2}L_fa}{\epsilon}\right\}\right\rceil
 \end{equation}
 where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L_f$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
 \end{theorem}
@@ -275,8 +276,8 @@ We can improve written above estimates if to add new conditions:
 \begin{theorem}
 Let function $f$ be convex and has $L$-Lipschitz continuous gradient.
 
-If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
-\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{La^2}{4\epsilon}\right\rceil\end{equation}
+If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{La^2}{2\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
@@ -458,18 +459,18 @@ if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textb
 
 \begin{figure}[ht!]  
 \vspace{-4ex} \centering \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-1.pdf} \label{10_1} }  
+\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-01.pdf} \label{10_1} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-3.pdf} \label{10_3} }
+\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-03.pdf} \label{10_3} }
 \hspace{2ex}
 \subfigure[]{ \includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-10.pdf} \label{10_10} }  
 \vspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-1.pdf} \label{100_1} }  
+\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-01.pdf} \label{100_1} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-3.pdf} \label{100_3} }
+\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-03.pdf} \label{100_3} }
 \hspace{2ex}
 \subfigure[]{ \includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-10.pdf} \label{100_10} }
 \caption{Comparison of different on inexact methods for task with different dimension $N$ and for different required accuracy $\epsilon$: \subref{10_1} $N=10,\epsilon=10^{-1}$; \subref{10_3} $N=10,\epsilon=10^{-3}$; \subref{10_10} $N=10,\epsilon=10^{-10}$; \subref{100_1} $N=10,\epsilon=10^{-1}$; \subref{100_3} $N=100,\epsilon=10^{-3}$; \subref{100_10} $N=100,\epsilon=10^{-10}$. } \label{fig:image}
@@ -522,7 +523,7 @@ $$\phi(\lambda_1, \lambda_2) \rightarrow \min_{0\leq\lambda_k\leq\lambda_{max}}$
 
 How to calculate function and derivatave value for such task was discussed in the section \ref{details}.
 
-We can see on \ref{fig:image} the following results. Firstly, the halving square method with provided in this work strategy \textbf{CurGrad} are the fastest method in all tests. In particular, this strategy is faster than strategy with constant estimate provided in \cite{Ston_Pas}. It proves that provided by Nesterov method with strategy through gradient is the best method for to solve two dimensional dual task of minimization. Secondly, the gain of this strategy in comparison with other method is increase when the required $\epsilon$ decrease. This fact demonstrated important advantange of this strategy: it does not depend on required accuracy strongly. So, this method with constant estimate has strong dependity on it because there is this accuracy in the constant estimate, PGM and inexact ellipsoid method require that the $x(\lambda)$ is found with accuracy depended on $\epsilon$. But halving square with ellipsoid method has not such dependety.
+We can see on \ref{fig:image} the following results. Firstly, the halving square method with provided in this work strategy \textbf{CurGrad} are the fastest method in the most tests tests. This method can be slower than other inexact methods if dimensional of primal task is small or $\epsilon$ is big. In particular, this strategy is faster than strategy with constant estimate provided in \cite{Ston_Pas}. It proves that provided by Nesterov method with strategy through gradient is the best method for to solve two dimensional dual task of minimization. Secondly, the gain of this strategy in comparison with other method is increase when the required $\epsilon$ decrease. This fact demonstrated important advantange of this strategy: it does not depend on required accuracy strongly. So, this method with constant estimate has strong dependity on it because there is this accuracy in the constant estimate, PGM and inexact ellipsoid method require that the $x(\lambda)$ is found with accuracy depended on $\epsilon$. But halving square with ellipsoid method has not such dependety.
 \section{Conclusion}
 \newpage
 \begin{thebibliography}{3}
