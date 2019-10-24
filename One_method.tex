@@ -396,6 +396,38 @@ If $g_k$ is $L_{g_k}$-lipschitz continious function:
 
 $$L_{g_k}\|\textbf{x}(\lambda)-\textbf{x}\|\leq |g_k(\textbf{x})|$$
 
+
+\section{Other Inexact Methods}
+\label{Inexact}
+
+Our optimization method can solve the task of minimization function $f$ on square when the function and its gradient can not be calculated accurately but there are other optimization method for such tasks. In each section one describes some of them and below there is experimental comparison of them with our method.
+
+The fist method is Primal Gradient Method (PGM) with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that this method converges to the solution with accuracy $\delta$:
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \frac{LR^2}{2}\exp\left(-k\frac{\mu}{L}\right) + \delta,$$
+where $R = \|\textbf{x}_0-\textbf{x}^*\|$ in our task. Moreover, in the \cite{PGM} it is proved that for the function
+$$f(\textbf{x}) = \min\limits_\textbf{u} \left(\Psi(\textbf{x},\textbf{u}) + \textbf{u}^\top A\textbf{x}\right)$$
+there is following $(\delta, L,\mu)$ oracle:
+$$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
+$$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
+with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
+
+The second method is Fast Gradient Method with $(\delta, L,\mu)$ oracle.
+this method converges to the solution with accuracy $\delta$:
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \min\left(\frac{4LR^2}{k^2}, LR^2\exp\left(-\frac{k}{2}\sqrt{\frac{\mu}{L}}\right)\right) + C_k\delta,$$
+where $C_k = \min\left(\frac{k}{3}+\frac{12}{5}, 1+\sqrt\frac{L}{\mu}\right)$. The method's description and proves for it is in the \cite{PGM} too. This method has significantly better convergence rate for  ill-conditioned problems.
+
+The third having to be discussed method is inexact ellipsoid method. The ellipsoid method with $\epsilon$-subgradient instead usual subgradient converges to a solution with accuracy $\epsilon$:
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*)\leq \max_{\textbf{x}\in Q}|f(\textbf{x})|\exp\left(-\frac{k}{8}\right)+\delta$$
+It is proved in \cite{Ellipsoids}. Moreover, in \cite{Polyak} there is proved that for the function
+$$f(\textbf{x}) = \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})$$
+the following statement is met:
+$$\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon})\in\partial_\epsilon f(\textbf{x}),$$
+if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
+
+Note that our method converge by the following way:
+
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq C\exp(-k),$$
+and it is the best theoretical convergence rate from all methods in this section.
 \section{Tests}
 
 In this section we show estimate on number iterations of practice. ALso there is comparison work time our new method with work time of other optimization methods such as inexact gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
@@ -463,32 +495,6 @@ Firstly, we see that the first strategy is the slowest strategy from the three s
 
 Secondly, we can see that the second and the third stratagies have similar results that's why we can state that the second estimate is good replacement for the third. Of course, it is only for the simple tasks when calculating gradients and derivatives is fast procedure. Obviously, when to calculate gradient is the hard procedure we will not have such positive results.
 
-\subsection{Other Inexact Methods}
-\label{Inexact}
-
-Our optimization method can solve the task of minimization function $f$ on square when the function and its gradient can not be calculated accurately but there are other optimization method for such tasks. In each section one describes some of them and in the next section there is comparison of our method and this methods.
-
-The fist method is Primal Gradient Method (PGM) with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that this method converges to the solution with accuracy $\delta$:
-$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \frac{LR^2}{2}\exp\left(-k\frac{\mu}{L}\right) + \delta,$$
-where $R = \|\textbf{x}_0-\textbf{x}^*\|$ in our task. Moreover, in the \cite{PGM} it is proved that for the function
-$$f(\textbf{x}) = \min\limits_\textbf{u} \left(\Psi(\textbf{x},\textbf{u}) + \textbf{u}^\top A\textbf{x}\right)$$
-there is following $(\delta, L,\mu)$ oracle:
-$$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
-$$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
-with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
-
-The second method is Fast Gradient Method with $(\delta, L,\mu)$ oracle.
-this method converges to the solution with accuracy $\delta$:
-$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \min\left(\frac{4LR^2}{k^2}, LR^2\exp\left(-\frac{k}{2}\sqrt{\frac{\mu}{L}}\right)\right) + C_k\delta,$$
-where $C_k = \min\left(\frac{k}{3}+\frac{12}{5}, 1+\sqrt\frac{L}{\mu}\right)$. The method's description and proves for it is in the \cite{PGM} too. This method has significantly better convergence rate for  ill-conditioned problems.
-
-The third having to be discussed method is inexact ellipsoid method. The ellipsoid method with $\epsilon$-subgradient instead usual subgradient converges to a solution with accuracy $\epsilon$. It is proved in \cite{Ellipsoids}. Moreover, in \cite{Polyak} there is proved that for the function
-$$f(\textbf{x}) = \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})$$
-the following statement is met:
-$$\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon})\in\partial_\epsilon f(\textbf{x}),$$
-if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
-
-
 \subsection{Comparison With Other Methods}
 \label{Comparison}
 
@@ -532,7 +538,7 @@ f(\textbf{x}) = \ln \left(1+\sum_{k=1}^me^{\textbf{a}_k^\top\textbf{x}}\right) +
 g_k(\textbf{x}) = \textbf{b}_k^\top\textbf{x}-R_k\leq0, k = \overline{1,n}\\
 \end{gather}
 
-It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaled 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{n\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to 10 in our experiments and has not changes.
+It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaling 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{N\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to $10^4$ in our experiments and has not changes.
 
 We introduce the following notation:
 
