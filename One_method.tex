@@ -41,15 +41,25 @@
 \tableofcontents
 \newpage
 
+We consider some new approach to method convex 2-dimensional optimization on a fixed square recently proposed by Yu. E. Nesterov (see ex.1.5 in https://arxiv.org/pdf/1711.00394.pdf). The method can be interested for to solve a dual problem for a convex problem with two functional constraints. The idea of the method consists in the narrowing of the domain until we achieve an acceptable quality of the solution. This method has to search minimum on the separating segments and we propose some non-depended on required accuracy stop condition for it. Estimations for the iterations number are proved for the cases of smooth and non-smooth functions. Besides there is an experimental comparison of our method with other inexact methods of convex optimization such as ellipsoid method with epsilon-subgradient and primal and fast gradient method with delta-L-oracle. The experiments were made on dual problems for problems with two constraints As a result, our method with provided in this work strategy has the best result.
+
 \section{Introduction}
 
-In this paper we research one method of optimization on a square in $\mathbb{R}^2$. The method was offered by Nesterov (see ex.~4 from ~\cite{task}). 
+In this paper we research one method of optimization on a square in $\mathbb{R}^2$. The method was offered by Nesterov (see ex.~4 from ~\cite{task}). interested for to solve a dual problem for a convex problem with two functional constraints. This method is reffered as Halving Square Method. 
 
-In the paper~\cite{Ston_Pas} there are some results for this method. Namely, there are some estimates for iterations number and accuracy for task on segment (see the next section or \cite{Ston_Pas}). Also there are comparison of this method with method of ellipsoids. Discussed method showed better results on time.
+ The idea of the method consists in the narrowing of the domain until we achieve an acceptable quality of the solution. This method has to search minimum on the separating segments. In the next section there is description of method and pseudocode for it.
 
-In this paper we want to continue this research. In the next section there is description of method and pseudocode for it. In the section~3. there are results where this method works correctly. The section~4. includes two ways to estimate accuracy for a task on segment and it is one of two main results in this paper. Following important result is theorem 5.3 for iterations number that is asymptotically twice as good as the estimate in \cite{Ston_Pas}.
+In the paper~\cite{Ston_Pas} there are some results for this method. Namely, there is an estimate for iterations number. Additionally, the authors provided strategy for subproblem on segment. Also there are comparison of this method with method of ellipsoids. Discussed method showed better results on time.
 
-Section Tests include different tests that show some theoretical results in practice and include comparison of this method with gradient descent. 
+But the provided strategy has several disadvantages. Firstly, the required accuracy for the problem on segment significantly depends on the required accuracy for initial task on segment. It is essential disadvantage when one want to solve initial task extra accurately. Secondly, the method has convergence only on function and is able to not converge to solution on argument.
+
+In this paper we continue this research and provide a new strategy for separating segments. According to it there is stop condition for one-dimensional problem. This stop condition does not depend on required initial accuracy and the HSM with this strategy converges to the solution on argument. The discussion of this strategy is in the section \ref{Delta}.
+
+Moreover, the new estimates for iterations number was provided in this work. There are estimates for smooth and non-smooth problem when on each iteration one chooses rectangle that include the global solution. Additionally, there are theoretical and experimental comparisons of this estimates.
+
+Also we carried out some numerical expirements for to compare the Halving Square Method with other methods. Firstly, it is comparison of different strategies for the Halving Square Method on problems when we can calculate object function's value analitacally. Secondly, it is comparison on dual problem when we can not do it. In this case we compare our method with other such inexact methods as primal gradient method, fast gradient method and ellipsoid method.
+
+This experiments showed that the Halving Square Method with provided in this work strategy is optimal method for to solve dual problem with high accuracy. And the gain of using this method grows with the growth of required accuracy.
 
 \section{Method Description}
 
@@ -67,7 +77,7 @@ Let's describe an algorithm formally. See pseudo-code \ref{alg:Example}.
 \begin{algorithmic}[1]
 \Function{Method}{convex function $f$, square $Q = [a, b]\times[c,d]$}
 
-$x_0:= solve(g = f(\cdot, \frac{c+d}{2}), [a,b], \delta)$
+$x_0:= solve(g = f(\cdot, \frac{c+vcd}{2}), [a,b], \delta)$
  
 $g = subgradient(f, (x_0, \frac{c+d}{2}))$
  
@@ -97,8 +107,6 @@ $g = subgradient(f, (x_0, \frac{c+d}{2}))$
 \section{Algorithm correctness}
 Let's $\textbf{x}_0$ is solution of the task on segment, $Q_1$ is choosed rectangle, $Q_2$ is not choosed rectangle.
 
-\subsection{Zero Error}
-
 \begin{lemma}\label{l1}
 If the optimization task on segment is solved with zero error and the $f$ is convex and differentiable at a point-solution, rectangle with solution of initial task was choosed correct.
 \end{lemma}
@@ -106,8 +114,6 @@ If the optimization task on segment is solved with zero error and the $f$ is con
 From sub-gradient definition, $\textbf{x}^* \in \{x|(\textbf{g}(\textbf{x}_0), \textbf{x}_0 - \textbf{x}^*) \geq 0)\}$. Lemma's statement follows from it and a fact that the first (or the second for vertical segment) gradient's component in point $\textbf{x}_0$ is zero.
 \end{proof}
 
-
-\subsection{Nonzero Error}
 \begin{theorem}
 Let's the $f$ has continuous derivative on the square. Then there is a neighbourhood of a solution of optimization task on segment such as a choice of rectangle will not change if one use any point from the   neighbourhood.
 \end{theorem}
@@ -126,32 +132,12 @@ From it and lemma 4.1 theorem's statement follows.
 
 \end{proof}
 
-\subsection{Undifferentiable convex function}
-
-The method does not work for all convex functions even for zero error on segment. 
-
-\textbf{Example 1.} There is an example in \cite{Ston_Pas}.
+The method does not work for all convex functions even for zero error on segment. There is an example of non-smooth convex problem in \cite{Ston_Pas} when this method can not converge to the solution more accurately then one constant.
 
 \section{Error's Value}
+\label{Delta}
 
-From derivative continuously we have following obvious result:
-
-\begin{lemma}
-If $f$ has continuous derivative. If $|f'_y(x, y_0)| > 0$ for all $x$ on horizontal segment, then the second gradient's component has same sign at all points of segment. If $|f'_x(x_0, y)| > 0$ for all $y$ on vertical segment, then the first gradient's component has same sign at all points of segment.
-\end{lemma}
-
-\textbf{Example 2.} All functions $f$ of the following type meet conditions of written above lemma:
-
-$$f(x, y) = \psi(x) + \phi(y),$$
-where $\psi, \phi$ are convex and differentiable functions.
-
-\textbf{Example 3.} Let's illustrate that we can not always take any point from segment. Let's consider following task:
-
-$$\min\left\{(x-y)^2 + x^2\Big|Q = [0,1]^2\right\}$$
-
-On segment $[0,1]\times\left\{\frac{1}{2}\right\}$ this task has solution $f^* = f\left(\frac{1}{4}, \frac{1}{2}\right) = \frac{1}{8}$. Derivative on $y$ at this point is $f'_y\left(\frac{1}{4}, \frac{1}{2}\right) = \frac{]}{2}$ but at the point $\left(1, \frac{1}{2}\right)$ is equal to $-1$. We can see that in this case rectangle will selected non-correctly.
-
-Let's find possible value of error's value, i.e. let's find a number $\delta_0$ such as if an error for   a solution on a segment is less $\delta_0$ then rectangle for the segment is defined correctly. Rectangles are defined correctly for a horizontal optimization task, if:
+Let's find possible value of error's value, i.e. let's find a number $\delta_0$ such as if a distance between a solution on a segment and its approximation is less $\delta_0$ then rectangle for the segment is selected correctly (selected rectangle includes global solution on square). Rectangles are defined correctly for a horizontal optimization task, if:
 
 \begin{equation}\label{MCH}
 \forall\delta : |\delta| < \delta_0 \Rightarrow f'_y(\textbf{x}_0)f'_y(x_0+\delta, y_0) > 0
@@ -239,7 +225,7 @@ Let's make a couple of remarks.
 
 Firstly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorems 4.1 and 4.2.
 
-Thirdly, all theorems in this section use $f'_y$ on horizontal segment and $f'_x$ on vertical segment. As a result, if one checks condition of stop on each iteration method will use full gradient on each iteration. It can slow down method but this estimates can be better than in ~\cite{Ston_Pas}. As a result, method can work faster.
+Secondly, we can use in this theorems Lipschitz constants not for gradients but for partitial derivative on segments. Its proves are obvious enough and almost repeat proves for this theorem.
 
 \section{Number of iterations}
 
@@ -251,7 +237,11 @@ If function $f$ is convex and $L_f$-Lipschitz continuous, then for to solve init
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
-This estimate is trivial consequence of the function is Lipschitz continuous.
+\begin{proof}
+The square's size equals to $\frac{a}{2^k}$ on $k^\text{th}$ iteration. If each irerations was correct then
+$$\|\textbf{x}_k-\textbf{x}^*\|\leq \frac{a}{2^k}\sqrt{2}$$
+Using the fact that function is Lipschitz continuous we have estimate \ref{NI1}
+\end{proof}
 
 There are functions which estimates from written above theorem are very accurate for.
 
@@ -277,7 +267,7 @@ We can improve written above estimates if to add new conditions:
 Let function $f$ be convex and has $L$-Lipschitz continuous gradient.
 
 If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
-\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{La^2}{2\epsilon}\right\rceil\end{equation}
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{La^2}{\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
@@ -291,7 +281,7 @@ $$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L}{2}\|\textbf{x}-\textbf{x}^*\|^2$$
 
 After $N$ iterations we have the estimate:
 
-$$f(\textbf{x}) - f(\textbf{x}^*)\leq \frac{L}{4}\left(\frac{a}{2^N}\right)^2$$
+$$f(\textbf{x}) - f(\textbf{x}^*)\leq L\left(\frac{a}{2^N}\right)^2$$
 
 Using it we have estimate \eqref{NI3}.
 \end{proof}
@@ -301,9 +291,44 @@ Estimate \ref{NI1} works in all cases and better then estimate \ref{NI3} when fo
 $$\frac{2L_f^2}{L_g}\leq \epsilon,$$
 где $L_f, L_g$ is Lipschitz constants for function and for gradient. On the other hand, the estimate \ref{NI3} works if point with zero gradient exists in the square. 
 
-\section{Details}
+\section{Halving Cube Method}
+
+This Halving Square Method is optimization method for convex problem on square. But there is obvious generalization for convex problems in high dimensional spaces on $n$-dimensional hypercube. Let the its faces are parallel to axes. Let's describe it:
+
+1. Take $(n-1)$-dimensional hyperplane in hypercube that includes hypercube center and is parallel to one of its face.
+
+2. To solve optimization problem on this set with accaracy that is met to condition from theorem \ref{CurGrad}.
+
+3. Calculate gradient in this point and select rectangle which antigradient look into.
+
+4. Repeat the third step $n$ times for each hyperplane in hypercube that includes hypercube center and is parallel to one of its face.
+
+5. Repeat the previous step until required accuracy is achieved.
+
+The proves for convergence for smooth function and for strategy repeat proves in the case of 2-dimensional space. Moreover, obvious enough that the following theorems are correct when on the fourth algorithm step rectangle was selected correctly.
+
+\begin{theorem}
+If function $f$ is convex and $L_f$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
+\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{\sqrt{n}L_fa}{\epsilon}\right\rceil\end{equation}
+where $a$ is a size of the initial square $Q$.
+\end{theorem}
+
+\begin{theorem}
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient.
+
+If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
+\begin{equation}N = \left\lceil\frac{1}{2}\log_2\frac{nLa^2}{2\epsilon}\right\rceil\end{equation}
+where $a$ is a size of the initial square $Q$.
+\end{theorem}
+
+Note the hyperplane in hypercube in the first step is $(n-1)$-dimensional hypercube. And we can use for it this method too. So, we solve the convex problem on $n$-dimensional hypercube recursively.
+
+But this method has two essential disadvanteges for enough high dimensional spaces. Fisrtly, the required iterations number depend on logarithm of dimension. Of course, it is essential only for very high dimensional problems. Secondly, recursive algorithm will be extra slow because each the complexity of each iteration for this method is factotial of dimension.
+
+We don't expect inspired result for each modification and we will not test it.
+
+\section{The Dual Problems}
 \label{details}
-\subsection{Function Parameters}
 
 This method was created to solve dual task. Namely, following task:
 
@@ -313,6 +338,8 @@ This method was created to solve dual task. Namely, following task:
 \end{gather}
 
 In the section we will discuss how transform this task to task of the task of minimization on square, what is derivative and lipschitz constants and how to calculate its fastly.
+
+\subsection{Function Parameters}
 
 Fitstly, let's transform this task to the task of minimization on square. According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variables:
 
@@ -369,6 +396,38 @@ If $g_k$ is $L_{g_k}$-lipschitz continious function:
 
 $$L_{g_k}\|\textbf{x}(\lambda)-\textbf{x}\|\leq |g_k(\textbf{x})|$$
 
+
+\section{Other Inexact Methods}
+\label{Inexact}
+
+Our optimization method can solve the task of minimization function $f$ on square when the function and its gradient can not be calculated accurately but there are other optimization method for such tasks. In each section one describes some of them and below there is experimental comparison of them with our method.
+
+The fist method is Primal Gradient Method (PGM) with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that this method converges to the solution with accuracy $\delta$:
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \frac{LR^2}{2}\exp\left(-k\frac{\mu}{L}\right) + \delta,$$
+where $R = \|\textbf{x}_0-\textbf{x}^*\|$ in our task. Moreover, in the \cite{PGM} it is proved that for the function
+$$f(\textbf{x}) = \min\limits_\textbf{u} \left(\Psi(\textbf{x},\textbf{u}) + \textbf{u}^\top A\textbf{x}\right)$$
+there is following $(\delta, L,\mu)$ oracle:
+$$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
+$$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
+with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
+
+The second method is Fast Gradient Method with $(\delta, L,\mu)$ oracle.
+this method converges to the solution with accuracy $\delta$:
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \min\left(\frac{4LR^2}{k^2}, LR^2\exp\left(-\frac{k}{2}\sqrt{\frac{\mu}{L}}\right)\right) + C_k\delta,$$
+where $C_k = \min\left(\frac{k}{3}+\frac{12}{5}, 1+\sqrt\frac{L}{\mu}\right)$. The method's description and proves for it is in the \cite{PGM} too. This method has significantly better convergence rate for  ill-conditioned problems.
+
+The third having to be discussed method is inexact ellipsoid method. The ellipsoid method with $\epsilon$-subgradient instead usual subgradient converges to a solution with accuracy $\epsilon$:
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*)\leq \max_{\textbf{x}\in Q}|f(\textbf{x})|\exp\left(-\frac{k}{8}\right)+\delta$$
+It is proved in \cite{Ellipsoids}. Moreover, in \cite{Polyak} there is proved that for the function
+$$f(\textbf{x}) = \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})$$
+the following statement is met:
+$$\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon})\in\partial_\epsilon f(\textbf{x}),$$
+if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
+
+Note that our method converge by the following way:
+
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq C\exp(-k),$$
+and it is the best theoretical convergence rate from all methods in this section.
 \section{Tests}
 
 In this section we show estimate on number iterations of practice. ALso there is comparison work time our new method with work time of other optimization methods such as inexact gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
@@ -436,24 +495,6 @@ Firstly, we see that the first strategy is the slowest strategy from the three s
 
 Secondly, we can see that the second and the third stratagies have similar results that's why we can state that the second estimate is good replacement for the third. Of course, it is only for the simple tasks when calculating gradients and derivatives is fast procedure. Obviously, when to calculate gradient is the hard procedure we will not have such positive results.
 
-\subsection{Other Inexact Methods}
-\label{Inexact}
-
-Our optimization method can solve the task of minimization function $f$ on square when the function and its gradient can not be calculated accurately but there are other optimization method for such tasks. In each section one describes some of them and in the next section there is comparison of our method and this methods.
-
-The fist method is Primal Gradient Method (PGM) with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that this method converges to the solution with accuracy $\delta$. Moreover, in the \cite{PGM} it is proved that for the function
-$$f(\textbf{x}) = \min\limits_\textbf{u} \left(\Psi(\textbf{x},\textbf{u}) + \textbf{u}^\top A\textbf{x}\right)$$
-there is following $(\delta, L,\mu)$ oracle:
-$$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
-$$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
-with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
-
-The second having to be discussed method is inexact ellipsoid method. The ellipsoid method with $\epsilon$-subgradient instead usual subgradient converges to a solution with accuracy $\epsilon$. It is proved in \cite{Ellipsoids}. Moreover, in \cite{Polyak} there is proved that for the function
-$$f(\textbf{x}) = \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})$$
-the following statement is met:
-$$\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon})\in\partial_\epsilon f(\textbf{x}),$$
-if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
-
 \subsection{Comparison With Other Methods}
 \label{Comparison}
 
@@ -497,7 +538,7 @@ f(\textbf{x}) = \ln \left(1+\sum_{k=1}^me^{\textbf{a}_k^\top\textbf{x}}\right) +
 g_k(\textbf{x}) = \textbf{b}_k^\top\textbf{x}-R_k\leq0, k = \overline{1,n}\\
 \end{gather}
 
-It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaled 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{n\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to 10 in our experiments and has not changes.
+It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaling 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{N\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to $10^4$ in our experiments and has not changes.
 
 We introduce the following notation:
 
@@ -525,6 +566,17 @@ How to calculate function and derivatave value for such task was discussed in th
 
 We can see on \ref{fig:image} the following results. Firstly, the halving square method with provided in this work strategy \textbf{CurGrad} are the fastest method in the most tests tests. This method can be slower than other inexact methods if dimensional of primal task is small or $\epsilon$ is big. In particular, this strategy is faster than strategy with constant estimate provided in \cite{Ston_Pas}. It proves that provided by Nesterov method with strategy through gradient is the best method for to solve two dimensional dual task of minimization. Secondly, the gain of this strategy in comparison with other method is increase when the required $\epsilon$ decrease. This fact demonstrated important advantange of this strategy: it does not depend on required accuracy strongly. So, this method with constant estimate has strong dependity on it because there is this accuracy in the constant estimate, PGM and inexact ellipsoid method require that the $x(\lambda)$ is found with accuracy depended on $\epsilon$. But halving square with ellipsoid method has not such dependety.
 \section{Conclusion}
+
+We discussed and proved that this method converges to the solution for smooth convex functon. Moreover, in the \cite{Ston_Pas} there is conterexample when the problem is non-smooth and we can not to converge to the solution with the accuracy on function better than a constant.
+
+After it we discussed different strategy for one-dimensional task. Two strategies were considered. The both suggest to use stop conditions that are met when the current approximation is "very near" to the segment's solution. The first compares the distance between them with derivative value in accurate segment's solution but the second compares it with derivative value in approximation. In the experiment the first has a little better result but it can not be used for real task. The second strategy using derivative value in current approximation is significantly better then constant estimate and does not depend on required accuracy.
+
+But all this strategy are good when the derivative value is high enough. But when the segment is near to the global solution this value will be small. Therefore one needs to make a lot of iterations on segment. For to avoid it we consider additional stop condition for global task on square when in current approximation the derivative value is near to zero.
+
+The most steps of methods assumped that derivative can be calculated accurately. But the main method purpose is to solve dual problems and for it one can not usually calculate it so. That's why we consider different modifications of this method for to solve such problems. The important moment is we don't add some dependence on initial required accuracy in the modificated method.
+
+Finally, we compared our method with new strategy for dual problem to prime LogSumExp problem with two linear constaints with our method with strategy using the constant estimate, primal gradient method and fast gradient method with $(\delta, L, \mu)$ -oracle and with inexact ellipsoids methods. The Halving Square Method is the fastest of them for enough high dimension (more 100) and for enough high required solution ($1e-3$ and more).
+
 \newpage
 \begin{thebibliography}{3}
 \bibitem{task}
