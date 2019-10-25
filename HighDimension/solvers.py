@@ -27,14 +27,13 @@ class HalvingCube:
 	def solver(self, ind, new_Q, method = 'GD'):
 		start_point = self.f.get_start_point(ind, new_Q)
 		solver = self.methods[method]
-		L_x = self.f.L_list[ind]
-		L = sum(self.f.L_list) - L_x
+		L_x,L = self.f.L[ind]
 		x_new = lambda x: np.array([i for ind_, i in enumerate(x) if ind_ < ind] +
 							  new_Q[ind] +
 							  [i for ind_, i in enumerate(x) if ind_ >= ind])
 		der = lambda x: self.f.grad[ind](x_new(x))
 		grad = lambda x: self.f.get_grad(x, without = ind)
-		mu = self.f.mu
+		mu = self.f.mu[ind]
 		cond = lambda x, size: self.CurGrad(x, der, size, L_x)
 		return der(solver(grad, start_point, L, mu, cond))
 
