@@ -136,7 +136,8 @@ class LogSumExp():
 		a = self.a
 		n = a.shape[0]
 		self.C = C
-		v = np.random.uniform(1,10, (1,))[0]
+		#v = np.random.uniform(1,10, (1,))[0]
+		v = 1
 		self.v = v
 		self.f = lambda x: np.log(1 + np.exp(v*x).sum()) + np.linalg.norm(x)**2*self.C
 		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
@@ -183,8 +184,6 @@ class LogSumExp():
 		print('L_f',self.fL)
 
 	def f_der(self, x):
-		a = self.A
-		grad = lambda x: a.T.dot(np.exp(a.dot(x))) /(1+np.exp(a.dot(x)).sum()) + 2*x*self.C
 		grad = lambda x: np.exp(self.v*x) / (1+np.exp(self.v*x).sum())
 		return grad(x)
 
