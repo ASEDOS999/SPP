@@ -135,11 +135,10 @@ class LogSumExp():
 		self.a = list_of_parameters
 		a = self.a
 		n = a.shape[0]
-		m = 10000
-		a = np.random.uniform(-1, 1, (m,n))
-		self.A = a
 		self.C = C
-		self.f = lambda x: np.log(1 + np.exp(a.dot(x)).sum()) + np.linalg.norm(x)**2*self.C
+		v = np.random.uniform(1,10, (1,))[0]
+		self.v = v
+		self.f = lambda x: np.log(1 + np.exp(v*x).sum()) + np.linalg.norm(x)**2*self.C
 		#self.f = lambda x: np.log(1 + sum([np.exp(i*x[ind]) for ind, i in enumerate(a)]))
 		# self.f = lambda x: np.linalg.norm(x)
 		if c is None:
@@ -180,12 +179,13 @@ class LogSumExp():
 		return R0
 
 	def get_lipschitz_constants(self):
-		self.fL = np.sqrt(np.linalg.eig(self.A.T.dot(self.A))[0].max())+ 2 * self.R0 * self.C
+		self.fL = self.v + 2 * self.C
 		print('L_f',self.fL)
 
 	def f_der(self, x):
 		a = self.A
 		grad = lambda x: a.T.dot(np.exp(a.dot(x))) /(1+np.exp(a.dot(x)).sum()) + 2*x*self.C
+		grad = lambda x: np.exp(self.v*x) / (1+np.exp(self.v*x).sum())
 		return grad(x)
 
 	def g1_der(self, x):
