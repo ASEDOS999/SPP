@@ -43,11 +43,11 @@ class QuadraticFunction:
 		lim = 2 * np.linalg.norm(self.b)/self.mu_full
 		return [[-lim, lim] for i in range(self.n)]
 	def get_start_point(self, ind, new_Q):
+		b = np.delete(self.b+self.A[ind,:], ind)
 		A = np.delete(np.delete(self.A, ind, 0), ind, 1)
 		eig = np.linalg.eig(A)[0]
 		eig.sort()
 		lmin = eig[0]
-		b = np.delete(self.b, ind) + A[ind,:]
 		lim = 2 * np.linalg.norm(b)/lmin
 		return np.zeros((self.n-1,)), lim
 		
