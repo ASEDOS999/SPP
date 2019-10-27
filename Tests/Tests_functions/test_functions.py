@@ -187,7 +187,8 @@ class LogSumExp():
 		print('L_f',self.fL)
 
 	def f_der(self, x):
-		grad = lambda x: np.exp(self.v*x) / (1+np.exp(self.v*x).sum())
+		m = lambda x: (self.v*x).max()
+		grad = lambda x: np.exp(self.v*x-m(x)) / (1/np.exp(m(x))+np.exp(self.v*x-m(x)).sum())
 		return grad(x)
 
 	def g1_der(self, x):
