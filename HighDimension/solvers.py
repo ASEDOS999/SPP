@@ -43,6 +43,7 @@ class HalvingCube:
 			Q = self.Q
 		n = 0
 		while n < N:
+			n += 1
 			for ind,i in enumerate(Q):
 				new_Q = Q.copy()
 				new_Q[ind] = sum(Q[ind]) / 2
