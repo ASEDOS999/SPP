@@ -27,7 +27,7 @@ class QuadraticFunction:
 			eig = np.linalg.eig(A)[0]
 			eig.sort()
 			self.mu.append(eig[0])
-			self.L.append(eig[-1]) 
+			self.L.append((self.L_full_grad, eig[-1])) 
 
 	def func_value(self, x):
 		return np.linalg.norm(self.A_.dot(x) - self.b)**2
@@ -42,3 +42,12 @@ class QuadraticFunction:
 	def get_square(self):
 		lim = 2 * np.linalg.norm(self.b)/self.mu_full
 		return [[-lim, lim] for i in range(self.n)]
+	def get_start_point(self, ind, new_Q):
+		A = np.delete(np.delete(self.A, ind, 0), ind, 1)
+		eig = np.linalg.eig(A)[0]
+		eig.sort()
+		lmin = eig[0]
+		b = np.delete(self.b, ind) + A[ind,:]
+		lim = 2 * np.linalg.norm(b)/lmin
+		return np.zeros((self.n-1,)), lim
+		
