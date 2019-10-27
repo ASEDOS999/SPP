@@ -6,7 +6,7 @@ class HalvingCube:
 		self.methods = {
 				'GD' : self.GD
 				}
-	def GD(grad, x0, L, mu, cond):
+	def GD(self, grad, x0, L, mu, cond):
 		x, R = x0
 		R0 = R
 		k = 0
@@ -29,25 +29,28 @@ class HalvingCube:
 		solver = self.methods[method]
 		L_x,L = self.f.L[ind]
 		x_new = lambda x: np.array([i for ind_, i in enumerate(x) if ind_ < ind] +
-							  new_Q[ind] +
+							  [new_Q[ind]] +
 							  [i for ind_, i in enumerate(x) if ind_ >= ind])
+		self.x_new = x_new
 		der = lambda x: self.f.grad[ind](x_new(x))
-		grad = lambda x: self.f.get_grad(x, without = ind)
+		grad = lambda x: self.f.get_grad(x_new(x), without = ind)
 		mu = self.f.mu[ind]
 		cond = lambda x, size: self.CurGrad(x, der, size, L_x)
 		return der(solver(grad, start_point, L, mu, cond))
 
-	def main(self, Q = self.Q, d = len(self.Q), N = 100):
+	def main(self, Q = None, N = 10):
+		if Q is None:
+			Q = self.Q
 		n = 0
 		while n < N:
 			for ind,i in enumerate(Q):
 				new_Q = Q.copy()
 				new_Q[ind] = sum(Q[ind]) / 2
-				g = self.solver()
+				g = self.solver(ind, new_Q)
 				if g > 0:
-					Q = [Q[ind][0], new_Q[ind]]
+					Q[ind] = [Q[ind][0], new_Q[ind]]
 				else:
-					Q = [new_Q[ind], Q[ind][1]]
+					Q[ind] = [new_Q[ind], Q[ind][1]]
 		return np.array([sum(i)/2 for i in Q])
 
 
