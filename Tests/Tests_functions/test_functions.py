@@ -148,12 +148,12 @@ class LogSumExp():
 		n = c.shape[0]
 		b1 = np.random.uniform(-1,1,(n,))
 		self.b1 = b1
-		self.g1mu, self.g1L = 0, np.linalg.norm(b1)
+		self.g1mu, self.g1L, self.g1M = 0, np.linalg.norm(b1), 0
 		self.g1 = lambda x: - self.R1**2 + b1.dot(x)
 
 		b2 = np.random.uniform(-1,1,(n,))
 		self.b2 = b2
-		self.g2mu, self.g2L = 0, np.linalg.norm(b2)
+		self.g2mu, self.g2L, self.g2M = 0, np.linalg.norm(b2), 0
 		self.g2 = lambda x: - self.R2**2 + b2.dot(x)
 		B = np.vstack((b1, b2))
 		l = np.linalg.eig(B.dot(B.T))[0]
@@ -172,6 +172,9 @@ class LogSumExp():
 		self.fL = None
 		self.fmu  = 2*self.C
 		self.get_lipschitz_constants()
+		cond_num = (4*self.fL/self.fmu * self.lmax/self.lmin)
+		print('cond_num', cond_num)
+		print('cond_num_sqrt', np.sqrt(cond_num))
 
 	def get_R0(self):
 		l_max = self.Q[1]
@@ -184,7 +187,8 @@ class LogSumExp():
 		print('L_f',self.fL)
 
 	def f_der(self, x):
-		grad = lambda x: np.exp(self.v*x) / (1+np.exp(self.v*x).sum())
+		m = lambda x: (self.v*x).max()
+		grad = lambda x: np.exp(self.v*x-m(x)) / (1/np.exp(m(x))+np.exp(self.v*x-m(x)).sum())
 		return grad(x)
 
 	def g1_der(self, x):
@@ -223,7 +227,7 @@ class LogSumExp():
 	def GD(self, l1, l2, L1, der, warm = None):
 		f = lambda x: self.phi(l1,l2)(x)
 		grad = lambda x: self.f_der(x) + l1*self.g1_der(x) + l2*self.g2_der(x)
-		L = self.fL +l1*self.g1L + l2*self.g2L
+		L = self.fL +l1*self.g1M + l2*self.g2M
 		mu = (self.fmu+ l1*self.g1mu+l2*self.g2mu)
 		M = L/mu
 		q = (M-1)/(M+1)

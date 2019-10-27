@@ -200,7 +200,7 @@ def get_grad(f,lambda_, eps):
 	l1, l2 = lambda_[0], lambda_[1]
 	obj = lambda x: f.f(x) + lambda_[0]*f.g1(x)+lambda_[1]*f.g2(x)
 	grad = lambda x: f.f_der(x) + f.g1_der(x)*l1 + f.g2_der(x)*l2
-	L = f.fL + l1* f.g1L + l2 * f.g2L
+	L = f.fL + l1* f.g1M + l2 * f.g2M
 	R = f.R0
 	mu = f.fmu + l1 * f.g1mu + l2 * f.g2mu
 	M = L / mu
@@ -290,7 +290,7 @@ def ellipsoid(f, Q, eps = None, cur_eps = 0.001, **kwargs):
 	results = [x]
 	while True:
 		if (np.clip(x, *domain.T) == x).any():
-			_df = get_grad(f,x, cur_eps)
+			_df = get_grad(f,x, cur_eps/2)
 		else:
 			if Q[0]<=x[0] <=Q[1]:
 				_df = np.array([Q[1], Q[2]])
@@ -339,7 +339,7 @@ class halving_square:
 
 		a = self.f.a
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*l1 + self.f.g2_der(x)*l2
-		L = self.f.fL+ l1* self.f.g1L + l2 * self.f.g2L
+		L = self.f.fL+ l1* self.f.g1M + l2 * self.f.g2M
 		R = R0
 		#mu = 2*(1+l1+l2)
 		mu = self.f.fmu + l1*self.f.g1mu+l2*self.f.g2mu
@@ -369,7 +369,7 @@ class halving_square:
 		x = np.zeros(self.f.a.shape)
 		a = self.f.a
 		grad = lambda x: self.f.f_der(x) + self.f.g1_der(x)*lambda1 + self.f.g2_der(x)*lambda2
-		L = self.f.fL+lambda1 * self.f.g1L + self.value * self.f.g2L
+		L = self.f.fL+lambda1 * self.f.g1M + self.value * self.f.g2M
 		#mu = 2 * (1+lambda1 + lambda2)
 		mu = self.f.fmu + lambda1 * self.f.g1mu + lambda2 * self.f.g2mu
 		M = L/mu
