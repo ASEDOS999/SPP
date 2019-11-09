@@ -4,9 +4,11 @@ class HalvingCube:
 		self.Q = Q
 		self.f = f
 		self.methods = {
-				'GD' : self.GD
+				'GD' : self.GD, 'HS': self.main
 				}
-	def GD(self, grad, x0, L, mu, cond, proj):
+	def GD(self, **kwargs):
+		grad, x0, L, mu, cond, proj = (kwargs['grad'], kwargs['start_point'],
+			kwargs['L'], kwargs['mu'], kwargs['cond'], kwargs['proj'])
 		x, R = x0
 		R0 = R
 		R = R0
@@ -37,14 +39,31 @@ class HalvingCube:
 		grad = lambda x: self.f.get_grad(x_new(x), without = ind)
 		mu = self.f.mu[ind]
 		cond = lambda x, size: self.CurGrad(x, der, size, L_x)
-		x = solver(grad, start_point, L, mu, cond, proj)
+		kwargs = {'grad':grad,
+				'start_point':start_point,
+				'L':L,
+				'mu':mu,
+				'cond' : cond,
+				'proj' : proj
+			}
+		x = solver(**kwargs)
 		return der(x)
 
-	def main(self, Q = None, N = 10):
-		if Q is None:
+	def main(self, **kwargs):
+		try:
+			N = kwargs['N']
+		except:
+			N = np.inf
+		try:
+			Q = kwargs['Q']
+		except:
 			Q = self.Q
+		try:
+			cond = kwargs['cond']
+		except:
+			cond = lambda x, size: False
 		n = 0
-		while n < N:
+		while n==0 or (n < N and not cond(x,size)):
 			n += 1
 			ind = 0
 			while ind < len(Q):
@@ -57,6 +76,9 @@ class HalvingCube:
 					new_Q[ind] = [new_Q[ind], Q[ind][1]]
 				Q = new_Q
 				ind += 1
+			Q_ = np.array(Q)
+			x = np.mean(Q_, axis = 1)
+			size = np.linalg.norm(Q_[:,1]-Q_[:,0])
 		return np.array([sum(i)/2 for i in Q])
 
 
