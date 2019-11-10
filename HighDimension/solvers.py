@@ -23,7 +23,6 @@ class HalvingCube:
 		return x
 	
 	def CurGrad(self, x, der, size, L):
-		print(x)
 		return abs(der(x)/L) >= size
 
 	def solver(self, ind, new_Q, method = 'HS', indexes = None):
@@ -38,7 +37,6 @@ class HalvingCube:
 			k = 0
 			for i,_ in enumerate(self.Q):
 				if i in indexes:
-					print(indexes, i, indexes[i])
 					u = indexes[i]
 					list_.append(u)
 				else:
