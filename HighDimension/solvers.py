@@ -23,15 +23,30 @@ class HalvingCube:
 		return x
 	
 	def CurGrad(self, x, der, size, L):
+		print(x)
 		return abs(der(x)/L) >= size
 
-	def solver(self, ind, new_Q, method = 'GD'):
+	def solver(self, ind, new_Q, method = 'HS', indexes = None):
 		start_point = self.f.get_start_point(ind, new_Q)
 		solver = self.methods[method]
 		L_x,L = self.f.L[ind]
-		x_new = lambda x: np.array([i for ind_, i in enumerate(x) if ind_ < ind] +
-							  [new_Q[ind]] +
-							  [i for ind_, i in enumerate(x) if ind_ >= ind])
+		if indexes is None:
+			indexes = {}
+		indexes[ind] = new_Q[ind]
+		def x_new(x, Q = self.Q, indexes = indexes):
+			list_ = []
+			k = 0
+			for i,_ in enumerate(self.Q):
+				if i in indexes:
+					print(indexes, i, indexes[i])
+					u = indexes[i]
+					list_.append(u)
+				else:
+					v =x[k]
+					list_.append(v)
+					k += 1
+			x = np.array(list_)
+			return x
 		self.x_new = x_new
 		Q_ = [i for ind_,i in enumerate(new_Q) if ind_!= ind]
 		proj = lambda x: np.clip(x, *np.array(Q_).T)
@@ -44,7 +59,9 @@ class HalvingCube:
 				'L':L,
 				'mu':mu,
 				'cond' : cond,
-				'proj' : proj
+				'proj' : proj,
+				'Q' : Q_,
+				'indexes' : indexes
 			}
 		x = solver(**kwargs)
 		return der(x)
@@ -62,6 +79,24 @@ class HalvingCube:
 			cond = kwargs['cond']
 		except:
 			cond = lambda x, size: False
+		try:
+			indexes = kwargs['indexes']
+		except:
+			indexes = None
+		if len(Q)==1:
+			a, b = Q[0][1],Q[0][0]
+			size = (b-a)/2
+			x = np.array([(b+a)/2])
+			der = kwargs['grad']
+			while not cond(x,size):
+				if der(x) > 0:
+					a, b = a,x[0]
+				else:
+					a,b = x[0], b
+				size = (b-a)/2
+				x = (b+a)/2
+				x = np.array([x])
+			return x
 		n = 0
 		while n==0 or (n < N and not cond(x,size)):
 			n += 1
@@ -69,7 +104,7 @@ class HalvingCube:
 			while ind < len(Q):
 				new_Q = Q.copy()
 				new_Q[ind] = sum(Q[ind]) / 2
-				g = self.solver(ind, new_Q)
+				g = self.solver(ind, new_Q, indexes = indexes)
 				if g > 0:
 					new_Q[ind] = [Q[ind][0], new_Q[ind]]
 				else:
