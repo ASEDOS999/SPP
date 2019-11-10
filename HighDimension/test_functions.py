@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 class QuadraticFunction:
-	def __init__(self, n = None):
+	def __init__(self, n = None, C = 0):
 		if n is None:
 			n = 100
 		A = np.random.uniform(-1, 1, (n,n))
 		self.A_ = A
-		A = A.T.dot(A)+ np.eye(n)*10
+		A = A.T.dot(A)+ np.eye(n)*C
 		self.eig_value = np.linalg.eig(A)[0]
 		self.eig_value.sort()
 		b = np.random.uniform(-10, 10, (n,))
@@ -19,6 +19,7 @@ class QuadraticFunction:
 		self.mu_full = self.eig_value[0]
 		self.L, self.mu, self.grad = [], [], []
 		self.grad = [lambda x:self.get_grad(x)[ind] for ind in range(self.n)]
+		print(self.L_full_grad/self.mu_full, self.mu_full)
 		self.get_params()
 		
 	def get_params(self):
@@ -33,12 +34,20 @@ class QuadraticFunction:
 		#return np.linalg.norm(self.A_.dot(x) - self.b)**2
 		return x.T@self.A@x - 2*self.b.T@x
 	
-	def get_grad(self, x, without = None):
-		g = 2*self.A.dot(x) - 2 * self.b
+	def get_grad(self, x, without = None, only_ind = None):
+		g = list()
+		if without is None and only_ind is None:
+			return 2 *self.A.dot(x) - 2 * self.b
+		if not only_ind is None:
+			for ind in only_ind:
+				g.append(2*self.A[ind,:].dot(x) - 2*self.b[ind])
+			return np.array(g)
 		if without is None:
-			return g
-		else:
-			return np.delete(g, without)
+			without = []
+		indexes = [i for i,_ in enumerate(g) if not i in without]
+		for ind in indexes:
+			g.append(2*self.A[ind,:].dot(x) - 2*self.b[ind])
+		return np.array(g)
 	
 	def get_square(self):
 		lim = 2 * np.linalg.norm(self.b)/self.mu_full
