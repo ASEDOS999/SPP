@@ -83,7 +83,7 @@ class HalvingCube:
 			indexes = None
 		if len(Q)==1:
 			a, b = Q[0][1],Q[0][0]
-			size = (b-a)/2
+			size = (b-a)
 			x = np.array([(b+a)/2])
 			der = kwargs['grad']
 			while not cond(x,size):
@@ -91,7 +91,7 @@ class HalvingCube:
 					a, b = a,x[0]
 				else:
 					a,b = x[0], b
-				size = (b-a)/2
+				size = (b-a)
 				x = (b+a)/2
 				x = np.array([x])
 			return x
