@@ -25,31 +25,30 @@ class HalvingCube:
 	def CurGrad(self, x, der, size, L):
 		return abs(der(x)/L) >= size
 
-	def solver(self, ind, new_Q, method = 'HS', indexes = None):
+	def solver(self, ind, new_Q, method = 'HS', indexes = None, x_new = None):
 		start_point = self.f.get_start_point(ind, new_Q)
 		solver = self.methods[method]
 		L_x,L = self.f.L[ind]
 		if indexes is None:
-			indexes = {}
-		indexes[ind] = new_Q[ind]
-		def x_new(x, Q = self.Q, indexes = indexes):
+			indexes = []
+		indexes.append(new_Q[ind])
+		def x_new_(x, Q = new_Q):
+			if len(x) == len(Q):
+				return x
 			list_ = []
 			k = 0
-			for i,_ in enumerate(self.Q):
-				if i in indexes:
-					u = indexes[i]
-					list_.append(u)
+			for ind, i in enumerate(Q):
+				if type(Q[ind]) == list:
+					list_.append(x[k])
+					k+=1
 				else:
-					v =x[k]
-					list_.append(v)
-					k += 1
-			x = np.array(list_)
-			return x
-		self.x_new = x_new
-		Q_ = [i for ind_,i in enumerate(new_Q) if ind_!= ind]
+					list_.append(Q[ind])
+			return np.array(list_)
+		x_new = x_new_
+		indexes = [i for i,_ in enumerate(new_Q) if type(_) != list]
 		proj = lambda x: np.clip(x, *np.array(Q_).T)
-		der = lambda x: self.f.get_grad(x_new(x))[ind]
-		grad = lambda x: self.f.get_grad(x_new(x), without = ind)
+		der = lambda x: self.f.get_grad(x_new(x), only_ind =  [ind])[0]
+		grad = lambda x: self.f.get_grad(x_new(x), without = indexes)
 		mu = self.f.mu[ind]
 		cond = lambda x, size: self.CurGrad(x, der, size, L_x)
 		kwargs = {'grad':grad,
@@ -58,8 +57,9 @@ class HalvingCube:
 				'mu':mu,
 				'cond' : cond,
 				'proj' : proj,
-				'Q' : Q_,
-				'indexes' : indexes
+				'Q' : new_Q,
+				'indexes' : indexes,
+				'x_new' : x_new
 			}
 		x = solver(**kwargs)
 		return der(x)
@@ -81,8 +81,16 @@ class HalvingCube:
 			indexes = kwargs['indexes']
 		except:
 			indexes = None
-		if len(Q)==1:
-			a, b = Q[0][1],Q[0][0]
+		try:
+			x_new = kwargs['x_new']
+		except:
+			x_new = None
+		if not indexes is None and len(indexes)== len(self.Q)-1: # NEED MODIFICATION
+			for i in Q:
+				if type(i) == list:
+					Q = i
+					break
+			a, b = Q[0],Q[1]
 			size = (b-a)
 			x = np.array([(b+a)/2])
 			der = kwargs['grad']
@@ -100,19 +108,28 @@ class HalvingCube:
 			n += 1
 			ind = 0
 			while ind < len(Q):
-				new_Q = Q.copy()
-				new_Q[ind] = sum(Q[ind]) / 2
-				g = self.solver(ind, new_Q, indexes = indexes)
-				if g > 0:
-					new_Q[ind] = [Q[ind][0], new_Q[ind]]
-				else:
-					new_Q[ind] = [new_Q[ind], Q[ind][1]]
-				Q = new_Q
+				if type(Q[ind]) == list:
+					new_Q = Q.copy()
+					new_Q[ind] = sum(Q[ind]) / 2
+					g = self.solver(ind, new_Q, indexes = indexes, x_new = x_new)
+					if g > 0:
+						new_Q[ind] = [Q[ind][0], new_Q[ind]]
+					else:
+						new_Q[ind] = [new_Q[ind], Q[ind][1]]
+					Q = new_Q
 				ind += 1
 			Q_ = np.array(Q)
-			x = np.mean(Q_, axis = 1)
-			size = np.linalg.norm(Q_[:,1]-Q_[:,0])
-		return np.array([sum(i)/2 for i in Q])
+			x = list()
+			size = 0
+			for i in Q:
+				if type(i) == list:
+					x.append(sum(i)/2)
+					size += (i[1]-i[0])**2
+				else:
+					x.append(i)
+			x = np.array(x)
+			size = np.sqrt(size)
+		return x
 
 
 def gradient_descent(f, Q, N = 100):
