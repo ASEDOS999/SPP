@@ -2,10 +2,14 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 class QuadraticFunction:
-	def __init__(self, n = None, C = 0):
+	def __init__(self, n = None, C = 0, mu = 0.1):
 		if n is None:
 			n = 100
 		A = np.random.uniform(-1, 1, (n,n))
+		#Q, _ = np.linalg.qr(A)
+		#L = np.diag(np.array([1, mu]))
+		#print(L.shape, Q.shape)
+		#A = Q@L@Q.T
 		self.A_ = A
 		A = A.T.dot(A)+ np.eye(n)*C
 		self.eig_value = np.linalg.eig(A)[0]
@@ -27,6 +31,8 @@ class QuadraticFunction:
 			A = np.delete(np.delete(self.A, ind, 0), ind, 1)
 			eig = np.linalg.eig(A)[0]
 			eig.sort()
+			#self.mu.append(self.mu_full)
+			#self.L.append((self.L_full_grad, self.L_full_grad))
 			self.mu.append(eig[0])
 			self.L.append((2*np.linalg.norm(self.A[ind,:]), 2 * eig[-1])) 
 
@@ -44,14 +50,15 @@ class QuadraticFunction:
 			return np.array(g)
 		if without is None:
 			without = []
-		indexes = [i for i,_ in enumerate(g) if not i in without]
+		indexes = [i for i,_ in enumerate(x) if not i in without]
 		for ind in indexes:
 			g.append(2*self.A[ind,:].dot(x) - 2*self.b[ind])
 		return np.array(g)
-	
+
 	def get_square(self):
 		lim = 2 * np.linalg.norm(self.b)/self.mu_full
 		return [[-lim, lim] for i in range(self.n)]
+
 	def get_start_point(self, ind, new_Q):
 		b = np.delete(self.b+self.A[ind,:], ind)
 		A = np.delete(np.delete(self.A, ind, 0), ind, 1)
