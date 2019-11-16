@@ -2,16 +2,20 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 class QuadraticFunction:
-	def __init__(self, n = None, C = 0, mu = 0.1):
+	def __init__(self, n = None, C = 0, mu = 0.1, L_max = 1, L_min = 0.1, way = 'random'):
 		if n is None:
 			n = 100
-		A = np.random.uniform(-1, 1, (n,n))
-		#Q, _ = np.linalg.qr(A)
-		#L = np.diag(np.array([1, mu]))
-		#print(L.shape, Q.shape)
-		#A = Q@L@Q.T
+		if way == 'random':
+			A = np.random.uniform(-1, 1, (n,n))
+			A = A.T.dot(A)+ np.eye(n)*C
+		if way == 'control':
+			a = np.random.uniform(L_min, L_max, (n,))
+			a[np.argmax(a)] = L_max
+			a[np.argmin(a)] = L_min
+			Q, _ = np.linalg.qr(np.random.uniform(-1, 1, (n,n)))
+			L = np.diag(np.array(a))
+			A = Q@L@Q.T
 		self.A_ = A
-		A = A.T.dot(A)+ np.eye(n)*C
 		self.eig_value = np.linalg.eig(A)[0]
 		self.eig_value.sort()
 		b = np.random.uniform(-10, 10, (n,))

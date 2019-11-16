@@ -78,7 +78,11 @@ class HalvingCube:
 		try:
 			cond = kwargs['cond']
 		except:
-			cond = lambda x, size: False
+			if 'eps' in kwargs:
+				eps = kwargs['eps']
+				cond = lambda x, size: np.linalg.norm(self.f.get_grad(x))<=eps
+			else:
+				cond = lambda x, size: False
 		try:
 			indexes = kwargs['indexes']
 		except:
@@ -100,7 +104,7 @@ class HalvingCube:
 				if der(x) > 0:
 					a, b = a,x[0]
 				else:
-					a,b = x[0], b
+					a, b = x[0], b
 				size = (b-a)
 				x = (b+a)/2
 				x = np.array([x])
@@ -134,28 +138,28 @@ class HalvingCube:
 		return x
 
 
-def gradient_descent(f, Q, N = 100):
+def gradient_descent(f, Q, N = 100, eps = None):
 	x0 = np.array([sum(i)/2 for i in Q])
 	grad = lambda x: f.get_grad(x)
 	L = f.L_full_grad
 	x = x0
 	n = 0
-	while n < N:
+	while n < N and (eps is None or np.linalg.norm(f.get_grad(x))>=eps):
 		x = x - 0.5/L * grad(x)
 		n += 1
 	return x
 
 def ellipsoid(f, Q, x_0=None, eps=None, N = 100):
 	n = len(Q)
-	x0 = np.array([sum(i) for i in Q])
+	x0 = np.array([sum(i)/2 for i in Q])
 	x = x0
 	eps = 5e-3 if eps is None else eps
-	rho = (Q[1] - Q[0]) * np.sqrt(n) / 2
+	rho = (Q[0][1] - Q[0][0]) * np.sqrt(n) / 2
 	H = np.identity(n)
-	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
+	domain = np.array(Q)
 	k = 0
 	results = [x]
-	while k < N:
+	while k < N and (eps is None or np.linalg.norm(f.get_grad(x))>=eps):
 		gamma = (rho / (n+1)) * (n / np.sqrt(n ** 2 - 1)) ** k
 		_df = f.get_grad(x)
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
