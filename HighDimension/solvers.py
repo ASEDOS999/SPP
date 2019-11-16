@@ -4,37 +4,27 @@ class HalvingCube:
 		self.Q = Q
 		self.f = f
 		self.methods = {
-				'GD' : self.GD, 'HS': self.main
+				'HS': self.main
 				}
-	def GD(self, **kwargs):
-		grad, x0, L, mu, cond, proj = (kwargs['grad'], kwargs['start_point'],
-			kwargs['L'], kwargs['mu'], kwargs['cond'], kwargs['proj'])
-		x, R = x0
-		R0 = R
-		R = R0
-		k = 0
-		M = L/mu
-		alpha = 2/(L+mu)
-		q = (M-1)/(M+1)
-		while not (cond(x, R) or np.linalg.norm(grad(x))<=1e-15):
-			x = (x - alpha * grad(x))
-			R *= q
-			k += 1
-		return x
 	
-	def CurGrad(self, x, der, size, L):
-		return abs(der(x)/L) >= size
+	def condition_for_condition(self):
+		#...
+	def condition_for_step(self):
+		#...
+	
+	def CurGrad(self, lambda_, der, size, L):
+		return abs(der(lambda_)/L) >= size
 
-	def solver(self, ind, new_Q, method = 'HS', indexes = None, x_new = None):
+	def solver(self, ind, new_Q, method = 'HS', indexes = None, lambda_new = None):
 		start_point = None
 		solver = self.methods[method]
-		L_x,L = self.f.L[ind]
+		L_lambda,L = self.f.L[ind]
 		if indexes is None:
 			indexes = []
 		else:
 			indexes = indexes.copy()
 		indexes.append(new_Q[ind])
-		def x_new_(x, Q = new_Q):
+		def lambda_new_(x, Q = new_Q):
 			if len(x) == len(Q):
 				return x
 			list_ = []
@@ -46,13 +36,13 @@ class HalvingCube:
 				else:
 					list_.append(Q[ind])
 			return np.array(list_)
-		x_new = x_new_
+		lambda_new = lambda_new_
 		indexes = [i for i,_ in enumerate(new_Q) if type(_) != list]
-		proj = lambda x: np.clip(x, *np.array(Q_).T)
-		der = lambda x: self.f.get_grad(x_new(x), only_ind =  [ind])[0]
-		grad = lambda x: self.f.get_grad(x_new(x), without = indexes)
+		proj = lambda lambda_: np.clip(lambda_, *np.array(Q_).T)
+		der = lambda lambda_: self.f.get_grad(lambda_new(lambda_), only_ind =  [ind])[0]
+		grad = lambda lambda_: self.f.get_grad(lambda_new(lambda_), without = indexes)
 		mu = self.f.mu[ind]
-		cond = lambda x, size: self.CurGrad(x, der, size, L_x)
+		cond = lambda lambda_, size: self.CurGrad(lambda_, der, size, L_lambda)
 		kwargs = {'grad':grad,
 				'start_point':start_point,
 				'L':L,
@@ -61,10 +51,10 @@ class HalvingCube:
 				'proj' : proj,
 				'Q' : new_Q,
 				'indexes' : indexes,
-				'x_new' : x_new
+				'lambda_new' : lambda_new
 			}
-		x = solver(**kwargs)
-		return der(x)
+		lambda_ = solver(**kwargs)
+		return der(lambda_)
 
 	def main(self, **kwargs):
 		try:
@@ -80,17 +70,13 @@ class HalvingCube:
 		except:
 			if 'eps' in kwargs:
 				eps = kwargs['eps']
-				cond = lambda x, size: np.linalg.norm(self.f.get_grad(x))<=eps
+				cond = lambda lambda_, size: np.linalg.norm(self.f.get_grad(lambda_))<=eps
 			else:
-				cond = lambda x, size: False
+				cond = lambda lambda_, size: False
 		try:
 			indexes = kwargs['indexes']
 		except:
 			indexes = None
-		try:
-			x_new = kwargs['x_new']
-		except:
-			x_new = None
 		if not indexes is None and len(indexes)== len(self.Q)-1: # NEED MODIFICATION
 			for i in Q:
 				if type(i) == list:
@@ -98,26 +84,26 @@ class HalvingCube:
 					break
 			a, b = Q[0],Q[1]
 			size = (b-a)
-			x = np.array([(b+a)/2])
+			lambda_ = np.array([(b+a)/2])
 			der = kwargs['grad']
-			while not cond(x,size):
-				if der(x) > 0:
-					a, b = a,x[0]
+			while not cond(lambda_,size):
+				if der(lambda_) > 0:
+					a, b = a,lambda_[0]
 				else:
-					a, b = x[0], b
+					a, b = lambda_[0], b
 				size = (b-a)
-				x = (b+a)/2
-				x = np.array([x])
-			return x
+				lambda_ = (b+a)/2
+				lambda_ = np.array([lambda_])
+			return lambda_
 		n = 0
-		while n==0 or (n < N and not cond(x,size)):
+		while n==0 or (n < N and not cond(lambda_,size)):
 			n += 1
 			ind = 0
 			while ind < len(Q):
 				if type(Q[ind]) == list:
 					new_Q = Q.copy()
 					new_Q[ind] = sum(Q[ind]) / 2
-					g = self.solver(ind, new_Q, indexes = indexes, x_new = x_new)
+					g = self.solver(ind, new_Q, indexes = indexes)
 					if g > 0:
 						new_Q[ind] = [Q[ind][0], new_Q[ind]]
 					else:
@@ -125,17 +111,17 @@ class HalvingCube:
 					Q = new_Q
 				ind += 1
 			Q_ = np.array(Q)
-			x = list()
+			lambda_ = list()
 			size = 0
 			for i in Q:
 				if type(i) == list:
-					x.append(sum(i)/2)
+					lambda_.append(sum(i)/2)
 					size += (i[1]-i[0])**2
 				else:
-					x.append(i)
-			x = np.array(x)
+					lambda_.append(i)
+			lambda_ = np.array(lambda_)
 			size = np.sqrt(size)
-		return x
+		return lambda_
 
 
 def gradient_descent(f, Q, N = 100, eps = None):
