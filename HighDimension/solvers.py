@@ -26,11 +26,13 @@ class HalvingCube:
 		return abs(der(x)/L) >= size
 
 	def solver(self, ind, new_Q, method = 'HS', indexes = None, x_new = None):
-		start_point = self.f.get_start_point(ind, new_Q)
+		start_point = None
 		solver = self.methods[method]
 		L_x,L = self.f.L[ind]
 		if indexes is None:
 			indexes = []
+		else:
+			indexes = indexes.copy()
 		indexes.append(new_Q[ind])
 		def x_new_(x, Q = new_Q):
 			if len(x) == len(Q):
