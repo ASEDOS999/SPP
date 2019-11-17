@@ -8,9 +8,11 @@ class HalvingCube:
 				}
 	
 	def condition_for_condition(self):
-		#...
-	def condition_for_step(self):
-		#...
+		return size <= abs(abs(g_k(x))/L_gk - size) # ATTENTION
+
+	def condition_for_step(self, x, size, L_g_without_k, gk):
+		return L_g_without_k*size <= np.linalg.norm(g_without_k(x))
+	
 	
 	def CurGrad(self, lambda_, der, size, L):
 		return abs(der(lambda_)/L) >= size
