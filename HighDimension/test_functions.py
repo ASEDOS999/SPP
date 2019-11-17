@@ -78,13 +78,14 @@ class QuadraticFunction:
 		
 class LogSumExp:
 	def __init__(self, d_primal = 100, d_dual = 2, C = 1):
+		self.d_primal, self.d_dual = d_primal, d_dual
 		self.C = C
 		v = 1
 		self.v = v
 		self.f = lambda x: np.log(1 + np.exp(v*x).sum()) + np.linalg.norm(x)**2*self.C
 		self.b = []
 		self.g_mu, self.g_L, self.g_M = [], [], []
-		self.g = []
+		self.g, self.g_der = [], []
 		for i in range(d_dual):
 			b = np.random.uniform(-1,1,(n,))
 			self.b.append(b)
@@ -92,12 +93,15 @@ class LogSumExp:
 			self.g_L.append(np.linalg.norm(b1))
 			self.g_M.append(0)
 			self.g.append(lambda x: self.b.dot(x) - 1)
+			self.g_der.append(b)
 
 		B = np.vstack(tuple(self.b))
 		l = np.linalg.eig(B.dot(B.T))[0]
 		self.lmin, self.lmax = l.min(), l.max()
+		
 		g = lambda x: np.array([i(x) for i in self.g])
 		self.phi = lambda lambda_: lambda x: -(self.f(x) + lambda_.dot(g(x))
+		
 		self.L = None
 		self.M = None
 
@@ -107,9 +111,73 @@ class LogSumExp:
 		self.R0 = self.get_R0()
 		print('R0', self.R0)
 		
-		self.fL = None
+		self.fL = self.v + 2 * self.C
 		self.fmu  = 2*self.C
-		self.get_lipschitz_constants()
 		
 		cond_num = (4*self.fL/self.fmu * self.lmax/self.lmin)
 		print('cond_num', cond_num)
+
+
+	def get_R0(self):
+		l_max = self.Q[0][1]
+		R0 = np.sqrt(2*np.log(self.d_primal+1))/self.C
+		return R0
+
+	def f_der(self, x):
+		m = lambda x: (self.v*x).max()
+		grad = lambda x: np.exp(self.v*x-m(x)) / (1/np.exp(m(x))+np.exp(self.v*x-m(x)).sum())
+		return grad(x)
+
+	def lipschitz_function(self, Q):
+		if self.L is None:
+			norm = lambda x: np.linalg.norm(x)
+			self.L = sum([norm(b) for b in self.b]) * self.R0
+		return self.L
+
+	def lipschitz_gradient(self, Q):
+		if self.M is None:
+			self.M = sum(self.g_L)**2 / self.C
+		return self.M
+
+	def calculate_function(self, l1, l2):
+		a = self.a
+		phi = self.phi
+		if (l1,l2) in self.values:
+			x_cur = self.values[(l1,l2)]
+		else:
+			s = time.time()
+			x_cur = scipy.optimize.minimize(lambda x:-phi(l1, l2)(x), 
+				np.zeros(self.a.shape), method = 'CG').x
+			self.values[(l1,l2)] = x_cur
+		return phi(l1, l2)(x_cur)
+
+	def get_x(self, lambda_, cond, warm = None):
+		f = lambda x: self.phi(l1,l2)(x)
+		g_grad = lambda x: [lambda[ind] * i for ind,i in enumerate(self.g_der)]
+		grad = lambda x: self.f_der(x) + sum(g_grad(x))
+		L = self.fL + lambda_.dot(np.array(self.g_L))
+		mu = self.fmu + lambda_.dot(np.array(self.g_mu))
+		M = L/mu
+		q = (M-1)/(M+1)
+		R = self.R0
+		alpha = 1/(L+mu)
+		x = np.zeros(self.a.shape)
+		if lambda_ in self.values:
+			x, R = self.values[lambda_]
+		R *= L/2
+		x, x_prev= x - 1/L * grad(x), x
+		R *= 1/5
+		N = 1
+		while not cond(x,R):
+			R *= min(q, (N+4)/(N+5))
+			x = x - alpha *grad(x)
+			N += 1
+		return x
+
+
+	def get_square(self):
+		x = np.zeros(self.d_primal)
+		gamma = min([-i(x) for i in self.g])
+		q = self.f(x) / gamma
+		self.Q = [[0,q] for i in range(d_dual)]
+		return self.Q
