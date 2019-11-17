@@ -12,11 +12,14 @@ class HalvingCube:
 		# L_gk is Lipschitz constant for gk
 		return L_gk / L * size <= abs(abs(gk(x))/L - size) # ATTENTION
 
-	def condition_for_step(self, x, size, L_g_without_k, gk):
+	def condition_for_step_on_square(self, x, size, L_g_without_k, g_without_k):
 		# L_gk is Lipschitz constant for gk
 		return L_g_without_k*size <= np.linalg.norm(g_without_k(x))
 	
-	
+	def condition_for_step_on_segment(self, x, size, L_g_k, g_k):
+		# L_gk is Lipschitz constant for gk
+		return L_g_k*size <= np.linalg.norm(g_k(x))
+		
 	def CurGrad(self, lambda_, der, size, L):
 		return abs(der(lambda_)/L) >= size
 
@@ -43,7 +46,6 @@ class HalvingCube:
 			return np.array(list_)
 		lambda_new = lambda_new_
 		indexes = [i for i,_ in enumerate(new_Q) if type(_) != list]
-		proj = lambda lambda_: np.clip(lambda_, *np.array(Q_).T)
 		der = lambda lambda_: self.f.get_grad(lambda_new(lambda_), only_ind =  [ind])[0]
 		grad = lambda lambda_: self.f.get_grad(lambda_new(lambda_), without = indexes)
 		mu = self.f.mu[ind]
@@ -53,7 +55,6 @@ class HalvingCube:
 				'L':L,
 				'mu':mu,
 				'cond' : cond,
-				'proj' : proj,
 				'Q' : new_Q,
 				'indexes' : indexes,
 				'lambda_new' : lambda_new
