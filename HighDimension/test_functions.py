@@ -76,3 +76,40 @@ class QuadraticFunction:
 				s += (i[0]-i[1])**2
 		return np.zeros((self.n-1,)), lim
 		
+class LogSumExp:
+	def __init__(self, d_primal = 100, d_dual = 2, C = 1):
+		self.C = C
+		v = 1
+		self.v = v
+		self.f = lambda x: np.log(1 + np.exp(v*x).sum()) + np.linalg.norm(x)**2*self.C
+		self.b = []
+		self.g_mu, self.g_L, self.g_M = [], [], []
+		self.g = []
+		for i in range(d_dual):
+			b = np.random.uniform(-1,1,(n,))
+			self.b.append(b)
+			self.g_mu.append(0)
+			self.g_L.append(np.linalg.norm(b1))
+			self.g_M.append(0)
+			self.g.append(lambda x: self.b.dot(x) - 1)
+
+		B = np.vstack(tuple(self.b))
+		l = np.linalg.eig(B.dot(B.T))[0]
+		self.lmin, self.lmax = l.min(), l.max()
+		g = lambda x: np.array([i(x) for i in self.g])
+		self.phi = lambda lambda_: lambda x: -(self.f(x) + lambda_.dot(g(x))
+		self.L = None
+		self.M = None
+
+		self.values = dict()
+		self.Q = self.get_square()
+		
+		self.R0 = self.get_R0()
+		print('R0', self.R0)
+		
+		self.fL = None
+		self.fmu  = 2*self.C
+		self.get_lipschitz_constants()
+		
+		cond_num = (4*self.fL/self.fmu * self.lmax/self.lmin)
+		print('cond_num', cond_num)
