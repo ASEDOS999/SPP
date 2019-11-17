@@ -163,7 +163,7 @@ class LogSumExp:
 		alpha = 1/(L+mu)
 		x = np.zeros(self.a.shape)
 		if lambda_ in self.values:
-			x, R = self.values[lambda_]
+			x, R = self.values[tuple(lambda_)]
 		R *= L/2
 		x, x_prev= x - 1/L * grad(x), x
 		R *= 1/5
@@ -172,6 +172,7 @@ class LogSumExp:
 			R *= min(q, (N+4)/(N+5))
 			x = x - alpha *grad(x)
 			N += 1
+		self.values[tuple(lambda_)] = (x,R)
 		return x
 
 
