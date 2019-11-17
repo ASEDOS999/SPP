@@ -7,10 +7,13 @@ class HalvingCube:
 				'HS': self.main
 				}
 	
-	def condition_for_condition(self):
-		return size <= abs(abs(g_k(x))/L_gk - size) # ATTENTION
+	def condition_for_condition(self, x, size, L_gk, gk, L):
+		# L is Lipschitz gradient's constant for \Phi(\lambda)
+		# L_gk is Lipschitz constant for gk
+		return L_gk / L * size <= abs(abs(gk(x))/L - size) # ATTENTION
 
 	def condition_for_step(self, x, size, L_g_without_k, gk):
+		# L_gk is Lipschitz constant for gk
 		return L_g_without_k*size <= np.linalg.norm(g_without_k(x))
 	
 	
