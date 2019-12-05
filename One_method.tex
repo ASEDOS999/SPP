@@ -227,7 +227,7 @@ Firstly, we can replace the Lipschitz condition on the square by the Lipschitz c
 
 Secondly, we can use in this theorems Lipschitz constants not for gradients but for partitial derivative on segments. Its proves are obvious enough and almost repeat proves for this theorem.
 
-\section{Number of iterations}
+\section{Convergence}
 
 Below proved estimates are correct if each iterations was correct, i.e. after each iteration there is the solution in the selected rectangle. It is important condition
 
@@ -242,6 +242,8 @@ The square's size equals to $\frac{a}{2^k}$ on $k^\text{th}$ iteration. If each 
 $$\|\textbf{x}_k-\textbf{x}^*\|\leq \frac{a}{2^k}\sqrt{2}$$
 Using the fact that function is Lipschitz continuous we have estimate \ref{NI1}
 \end{proof}
+
+The similar estimate was proven for the fist strategy without convergence on argument too. This proof can be found in the work \cite{Ston_Pas}.
 
 There are functions which estimates from written above theorem are very accurate for.
 
@@ -314,10 +316,18 @@ where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
 \begin{theorem}
-Let function $f$ be convex and has $L$-Lipschitz continuous gradient.
+Let function $f$ be convex.
 
-If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
-\begin{equation}N = \left\lceil\frac{1}{2}\log_2\frac{nLa^2}{2\epsilon}\right\rceil\end{equation}
+If
+
+1. Function $f$ has $L$-Lipschitz continious gradient
+
+2. $\exists \textbf{x}^*\in Q: \nabla f(\textbf{x}^*) = \textbf{0}$
+
+3. Strategy gives a convergence on argument
+
+then for to approach accuracy $\epsilon$ on function the following iterations number is sufficient:
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{Ma^2}{4\epsilon}\right\rceil,\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
@@ -330,31 +340,30 @@ We don't expect inspired result for each modification and we will not test it.
 \section{The Dual Problems}
 \label{details}
 
-This method was created to solve dual task. Namely, following task:
+This method is interesting for to solve dual problems for problems with two constraints. Namely, we are interesting in solution of the following problem:
 
 \begin{gather}
--\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda\geq 0},\\
-\text{where } \phi = \min_\textbf{x}\left(f(\textbf{x}) + \lambda_1 g_1(\textbf{x}) + \lambda_2 g_2(\textbf{x})\right)
+\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda\geq 0},\\
+\text{where } \phi = -\min_\textbf{x}\left(f(\textbf{x}) + \lambda_1 g_1(\textbf{x}) + \lambda_2 g_2(\textbf{x})\right)
 \end{gather}
+$$\textbf{x}(\lambda) = \arg\min_\textbf{x}\Phi(\textbf{x}, \lambda)$$
 
-In the section we will discuss how transform this task to task of the task of minimization on square, what is derivative and lipschitz constants and how to calculate its fastly.
+In this section we will discuss how transform this task to task of the task of minimization on square, what is derivative and lipschitz constants. Also, there is description of way for to calculate the value of function $\phi$ and its derivative.
 
-\subsection{Function Parameters}
-
-Fitstly, let's transform this task to the task of minimization on square. According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variables:
+Fitstly, let's transform this problem to the problem of minimization on square. According to \cite{task} (see ex. 4.1), we can add following restraint for the dual variables:
 
 \begin{gather}
 \label{restr:dual}
-\|{\lambda}\|_1 \leq \lambda_{\text{max}} = \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),\\
+\|{\lambda}\|_1 \leq a = \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),\\
 \text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_ig_i(\overline{\textbf{x}})$}
 \end{gather}
-And we understand that there is the dual task's solution in a square $Q = [0, \lambda_{\text{max}}]^2$. And we have following optimization task:
+According to this statemant ther is the $\lambda^*$ in square $Q = [0, a]^2$. And we have following optimization task:
 \begin{gather}
 \label{dual}
--\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda \in Q}
+\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda \in Q}
 \end{gather}
 
-Secondly, the gradient of function $\phi$ will be calculated according well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem}.
+The next point is a gradient of function $\phi$. It will be calculated according to well-known Demyanov-Danskin-Rubinov Theorem, see \cite{DDR-theorem}.
 
 \begin{theorem}
 Let $\phi(\lambda)=\min\limits_{x\in X}\Phi(x,\lambda)$ for all $\lambda\geq0$, where $\Phi$ is a smooth convex function with respect to $\lambda$ and $x(\lambda)$ is the only maximum point. Then
@@ -374,28 +383,67 @@ Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies 
 
 This theorem can be proved easy for the 2-dimensional space. In this case $g$ is a vector-function.
 
-In the following subsection we can use following notations:
-
-$$\Phi(\textbf{x},\lambda) = f(\textbf{x}) + \lambda_1g_1(\textbf{x}) + \lambda_2g_2(\textbf{x})$$
-$$\textbf{x}(\lambda) = \arg\min_\textbf{x}\Phi(\textbf{x}, \lambda)$$
-$$\phi(\lambda) = \min_\textbf{x} \Phi(\textbf{x}, \lambda) = \Phi(\textbf{x}(\lambda), \lambda)$$
-
 The next subsections are devoted to efficient calculation of function's and derivative's values.
 
-\subsection{Calcularting $\textbf{x}(\lambda)$}
+The main problem for such saddle-points problems is that one can not calculate $\textbf{x}(\lambda)$ presicely. Therefore, one have not precise value of the gradient in our method.
 
-We should have solution approximation on a segment for the one iteration. We will search it through the following dichotomy method: take a center of current segment and select such subsegment as antigradient looks at it. Obviously, that for to make one step on segment or on square we need the signum of derivative approximation matches with the derivative signum.
+We need $\textbf{x}(\lambda)$ when we solve one-dimensional problem. There are three following cases:
 
-Let $\lambda$ is a point which we want calculate derivative for the step on a segment or on the square. One should to calculate the derivative with respect to $\lambda_k$ for to define what rectangle must be selected. If we used its approximation it is important that signum of approximation $\phi'_{\lambda_k}$ and of $\widetilde{\phi'_{\lambda_k}}$ are match. We have following sufficient condition for it:
+1. The step of dichotomy on segment.
 
-$$|\phi'_{\lambda_k} - \widetilde{\phi'_{\lambda_k}}|\leq |\widetilde{\phi'_{\lambda_k}}|$$
+2. The test of stop-condition.
 
-$$|g_k(\textbf{x}(\lambda))-g_k(\textbf{x})|\leq |g_k(\textbf{x})|$$
+3. The select of rectangle.
 
-If $g_k$ is $L_{g_k}$-lipschitz continious function:
+Let's assume that we solve one dimensional problem on segment that is paralell to the first axis. For the case of the second axis the results will be similar. In the each above written case we are interesting in not full gradient but :
 
-$$L_{g_k}\|\textbf{x}(\lambda)-\textbf{x}\|\leq |g_k(\textbf{x})|$$
+1. The first component, i.e. $g_1(\textbf{x}(\lambda))$.
 
+2. (for the strategy through current gradient) the value of difference $\delta-\frac{|g_2(\textbf{x}(\lambda))|}{L}$, where $L$ is a Lipschitz constant for gradient of $\phi$.
+
+3. The second component, i.e. $g_2(\textbf{x}(\lambda))$.
+
+Moreover, for each case only sign of corresponding expression. For it we will use the following lemma.
+\begin{lemma}
+$\forall a,b\in\mathbb{R}:b\neq 0, |a-b|\leq |b| \Rightarrow \sign a = \sign b$
+\end{lemma}
+\begin{proof}
+If $b>0$ and $a\leq b$ then the lemma's condition is equivalent to the following condition:
+$$b-a\leq b\Rightarrow a\geq 0.$$
+If $b>0$ and $a \geq b$ then $a\geq 0$.
+
+The case of negative $b$ is proven similary.
+\end{proof}
+
+According this lemma we have the following stop conditions for calculating $\textbf{x}(\lambda)$ for the cases:
+
+1. $|g_1(\textbf{x})-g_1(\textbf{x})|\leq |g_1(\textbf{x})|$
+
+2. $\frac{1}{L}\Big||g_2(\textbf{x})|-|g_2(\textbf{x}(\lambda))|\Big|\leq \Big|\delta-\frac{|g_2(\textbf{x}|}{L})\Big|$
+
+3. $|g_2(\textbf{x})-g_2(\textbf{x}(\lambda))|\leq |g_2(\textbf{x})|$
+
+In this moment we can state the following theorem.
+
+\begin{theorem}\label{x_lambda}
+Let $g_k$ be $L_{g_k}$-Lipschitz continious. Then the following statements are true:
+
+1. For to make the dichotomy step correctly one can calculate $\textbf{x}(\lambda)$ untill the following condition is approached:
+$$L_{g_1}\|\textbf{x}-\textbf{x}(\lambda)\|\leq |g_1(\textbf{x})|.$$
+
+2. For to test stop condition correctly one can calculate $\textbf{x}(\lambda)$ untill the following condition is approached:
+$$\frac{L_{g_2}}{L}\|\textbf{x}-\textbf{x}(\lambda)\|\leq\Big|\delta-\frac{|g_2(\textbf{x}|}{L})\Big|,$$
+where $\delta$ is a distance between $\lambda$ and solution of one dimensional task $\lambda_*$.
+
+3. For to select rectangle according to strategy one can calculate $\textbf{x}(\lambda)$ untill the following condition is approached:
+$$L_{g_2}\|\textbf{x}-\textbf{x}(\lambda)\|\leq |g_2(\textbf{x})|.$$
+\end{theorem}
+
+There are two interesting remarks.
+
+Firstly, the calculating of $\textbf{x}(\lambda)$ does not depend on required accuracy $\epsilon$ for function $\phi$. This result is unique for our method and one can not see such effect in other inexact methods (see the next section).
+
+Secondly, this strategies does not guarantee that the calculating of $\textbf{x}(\lambda)$ will stop. For example, let's consider the first condition. If $g_1(\textbf{x}(\lambda)) = 0$  and $|g_1(\textbf{x})|$ decreases faster than $L_{g_1}\|\textbf{x}-\textbf{x}(\lambda)\|$ with decreasing of $\|\textbf{x}-\textbf{x}(\lambda)\|$ than the stop condition will not be approached. This case is looked as extra specific and does not observed in our experiments but it can take place.
 
 \section{Other Inexact Methods}
 \label{Inexact}
@@ -500,26 +548,29 @@ Secondly, we can see that the second and the third stratagies have similar resul
 
 \begin{figure}[ht!]  
 \vspace{-4ex} \centering \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-01.pdf} \label{10_1} }  
+\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-03.pdf} \label{100_3} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-03.pdf} \label{10_3} }
-\hspace{2ex}
-\subfigure[]{ \includegraphics[width=0.25\linewidth]{Tests/Images/10_1e-10.pdf} \label{10_10} }  
+\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-10.pdf} \label{100_10} }
 \vspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-01.pdf} \label{100_1} }  
+\includegraphics[width=0.25\linewidth]{Tests/Images/1000_1e-03.pdf} \label{1000_3} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-03.pdf} \label{100_3} }
+\includegraphics[width=0.25\linewidth]{Tests/Images/1000_1e-10.pdf} \label{1000_10} }
+\vspace{2ex}
+\subfigure[]{
+\includegraphics[width=0.25\linewidth]{Tests/Images/10000_1e-03.pdf} \label{10000_3} }  
 \hspace{2ex}
-\subfigure[]{ \includegraphics[width=0.25\linewidth]{Tests/Images/100_1e-10.pdf} \label{100_10} }
-\caption{Comparison of different on inexact methods for task with different dimension $N$ and for different required accuracy $\epsilon$: \subref{10_1} $N=10,\epsilon=10^{-1}$; \subref{10_3} $N=10,\epsilon=10^{-3}$; \subref{10_10} $N=10,\epsilon=10^{-10}$; \subref{100_1} $N=10,\epsilon=10^{-1}$; \subref{100_3} $N=100,\epsilon=10^{-3}$; \subref{100_10} $N=100,\epsilon=10^{-10}$. } \label{fig:image}
+\subfigure[]{
+\includegraphics[width=0.25\linewidth]{Tests/Images/10000_1e-10.pdf} \label{10000_10} }
+\hspace{2ex}
+\caption{Comparison of different on inexact methods for task with different dimension $N$ and for different required accuracy $\epsilon$: \subref{100_3} $N=100,\epsilon=10^{-3}$; \subref{100_10} $N=100,\epsilon=10^{-10}$; \subref{1000_3} $N=1000,\epsilon=10^{-3}$; \subref{1000_10} $N=1000,\epsilon=10^{-10}$; \subref{10000_3} $N=10000,\epsilon=10^{-3}$; \subref{10000_10} $N=10000,\epsilon=10^{-10}$. } \label{fig:image}
 \end{figure}
 
-Let's compare our method with inexact ellipsoid method and primal gradient method with $(\delta, L,\mu)$ oracle (see previous subsection \ref{Inexact}) on a dual task.
+Let's compare our method with inexact ellipsoid method and gradient methods (PGM and FGM) with $(\delta, L,\mu)$ oracle (see previous subsection \ref{Inexact}) on a dual task.
 
-For to find $\textbf{x}(\lambda)$ we will use gradients descent. There are theoretical result that can help to manange distance $\|\textbf{x}_k-\textbf{x}^*\|$ from current to optimal points. In particular, there are following results:
+For to find $\textbf{x}(\lambda)$ we will use gradient descent. There are theoretical result that can help to manange distance $\|\textbf{x}_k-\textbf{x}^*\|$ from optimal point to its current approximation. In particular, there are following results:
 \begin{itemize}
 \item If $f$ is a convex function with $L$-Lipschitz continious gradient then gradient descent with step $\alpha_k = \frac{1}{L}$ converges with speed
 $$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \frac{\|\textbf{x}_0-\textbf{x}^*\|}{k+4}$$
@@ -527,24 +578,34 @@ $$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \frac{\|\textbf{x}_0-\textbf{x}^*\|}{k
 $$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \left(\frac{M-1}{M+1}\right)^kL\|\textbf{x}_0-\textbf{x}^*\|,$$
 where $M =\frac{L}{\mu}$.
 \end{itemize}
-The proves for this statements one can find in many books of optimization, for example, in the book \cite{Polyak}. For all inexact method we will calculate $x(\lambda)$ with such accuracy as the method will converge to the solution with same for all methods accuracy $\epsilon$
 
-We consider following prime task:
+The proves for this statements one can find in many books of optimization, for example, in the book \cite{Polyak}.
+
+We will use functions where $\mu$ is small enough. Therefore, our method for calculating $\textbf{x}(\lambda)$ will converge to solution according to the first estimate.
+
+For all inexact method we will calculate $\textbf{x}(\lambda)$ with such accuracy as the method will converge to the solution with same for all methods accuracy $\epsilon$. For PGM, FGM and ellipsoids methods we will calculate $\textbf{x}(\lambda)$ with accuracy $\frac{\epsilon}{2}$ on function. For our method with the both strategies we will calculate $\textbf{x}(\lambda)$ untill the conditions from the \ref{dual} is approached.
+
+
+We consider the following prime task:
 
 \begin{gather}
 \label{prime}
-f(\textbf{x}) = \ln \left(1+\sum_{k=1}^me^{\textbf{a}_k^\top\textbf{x}}\right) + C\|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}}\\
-\text{s.t.}\,\textbf{x}\in \mathbb{R}\\
-g_k(\textbf{x}) = \textbf{b}_k^\top\textbf{x}-R_k\leq0, k = \overline{1,n}\\
+f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{\alpha x_k}\right) + \beta\|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}\in \mathbb{R}^N}\\
+g_k(\textbf{x}) = \langle \textbf{b}_k, \textbf{x}\rangle+c_k\leq0, k = \overline{1,m}\\
 \end{gather}
 
-It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $C$ determines strong convexity of our task and in the tests one takes $C$ equaling 1. The $N$ is diminsionality of primal task and is determined for different tests below. Matrixes $A = \|\textbf{a}_k\|_{k=1}^m \in\mathbb{R}^{N\times m}$ and $B = \|\textbf{b}_k\|_{k=1}^n \in\mathbb{R}^{N\times n}$ are being generated randomly. The $n$ is equal to dimensionality of dual task and in the current case is equal to 2. The $m$ is equal to $10^4$ in our experiments and has not changes.
+It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $\beta$ determines strong convexity of our task and in the tests one takes $beta=0.1$. The $N$ is diminsionality of primal task and is determined for different tests below. The parameter $\alpha$ is equal to 1. The parameters $c_k$ are equal to 1 too. The vectors $\{b_k\}_{k=1}^m$ are generated randomly for the each test. The $m$ is equal to dimensionality of dual task and in the current case is equal to 2.
+
+The LogSumExp-problem is $L$-Lipschitz continious function with $M$-Lipschitz continious gradient where $L=1$ and $M=\alpha$. Therefore:
+$$L_f = \alpha+2\beta R, M_f = \alpha^2 + 2\beta,$$
+$$\mu_f = 2\beta,$$
+where $R=\|\textbf{x}_0-\textbf{x}^*\|$ is the size of initial approximation. The functions $g_k$ are $L_k$-Lipschitz continious where $L_k=\|b_k\|$. 
 
 We introduce the following notation:
 
 \begin{equation}
 \label{phi}
-\phi(\lambda_1, \lambda_2) = -\min\limits_{\textbf{x}}\left(f(\textbf{x}) +\lambda_1 g_1(\textbf{x}) +\lambda_2g_2(\textbf{x})\right)
+\phi(\lambda_1, \lambda_2) = -\min\limits_{\textbf{x}\in \mathbb{R}^N}\left(f(\textbf{x}) +\lambda_1 g_1(\textbf{x}) +\lambda_2g_2(\textbf{x})\right)
 \end{equation}
 
 In such notations the dual task for the task \ref{prime} looks like:
@@ -562,7 +623,7 @@ And we have following task:
 
 $$\phi(\lambda_1, \lambda_2) \rightarrow \min_{0\leq\lambda_k\leq\lambda_{max}}$$
 
-How to calculate function and derivatave value for such task was discussed in the section \ref{details}.
+Calculating of function and derivatave value for such task was discussed in the section \ref{details}.
 
 We can see on \ref{fig:image} the following results. Firstly, the halving square method with provided in this work strategy \textbf{CurGrad} are the fastest method in the most tests tests. This method can be slower than other inexact methods if dimensional of primal task is small or $\epsilon$ is big. In particular, this strategy is faster than strategy with constant estimate provided in \cite{Ston_Pas}. It proves that provided by Nesterov method with strategy through gradient is the best method for to solve two dimensional dual task of minimization. Secondly, the gain of this strategy in comparison with other method is increase when the required $\epsilon$ decrease. This fact demonstrated important advantange of this strategy: it does not depend on required accuracy strongly. So, this method with constant estimate has strong dependity on it because there is this accuracy in the constant estimate, PGM and inexact ellipsoid method require that the $x(\lambda)$ is found with accuracy depended on $\epsilon$. But halving square with ellipsoid method has not such dependety.
 \section{Conclusion}
