@@ -1,0 +1,356 @@
+\documentclass{beamer}
+
+\usepackage[russian]{babel}
+\usepackage[utf8]{inputenc}
+\inputencoding{utf8}
+\usepackage[normalem]{ulem}
+
+\usepackage{subfigure}
+
+
+% There are many different themes available for Beamer. A comprehensive
+% list with examples is given here:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+% You can uncomment the themes below if you would like to use a different
+% one:
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+%\usetheme{Berkeley}
+%\usetheme{Berlin}
+%\usetheme{Boadilla}
+%\usetheme{boxes}
+%\usetheme{CambridgeUS}
+%\usetheme{Copenhagen}
+%\usetheme{Darmstadt}
+%\usetheme{default}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover}
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck}
+\usetheme{Madrid}
+%\usetheme{Malmoe}
+%\usetheme{Marburg}
+%\usetheme{Montpellier}
+%\usetheme{PaloAlto}
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw}
+
+\title{One Method for Convex Optimization on Square}
+
+\author{I.~Kuruzov\inst{1} \and F.~Stonyakin\inst{1, 2}}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute[MIPT] % (optional, but mostly needed)
+{
+  \inst{1}%
+Moscow Institut of Physics and Technology
+  \and
+  \inst{2}%
+V.I.~Vernandsky Crimean Federal University
+}
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date{QIPA, 2019}
+% - Either use conference name or its abbreviation.
+% - Not really informative to the audience, more for people (including
+%   yourself) who are reading the slides online
+
+\subject{Theoretical Computer Science}
+% This is only inserted into the PDF information catalog. Can be left
+% out. 
+
+% If you have a file called "university-logo-filename.xxx", where xxx
+% is a graphic format that can be processed by latex or pdflatex,
+% resp., then you can add a logo as follows:
+
+% \pgfdeclareimage[height=0.5cm]{university-logo}{university-logo-filename}
+% \logo{\pgfuseimage{university-logo}}
+
+% Delete this, if you do not want the table of contents to pop up at
+% the beginning of each subsection:
+\AtBeginSubsection[]
+{
+  \begin{frame}<beamer>{Outline}
+    \tableofcontents[currentsection,currentsubsection]
+  \end{frame}
+}
+
+% Let's get started
+\DeclareMathOperator{\sign}{sign}
+\usepackage{tikz}
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+
+\begin{frame}{Method's Description}
+Problem:
+$$\min_{(x,y)}\left\{f(x,y)|(x,y) \in Q\right\},$$
+where $f$ is a convex function, $Q = [a,b]\times[c, d]\in \mathbb{R}^2$ is a square.
+
+The method was proposed by Yu.~Nesterov:
+\pause
+
+\tikz{
+    \draw (-1.5,1.5) -- (1.5,1.5) -- (1.5,-1.5) -- (-1.5,-1.5) -- (-1.5,1.5);
+	\pause    
+    \draw (-1.5,0) -- (1.5, 0);
+    \pause
+    \draw[red, ->] (-1, 0) -- (-1.1, 0.5);
+    \node[below right] at (-1.1, 0.5){$\nabla f$}; 
+    \pause
+    \draw[dashed] (2.5,1.5) -- (5.5,1.5) -- (5.5,0) -- (2.5,0) -- (2.5,1.5);
+    \draw (2.5,0) -- (5.5,0) -- (5.5,-1.5) -- (2.5,-1.5) -- (2.5,0);
+	\pause    
+    \draw (4, 0) -- (4, -1.5);
+    \pause
+    \draw[red, ->] (4, -0.75) -- (4.7, -0.8);
+    \node[below right] at (4.1, -0.8){$\nabla f$};
+    \pause
+    \draw[dashed] (6.5, 0) -- (6.5, 1.5) -- (9.5, 1.5) -- (9.5, -1.5) -- (8, -1.5);
+	\draw (6.5,0) -- (8, 0) -- (8, -1.5) -- (6.5, -1.5) -- (6.5, 0);
+}
+\end{frame}
+
+\begin{frame}{Plan}
+  \tableofcontents
+  % You might wish to add the option [pausesections]
+\end{frame}
+
+% Section and subsections will appear in the presentation overview
+% and table of contents.
+
+\section{Strategies for One-Dimensional Task}
+
+\begin{frame}{Strategies}{Constant Estimate}
+Let $f$ be $L$-Lipschitz continious function with $M$-Lipschitz continious gradient.
+
+$\delta$ is a distance between the one-dimensional task's solution and its approximation.
+\begin{block}{Constant Estimate}
+Then if each one-dimensional task was solved with the following accuracy
+$$\boxed{\delta \leq \frac{\epsilon}{2Ma(\sqrt{2}+\sqrt{5})(1-\frac{\epsilon}{La\sqrt{2}})}}$$
+then this method converge to minimum of $f$ on square with accuracy $\epsilon$ on function.
+\end{block}
+\pause
+There are examples where there is not convergence on argument.
+\end{frame}
+
+\begin{frame}{Strategies}{Current Gradient}
+Purpose: to select rectangle with $x^*$.
+\pause
+
+Let $x_* =\arg\min_{x \in \text{segment}}f(x)$ is a solution of one-dimensional task, $x_{current}$ is its current approximation on segment.
+
+Purpose:
+    $$\sign f'_y(x_*) = \sign f'_y(x_{current})$$
+\pause    
+More strong condition
+    $$|f'_y(x_*) - f'_y(x_{current})| \leq |f'_y(x_{current})|$$
+\pause
+\begin{block}{Current Gradient}
+If $f$ has $M$-Lipschitz continious gradient then if each task on segment was solved with the accuracy satisfying condition
+  $$\boxed{\delta \leq \frac{|f'_y(x_{current})|}{M}}$$
+then this method converge to minimum of $f$ on square \textbf{on argument}.
+\end{block}
+\end{frame}
+
+\begin{frame}{Strategies}{Small gradient}
+\begin{block}{Small Gradient}
+$f$ is convex function with $M$-Lipschitz continious gradient. Then $\textbf{x}$ is solution of inital task with accuracy $\epsilon$ on function, if
+
+$$\|\nabla f(\textbf{x})\|\leq \frac{\epsilon}{a\sqrt{2}}, $$
+where $a$ is square's size.
+\end{block}
+\end{frame}
+
+\section{Convergence}
+
+\begin{frame}{Convergence}
+
+Let $f$ be convex function. $Q$ is square with size $a$.
+
+\begin{block}{Convergence}
+If function $f$ is $L$-Lipschitz continious then for to approach accuracy $\epsilon$ on function the following iterations number is sufficient:
+\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{La\sqrt{2}}{\epsilon}\right\rceil.\end{equation}
+\end{block}
+
+\end{frame}
+
+\begin{frame}{Convergence}
+\begin{block}{Convergence}
+If
+
+1. Function $f$ has $M$-Lipschitz continious gradient
+
+2. $\exists \textbf{x}^*\in Q: \nabla f(\textbf{x}^*) = \textbf{0}$
+
+3. Strategy gives a convergence on argument
+
+then for to approach accuracy $\epsilon$ on function the following iterations number is sufficient:
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{Ma^2}{4\epsilon}\right\rceil.\end{equation}
+\end{block}
+
+\end{frame}
+
+\section{Dual Problems}
+\begin{frame}{Dual Problems}{Problem}
+
+Problem:
+
+$$\min_{\textbf{x}\in \mathbb{R}^n} f(\textbf{x})$$
+$$\text{s.t. } g_k(\textbf{x}) \leq 0, k = \overline{1,m}$$
+
+where $f$ is $\mu_f$-strong convex $L_f$-Lipschitz continious function with $M_f$-Lipschitz continious gradient
+, $g_k$  is convex $L_{g_k}$-Lipschitz continious function with $M_{g_k}$-Lipschitz continious gradient for all $k=\overline{1,m}$.
+\end{frame}
+
+\begin{frame}{Dual Problems}{Problem}
+Dual problem
+
+$$\min_{\lambda \in \mathbb{R}^m_+} \Phi(\lambda),$$
+where $$\Phi(\lambda) = -\min\limits_{\textbf{x}\in \mathbb{R}^n}\left(f(\textbf{x}) + \langle\lambda, g(\textbf{x})\rangle\right).$$
+
+$$x(\lambda) = \arg\min\limits_{\textbf{x}\in \mathbb{R}^n}\left(f(\textbf{x}) + \langle\lambda, g(\textbf{x})\rangle\right)$$
+\end{frame}
+
+\begin{frame}{Dual Problems}{Parameters}
+\begin{block}{Slater's Condition}
+If $\textbf{x}_0\in\mathbb{R}^n : g(\textbf{x}_0)<0$ then
+$$\|\lambda^*\|_1 \leq \frac{1}{\gamma}\left(f(\textbf{x}_0)-f(\textbf{x}^*)\right)=a, \text{где } \gamma = \min_k \left[-g_k(\textbf{x}_0)\right].$$
+\end{block}
+\pause
+$$\min_{\lambda\in\mathbb{R}^m_+}\Phi(\lambda) = \min_{\lambda\in Q}\Phi(\lambda),$$
+where $Q = [0,a]^m$.
+\end{frame}
+
+\begin{frame}{Dual Problems}{Parameters}
+$$\Phi(\lambda) = -\min\limits_{\textbf{x}\in \mathbb{R}^n}\left(f(\textbf{x}) + \langle\lambda, g(\textbf{x})\rangle\right)$$
+Gradient (Demyanov-Danskin-Rubinov theorem):
+$$\nabla \Phi(\lambda) = -g(\textbf{x}(\lambda))$$
+Lipschitz constant for function:
+$$L = \max\|g(\textbf{x})\|$$
+Lipschitz constant for gradient:
+$$M = \frac{L_g^2}{\mu_f}$$
+\end{frame}
+
+\begin{frame}{Dual Problems}{How to calculate $\textbf{x}(\lambda)$}
+Questions:
+
+1. How does one do iteration on segment?
+
+2. How does one test the stop condition for one-dimensional task $\delta \leq \frac{|\Phi_2'(\lambda)|}{L}$?
+
+3. How does one select a rectangle?
+\end{frame}
+
+\begin{frame}{Dual Problems}{How to calculate $\textbf{x}(\lambda)$}
+We are interesting in only signum:
+
+1. $\Phi_1'(\lambda) = g_1\left(\textbf{x}(\lambda)\right)$
+
+2. $\delta -  \frac{|\Phi_2'(\lambda)|}{M} = \delta -  \frac{|g_2\left(\textbf{x}(\lambda)\right)|}{M} $
+
+3. $\Phi_2'(\lambda) = g_2\left(\textbf{x}(\lambda)\right)$
+\pause
+
+Use one trick:
+
+$$\forall a, b\neq 0\,|a-b|\leq|b|\rightarrow \sign a = \sign b$$
+\pause
+Stop-condition for calculating $x(\lambda)$:
+
+1. $L_{g_1}\|\textbf{x}-\textbf{x}(\lambda)\| \leq |g_1(\textbf{x})|$
+
+2. $\frac{L_{g_2}}{M}\|\textbf{x}-\textbf{x}(\lambda)\|\leq \Big|\delta-\frac{|g_2\left(\textbf{x}\right)|}{M}\Big|$
+
+3. $L_{g_2}\|\textbf{x}-\textbf{x}(\lambda)\| \leq |g_2(\textbf{x})|$
+\end{frame}
+
+\section{Experiments}
+
+\begin{frame}{Experiments}{Task}
+
+$$f(\textbf{x}) = \log_2\left(1+\sum_{k=1}^ne^{\alpha x_k}\right) + \beta\|\textbf{x}\|^2_2 \rightarrow \min_{\textbf{x}\in\mathbb{R}^n}$$
+$$\text{s.t. }g_k(\textbf{x}) = \langle b_k, \textbf{x}\rangle + c_k$$
+Dual problem:
+$$-\min\limits_{\textbf{x}\in \mathbb{R}^n}\left(f(\textbf{x}) + \langle\lambda, g(\textbf{x})\rangle\right) \rightarrow \min_{\lambda \in [0,a]^2}$$
+\end{frame}
+
+\begin{frame}{Experiments}{Other methods}
+1. Ellipsoids Method with $\epsilon$-subgradient
+
+Convergence:$$\min_k\Phi(\lambda_k) - \Phi(\lambda^*)\leq \max_{\lambda\in Q}|\Phi(\lambda)|\exp\left(-\frac{k}{8}\right) + \epsilon$$
+
+\pause
+2. Primal Gradient Method with $(\delta,L)$-oracle.
+
+Convergence:$$\min_k\Phi(\lambda_k) - \Phi(\lambda^*)\leq \frac{LR^2}{2}\exp\left(-k\frac{\mu}{L}\right) + \delta$$
+
+\pause
+
+3. Fast Gradient Method with $(\delta,L)$-oracle.
+
+Convergence:$$\min_k\Phi(\lambda_k) - \Phi(\lambda^*)\leq \min\left(\frac{4LR^2}{k^2}, LR^2\exp\left(-\frac{k}{2}\sqrt{\frac{\mu}{L}}\right)\right) + C_k\delta,$$
+\end{frame}
+
+\begin{frame}{Experiments}{Results}
+\begin{figure}[H]
+\begin{minipage}[h]{0.47\linewidth}
+\center{\includegraphics[width=0.7\linewidth]{../Images/100_1e-03.pdf}} \\$n=100, \epsilon=1e-3$ \\
+\end{minipage}
+\hfill
+\begin{minipage}[h]{0.47\linewidth}
+\center{\includegraphics[width=0.7\linewidth]{../Images/100_1e-10.pdf}} \\$n=100, \epsilon=1e-10$
+\end{minipage}
+\vfill
+\begin{minipage}[h]{0.47\linewidth}
+\center{\includegraphics[width=0.7\linewidth]{../Images/10000_1e-03.pdf}} \\$n=10000, \epsilon=1e-3$ \\
+\end{minipage}
+\hfill
+\begin{minipage}[h]{0.47\linewidth}
+\center{\includegraphics[width=0.7\linewidth]{../Images/10000_1e-10.pdf}} \\$n=10000, \epsilon=1e-10$ \\
+\end{minipage}
+\end{figure}
+\end{frame}
+
+\section{Generalization}
+
+\begin{frame}{Generalization}
+In the case of dimension >2:
+$$\text{Square $\rightarrow$ $n$-dimensional hypercube}$$
+$$\text{Separating segment $\rightarrow$ $n-1$-dimensional hypercube}$$
+\pause
+Convergence:
+\begin{equation}N = \left\lceil\log_2\frac{La\sqrt{2n}}{\epsilon}\right\rceil.\end{equation}
+\pause
+One can use this method recursively!
+\end{frame}
+
+\begin{frame}{Summary}
+\begin{itemize}
+\item One Method for Two-dimensional optimization
+\item Its application in dual problems
+\item Comparison of different modifications and different methods
+\item Generalization
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\center Thank you for your attention!
+\end{frame}
+
+\end{document}
+
+

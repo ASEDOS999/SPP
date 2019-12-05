@@ -120,6 +120,7 @@ $$\min_{(x,y)}\left\{f(x,y)|(x,y) \in Q\right\},$$
     \draw[dashed] (6.5, 0) -- (6.5, 1.5) -- (9.5, 1.5) -- (9.5, -1.5) -- (8, -1.5);
 	\draw (6.5,0) -- (8, 0) -- (8, -1.5) -- (6.5, -1.5) -- (6.5, 0);
 }
+Метод был предложен Ю.Е.~Нестеровым.
 \end{frame}
 
 \begin{frame}{План}
@@ -135,7 +136,7 @@ $$\min_{(x,y)}\left\{f(x,y)|(x,y) \in Q\right\},$$
 \begin{frame}{Стратегии}{Constant Estimate}
 Пусть $f$ - $L$-липшецева с $M$-липшецевым градиентом.
 
-Доказано, что следующей точности для одномерной задачи достаточно для достижения точности $\epsilon$ по функции исходной задачи:
+Доказано Ф.Стонякиным и Д.Пасечнюком, что следующей точности для одномерной задачи достаточно для достижения точности $\epsilon$ по функции исходной задачи:
 
 $$\boxed{\delta \leq \frac{\epsilon}{2Ma(\sqrt{2}+\sqrt{5})(1-\frac{\epsilon}{La\sqrt{2}})}}$$
 \pause
@@ -145,11 +146,14 @@ $$\boxed{\delta \leq \frac{\epsilon}{2Ma(\sqrt{2}+\sqrt{5})(1-\frac{\epsilon}{La
 \begin{frame}{Стратегии}{Current Gradient}
 Хотим: выбрать прямоугольник, содержащий решение исходной задачи
 \pause
+
+$x_* =\arg\min_{x \in \text{segment}}f(x)$, $x_{current}$ - текущее приближение $x_*$ на отрезке.
+
 Достаточно условия на знак:
-    $$\sign f'_y(x_0) = \sign f'_y(x_{current})$$
+    $$\sign f'_y(x_*) = \sign f'_y(x_{current})$$
 \pause    
 Усиленное условие
-    $$|f'_y(x_0) - f'_y(x_{current})| \leq |f'_y(x_{current})|$$
+    $$|f'_y(x_*) - f'_y(x_{current})| \leq |f'_y(x_{current})|$$
 \pause
 В случае $M$-липшецевости градиента:
   $$\boxed{\delta \leq \frac{|f'_y(x_{current})|}{M}}$$
@@ -230,7 +234,7 @@ $$\min_{\lambda\in\mathbb{R}^m_+}\Phi(\lambda) = \min_{\lambda\in Q}\Phi(\lambda
 \begin{frame}{Двойственные задачи}{Параметры двойственной}
 $$\Phi(\lambda) = -\min\limits_{\textbf{x}\in \mathbb{R}^n}\left(f(\textbf{x}) + \langle\lambda, g(\textbf{x})\rangle\right)$$
 Градиент (теорема Демьянов-Данскин-Рубинов):
-$$\nabla \Phi(\lambda) = g(\textbf{x}(\lambda))$$
+$$\nabla \Phi(\lambda) = -g(\textbf{x}(\lambda))$$
 Константа Липшица для функции:
 $$L = \max\|g(\textbf{x})\|$$
 Константа Липшица для градиента:
@@ -297,19 +301,19 @@ $$-\min\limits_{\textbf{x}\in \mathbb{R}^n}\left(f(\textbf{x}) + \langle\lambda,
 \begin{frame}{Эксперименты}{Результаты}
 \begin{figure}[H]
 \begin{minipage}[h]{0.47\linewidth}
-\center{\includegraphics[width=0.7\linewidth]{Images/100_1e-03.pdf}} \\$n=100, \epsilon=1e-3$ \\
+\center{\includegraphics[width=0.7\linewidth]{../Images/100_1e-03.pdf}} \\$n=100, \epsilon=1e-3$ \\
 \end{minipage}
 \hfill
 \begin{minipage}[h]{0.47\linewidth}
-\center{\includegraphics[width=0.7\linewidth]{Images/100_1e-10.pdf}} \\$n=100, \epsilon=1e-10$
+\center{\includegraphics[width=0.7\linewidth]{../Images/100_1e-10.pdf}} \\$n=100, \epsilon=1e-10$
 \end{minipage}
 \vfill
 \begin{minipage}[h]{0.47\linewidth}
-\center{\includegraphics[width=0.7\linewidth]{Images/10000_1e-03.pdf}} \\$n=10000, \epsilon=1e-3$ \\
+\center{\includegraphics[width=0.7\linewidth]{../Images/10000_1e-03.pdf}} \\$n=10000, \epsilon=1e-3$ \\
 \end{minipage}
 \hfill
 \begin{minipage}[h]{0.47\linewidth}
-\center{\includegraphics[width=0.7\linewidth]{Images/10000_1e-10.pdf}} \\$n=10000, \epsilon=1e-10$ \\
+\center{\includegraphics[width=0.7\linewidth]{../Images/10000_1e-10.pdf}} \\$n=10000, \epsilon=1e-10$ \\
 \end{minipage}
 \end{figure}
 \end{frame}
