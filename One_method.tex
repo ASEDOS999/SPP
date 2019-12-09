@@ -68,18 +68,18 @@ Let's consider a following task:
 $$\min_{(x,y)}\left\{f(x,y)|(x,y) \in Q\right\},$$
 where $f$ is a convex function, $Q$ - is a square on the plane.
 
-Let's consider a following method. One solves task of minimization for a function $g(x) = f\left(x, y_0 = \frac{a}{2}\right)$ on a segment $[0, a]$ with an accuracy $\delta$ on function. After that one calculates a sub-gradient in a received point and chooses the rectangle which the sub-gradient "does not look" in. Similar actions are repeated for a vertical segment. As a result we have the square decreased twice. Let's find a possible value of error $\delta_0$ for task on segment and a sufficient iteration's number $N$ to solve the initial task with accuracy $\epsilon$ on function.
+Let's consider a following method. One solves task of minimization for a function $g(x) = f\left(x, y_0 = \frac{a}{2}\right)$ on a segment $[0, a]$ with an accuracy $\delta$ on function. After that one calculates a subgradient in a received point and chooses the rectangle which the subgradient "does not look" in. Similar actions are repeated for a vertical segment. As a result we have the square decreased twice. Let's find a possible value of error $\delta_0$ for task on segment and a sufficient iteration's number $N$ to solve the initial task with accuracy $\epsilon$ on function.
 
 Let's describe an algorithm formally. See pseudo-code \ref{alg:Example}.
 
 \begin{algorithm}[H]
-\caption{Algorithm of the method}\label{alg:Example}
+\caption{Halving Square Method}\label{alg:Example}
 \begin{algorithmic}[1]
 \Function{Method}{convex function $f$, square $Q = [a, b]\times[c,d]$}
 
-$x_0:= solve(g = f(\cdot, \frac{c+vcd}{2}), [a,b], \delta)$
+$x_* \leftarrow \arg\min_{x\in[a,b]}f(x, \frac{c+d}{2})$
  
-$g = subgradient(f, (x_0, \frac{c+d}{2}))$
+$g \leftarrow \partial f(x_*, \frac{c+d}{2})$
  
 \If{g[1] > 0}
 \State$Q := [a,b] \times [c, \frac{c+d}{2}]$ 
@@ -87,145 +87,176 @@ $g = subgradient(f, (x_0, \frac{c+d}{2}))$
 \State$Q := [a,b] \times [\frac{c+d}{2}, d]$ 
 \EndIf
 
- $y_0:= solve(g = f(\frac{a+b}{2}, \cdot), [c,d], \delta)$
+ $y_*\leftarrow \arg\min_{y\in[c,d]}f(\frac{a+b}{2}), y) $
  
- $g := subgradient(f, (\frac{a+b}{2}), y_0)$
+ $g \leftarrow \partial f(\frac{a+b}{2}), y_*)$
  
  \If{g[0] > 0}
  \State$Q := [a, \frac{a+b}{2}] \times [c, d]$ 
 \Else
 \State$Q := [\frac{a+b}{2},b] \times [c, d]$ 
 \EndIf
-\If{StopRec() == False}
+\If{$f(\frac{a+b}{2}, \frac{c+d}{2})-f^*>\epsilon$}
 \State Method($f$, $Q$) 
 \EndIf
-\Return $(\frac{a+b}{2}, \frac{c+d}{2})$
+
+\Return$(\frac{a+b}{2}, \frac{c+d}{2})$
 \EndFunction 
  \end{algorithmic}
 \end{algorithm}
 
-\section{Algorithm correctness}
-Let's $\textbf{x}_0$ is solution of the task on segment, $Q_1$ is choosed rectangle, $Q_2$ is not choosed rectangle.
+The $\arg\min$ will be find through dichotomy method that uses derivative, i.e. it is method that take the derivative in the center of curent segment and select the part segment that anti-gradient looks at. The interesting remark is that it is one-dimensional analog of our method. 
 
-\begin{lemma}\label{l1}
-If the optimization task on segment is solved with zero error and the $f$ is convex and differentiable at a point-solution, rectangle with solution of initial task was choosed correct.
+The sufficient accuracy for $\arg\min$ will be discussed in the section \ref{Delta}.
+
+\section{Algorithm correctness}
+
+In this section there are profes for the fact that our method works for some accuracy for one-dimensional problem on segment.
+
+Now we introduce the following notation. If we solve the one-dimensional problem then $f_\perp'$ is a perpendicular to the segment subgradient's component, i.e. it is a derivative on the variable that is fixed on this segment. In this case $f'_\parallel$ is a parallel to the segment subgradient's component.
+
+We will use the following enough obvious lemma.
+
+\begin{lemma}
+\label{subgradient}
+
+If $\textbf{x}_*$ is a solution of one-dimensional problem on a horizontal segment then
+
+$$\exists g \in \partial f(\textbf{x}_*) : g_\parallel = 0$$
 \end{lemma}
 \begin{proof}
-From sub-gradient definition, $\textbf{x}^* \in \{x|(\textbf{g}(\textbf{x}_0), \textbf{x}_0 - \textbf{x}^*) \geq 0)\}$. Lemma's statement follows from it and a fact that the first (or the second for vertical segment) gradient's component in point $\textbf{x}_0$ is zero.
+...
 \end{proof}
 
 \begin{theorem}
 Let's the $f$ has continuous derivative on the square. Then there is a neighbourhood of a solution of optimization task on segment such as a choice of rectangle will not change if one use any point from the   neighbourhood.
 \end{theorem}
 \begin{proof}
-Let's consider a case when we work with horizontal segment. Case with vertical segment is considered analogously. Then we are interesting in $f_y'(x_0, y_0)$. If $\textbf{x}_0$ is not solution of initial task, then $f_y'(x_0, y_0) \neq 0$. 
-
-From a continuity of the derivative:
-
-$$\lim\limits_{\delta \rightarrow 0}f_y'(x_0+\delta, y_0) = f_y'(x_0, y_0)$$
-
-Therefore, 
-
-$$\exists \delta_0:\forall \textbf{x}_\delta\in B_{\delta_0}(x_0)\times y_0\Rightarrow \sign(f_y'(\textbf{x}_\delta)) = \sign(f_y'(\textbf{x}_0))$$
-
-From it and lemma 4.1 theorem's statement follows.
-
+...
 \end{proof}
 
 The method does not work for all convex functions even for zero error on segment. There is an example of non-smooth convex problem in \cite{Ston_Pas} when this method can not converge to the solution more accurately then one constant.
 
-\section{Error's Value}
+\section{One-Dimensional Problem}
 \label{Delta}
 
-Let's find possible value of error's value, i.e. let's find a number $\delta_0$ such as if a distance between a solution on a segment and its approximation is less $\delta_0$ then rectangle for the segment is selected correctly (selected rectangle includes global solution on square). Rectangles are defined correctly for a horizontal optimization task, if:
+In this section we describe a sufficient conditions for to stop to solve one-dimensinal problem on segment. We will use the following notation:
+
+$$(x_*,y_*)\text{ -- solution of one-dimensional problem} $$
+$$\delta = |x-x_*| \text{ -- distance}$$
+
+In the work \cite{Ston_Pas} there are proves for the following theorem:
+
+\begin{theorem}
+\label{ConstEst}
+Let $f$ be convex $M$-Lipschitz continious function with $L$-Lipschitz continious gradient.
+Then if each one-dimensional task was solved with the following accuracy
+\begin{equation}
+\delta \leq \frac{\epsilon}{2Ma(\sqrt{2}+\sqrt{5})(1-\frac{\epsilon}{La\sqrt{2}})}
+\end{equation}
+then this method converge to minimum of $f$ on square with accuracy $\epsilon$ on function.
+\end{theorem}
+
+This strategy requires to solve each one-dimensional problem with accuracy of order of $\epsilon$. It can be sufficient disadvantage for iterations on the big segments in the start of method's work. Also this strategy does not give convergence on argument. We will call this strategy \textbf{ConstEst}(Constant Estimate).
+
+Let's develop strategy where there is convergence on argument. Rectangles are defined correctly for a horizontal optimization task, if:
 
 \begin{equation}\label{MCH}
-\forall\delta : |\delta| < \delta_0 \Rightarrow f'_y(\textbf{x}_0)f'_y(x_0+\delta, y_0) > 0
+f'_y(\textbf{x}_*)f'_y(x_*+\delta, y_*) > 0
 \end{equation}
 
 Analogically, for a vertical segment:
 \begin{equation}\label{MCV}
-\forall\delta: |\delta| < \delta_0 \Rightarrow f'_x(\textbf{x}_0)f'_x(x_0, y_0+\delta) > 0
+f'_x(\textbf{x}_*)f'_x(x_*, y_*+\delta) > 0
 \end{equation}
-
-
-
-
-\begin{theorem}
-\label{ConstGrad}
-Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
-
-The current segment is horizontal and $\exists M>0  : \Rightarrow|f_y'(\textbf{x}_0)| \geq M$ or the current segment is vertical and $\exists M>0  : \Rightarrow|f_x'(\textbf{x}_0)| \geq M$. Then rectangle is defined correctly if the possible value of error is less than $\frac{M}{L}$.
-\end{theorem}
-\begin{proof}
-Condition \eqref{MCH} is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
-$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_0)\right|$:
-
-$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right|<\left|f'_y(\textbf{x}_0)\right|$$
-
-The $L$-Lipschitz continuity gives following inequality:
-
-$$\left|f'_y(\textbf{x}_0) - f'_y(x_0+\delta, y_0)\right| \leq L|\delta|$$
-
-Therefore the following possible value is sufficient to select rectangle correctly:
-
-$$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
-
-Statement for vertical segment is proved similarly.
-\end{proof}
-
-In written above theorem the estimate needs some lower bound for derivatibe in point-solution on segment and this task can be hard in practise. Using other interpretation of the condition \eqref{MCH} one can take more useful result.
 
 \begin{theorem}
 \label{CurGrad}
-Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_0$ is a solution of optimization's  task on a current segment. 
+Let function $f$ be convex and has $L$-Lipschitz continuous gradient and a point $\textbf{x}_*$ is a solution of optimization's  task on a current segment. 
 
 The current segment is horizontal and $M = |f_y'(\textbf{x}_{current})|$ or the current segment is vertical and $M = |f_y'(\textbf{x}_{current})|$. Then rectangle is defined correctly if a distance between $\textbf{x}_{cur}$ and accurate solution on segment is less than $\frac{M}{L}$.
 \end{theorem}
 \begin{proof}
 Condition \eqref{MCH} is met if there is a derivative $f'_y(x_0+\delta, y_0)$ in a neighbourhood of 
-$f'_y(\textbf{x}_0)$ with radius $\left|f'_y(\textbf{x}_{cur})\right|$:
+$f'_y(\textbf{x}_*)$ with radius $\left|f'_y(\textbf{x}_{cur})\right|$:
 
-$$\left|f'_y(\textbf{x}_0) - f'_y(\textbf{x}_{cur})\right|<\left|f'_y(\textbf{x}_{cur})\right|$$
+$$\left|f'_y(\textbf{x}_*) - f'_y(\textbf{x}_{cur})\right|<\left|f'_y(\textbf{x}_{cur})\right|$$
 
 The $L$-Lipschitz continuity gives following inequality:
 
-$$\left|f'_y(\textbf{x}_0) - f'_y(\textbf{x}_{cur})\right| \leq L|\delta|$$
+$$\left|f'_y(\textbf{x}_*) - f'_y(\textbf{x}_{cur})\right| \leq L|\delta|$$
 
 Therefore the following possible value is sufficient to select rectangle correctly:
 
-$$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x}_0)\right|}{L}$$
+$$\delta_0 < \frac{M}{L} \leq \frac{\left|f'_y(\textbf{x})\right|}{L}$$
 
 Statement for vertical segment is proved similarly.
 \end{proof}
 
-Theorems 4.1 and 4.2 give stop conditions in the case when gradient in point-solution on segment and close points is large. But what should we do if gradient in this point is small?
+Theorem \ref{CurGrad} gives stop conditions in the case when gradient in point-solution on segment and close points is large. But what should we do if gradient in this point is small?
 
 \begin{theorem}
-Let $f$ be convex and has $L$-Lipschitz continuous gradient. Then for accuracy on function $\epsilon$ following condition in point $\textbf{x}$ is sufficient:
+\label{small}
+Let $f$ be $M$-Lipschitz continuous convex and have $L$-Lipschitz continuous gradient. The points $\textbf{x}_*$ is one-dimensional problem's solution and $\textbf{x}$ is its approximation, $\delta = \|\textbf{x}_*-\textbf{x}\|$ is a distance between them.
 
-$$\|\nabla f(\textbf{x})\|\leq \frac{\epsilon}{a\sqrt{2}}, $$
-where $a$ is size of current square.
+Then for accuracy on function $\epsilon$ following condition in point $\textbf{x}$ is sufficient:
+$$\delta \leq \frac{\epsilon-LR|f_\perp'(x_*)|}{L+MR}, $$
+where $R=a\sqrt{2}$ is size of current square.
 \end{theorem}
 
 \begin{proof}
-Let's consider following inequality for convex functions (see prove in \cite{Nesterov}):
 
-$$f(\textbf{x}^*) - f(\textbf{x}) \geq (\nabla f(\textbf{x}), \textbf{x}^* - \textbf{x} )$$
+From the lemma \ref{subgradient} we have:
+
+$$g \in \partial f(\textbf{x}_*): g_\parallel = 0.$$
+
+Then the following inequallity is true by diffenition of subgradient:
+
+$$f(\textbf{x}^*) - f(\textbf{x}_*) \geq (g, \textbf{x}^* - \textbf{x}_*)$$
 
 Using  Cauchy–Bunyakovsky–Schwarz inequality one has following inequality
 
-$$f(\textbf{x}) - f(\textbf{x}^*) \leq -(\nabla f(\textbf{x}), \textbf{x}^* - \textbf{x} )\leq$$
-$$\leq \|\nabla f(\textbf{x})\| \|\textbf{x}^* - \textbf{x}\|\leq \|\nabla f(\textbf{x})\|a\sqrt{2}$$
+$$f(\textbf{x}_*) - f(\textbf{x}^*) \leq -(g, \textbf{x}^* - \textbf{x}_* )\leq$$
+$$\leq \|g\| \|\textbf{x}^* - \textbf{x}_*\|\leq \|g\|a\sqrt{2}$$
 
-This inequality proves theorem's statement.
+On the other hand, we have:
+
+$$f(\textbf{x})-f(\textbf{x}_*)\leq M\delta$$
+
+Therefore we have the following estimate:
+
+$$f(\textbf{x})-f(\textbf{x}^*) \leq M\delta +\|g\|a\sqrt{2} = M\delta + |f_\perp'(\textbf{x}_*)|R$$
+
+From Lipschitz continious from gradient we have:
+
+$$f(\textbf{x})-f(\textbf{x}^*) \leq M\delta + \left(|f_\perp'(\textbf{x})|+L\delta\right)R$$
+
+Then for to approach accuracy $\epsilon$ at the point $x$ the following condition is sufficient:
+
+$$M\delta +\|g\|a\sqrt{2} = M\delta + \left(|f_\perp'(\textbf{x})|+L\delta\right)R \leq \epsilon$$
+
+$$\delta \leq \frac{\epsilon - |f_\perp'(\textbf{x})|}{M+LR}$$
 \end{proof}
+
+Then our addaptive strategy is following. One is to calculate untill the following condition is met:
+
+\begin{equation}
+\label{Adaptive}
+\delta \leq \max\left\{
+	\frac{|f_\perp'(\textbf{x})|}{L}, 
+	\frac{\epsilon - |f_\perp'(\textbf{x})|}{M+LR}
+	\right\}.
+\end{equation}
+
+And if the condition from theorem \ref{small} we stop our method. This strategy is reffered as \textbf{CurGrad}(Current Gradient).
+
 
 Let's make a couple of remarks.
 
-Firstly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the theorems 4.1 and 4.2.
+Firstly, we can replace the Lipschitz condition on the square by the Lipschitz condition on the segments in the written above theorems.
 
 Secondly, we can use in this theorems Lipschitz constants not for gradients but for partitial derivative on segments. Its proves are obvious enough and almost repeat proves for this theorem.
+
 
 \section{Convergence}
 
@@ -238,7 +269,7 @@ where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
 \begin{proof}
-The square's size equals to $\frac{a}{2^k}$ on $k^\text{th}$ iteration. If each irerations was correct then
+The square's size equals $\frac{a}{2^k}$ on $k$'th iteration. If each irerations was correct then
 $$\|\textbf{x}_k-\textbf{x}^*\|\leq \frac{a}{2^k}\sqrt{2}$$
 Using the fact that function is Lipschitz continuous we have estimate \ref{NI1}
 \end{proof}
@@ -247,29 +278,29 @@ The similar estimate was proven for the fist strategy without convergence on arg
 
 There are functions which estimates from written above theorem are very accurate for.
 
-\textbf{Example 5.} Let's consider following task with positive constant $A$:
+\textbf{Example 5.} Let's consider following task with positive constant $\alpha$:
 
-$$\min\left\{A(x+y)|Q = [0,1]^2\right\}$$
+$$\min\left\{\alpha(x+y)|Q = [0,1]^2\right\}$$
 
-If one take a center of a current solution as approximate  solution one have value $\frac{A}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{A}{\epsilon}\rceil$. For this function $L_f = 2A$. Therefore, estimate \eqref{NI1} is accurate for such tasks with little error that not more one iteration.
+If one take a center of a current solution as approximate  solution one have value $\frac{\alpha}{2^N}$ after $N$ iterations. Therefore, for accuracy $\epsilon$ one has to $\lceil\log_2\frac{\alpha}{\epsilon}\rceil$. For this function $L_f = 2\alpha$. Therefore, estimate \eqref{NI1} is accurate for such tasks with little error that not more one iteration.
 
-But any convex function is locally Lipschitz continuous at all $x \in \intt Q$. Therefore, we have following theorem.
-
-\begin{theorem}
-If function $f$ is convex and a solution $x^*\in \intt Q$, then for to solve initial task with accuracy $\epsilon$ on function one has to take a center of a current square as approximate  solution and make following iteration's numbers:
-\begin{equation}\label{NI2}
-N = \left\lceil\log_2\max\left\{\frac{a}{\epsilon_0(\textbf{x}^*)},\frac{\sqrt{2}L_fa}{\epsilon}\right\}\right\rceil
-\end{equation}
-where $a$ is a size of the initial square $Q$, $\epsilon_0(x^*)$ is size of neighbourhood of $x^*$ which $f$ is $L_f$-Lipschitz continuous in, $\Delta f =  f(x_0) - f(x^*)$, $x_0$ is a center of square $Q$.
-\end{theorem}
 
 We can improve written above estimates if to add new conditions:
 
 \begin{theorem}
-Let function $f$ be convex and has $L$-Lipschitz continuous gradient.
+Let function $f$ be convex.
 
-If solution is a internal point, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
-\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{La^2}{\epsilon}\right\rceil\end{equation}
+If
+
+1. Function $f$ has $L$-Lipschitz continious gradient
+
+2. $\exists \textbf{x}^*\in Q: \nabla f(\textbf{x}^*) = \textbf{0}$
+
+3. Strategy gives a convergence on argument
+
+then for to approach accuracy $\epsilon$ on function the following iterations number is sufficient:
+\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{Ma^2}{4\epsilon}\right\rceil,
+\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
@@ -291,11 +322,12 @@ Using it we have estimate \eqref{NI3}.
 Estimate \ref{NI1} works in all cases and better then estimate \ref{NI3} when following condition is met:
 
 $$\frac{2L_f^2}{L_g}\leq \epsilon,$$
-где $L_f, L_g$ is Lipschitz constants for function and for gradient. On the other hand, the estimate \ref{NI3} works if point with zero gradient exists in the square. 
+where $L_f, L_g$ is Lipschitz constants for function and for gradient. On the other hand, the estimate \ref{NI3} works if point with zero gradient exists in the square. 
+
 
 \section{Halving Cube Method}
 
-This Halving Square Method is optimization method for convex problem on square. But there is obvious generalization for convex problems in high dimensional spaces on $n$-dimensional hypercube. Let the its faces are parallel to axes. Let's describe it:
+This Halving Square Method is optimization method for convex problem on square. But there is obvious generalization for convex problems in high dimensional spaces on $n$-dimensional hypercube.  Let's describe it:
 
 1. Take $(n-1)$-dimensional hyperplane in hypercube that includes hypercube center and is parallel to one of its face.
 
@@ -311,7 +343,7 @@ The proves for convergence for smooth function and for strategy repeat proves in
 
 \begin{theorem}
 If function $f$ is convex and $L_f$-Lipschitz continuous, then for to solve initial task with accuracy $\epsilon$ on function one should make following iteration's numbers:
-\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{\sqrt{n}L_fa}{\epsilon}\right\rceil\end{equation}
+\begin{equation}N = \left\lceil\log_2\frac{\sqrt{n}L_fa}{\epsilon}\right\rceil\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
@@ -327,7 +359,7 @@ If
 3. Strategy gives a convergence on argument
 
 then for to approach accuracy $\epsilon$ on function the following iterations number is sufficient:
-\begin{equation}\label{NI3}N = \left\lceil\frac{1}{2}\log_2\frac{Ma^2}{4\epsilon}\right\rceil,\end{equation}
+\begin{equation}N = \left\lceil\frac{1}{2}\log_2\frac{Ma^2}{4\epsilon}\right\rceil,\end{equation}
 where $a$ is a size of the initial square $Q$.
 \end{theorem}
 
@@ -355,7 +387,7 @@ Fitstly, let's transform this problem to the problem of minimization on square. 
 \begin{gather}
 \label{restr:dual}
 \|{\lambda}\|_1 \leq a = \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),\\
-\text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_ig_i(\overline{\textbf{x}})$}
+\text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_i[-g_i(\overline{\textbf{x}})]$}
 \end{gather}
 According to this statemant ther is the $\lambda^*$ in square $Q = [0, a]^2$. And we have following optimization task:
 \begin{gather}
@@ -419,7 +451,7 @@ According this lemma we have the following stop conditions for calculating $\tex
 
 1. $|g_1(\textbf{x})-g_1(\textbf{x})|\leq |g_1(\textbf{x})|$
 
-2. $\frac{1}{L}\Big||g_2(\textbf{x})|-|g_2(\textbf{x}(\lambda))|\Big|\leq \Big|\delta-\frac{|g_2(\textbf{x}|}{L})\Big|$
+2. $\frac{1}{L}\Big||g_2(\textbf{x})|-|g_2(\textbf{x}(\lambda))|\Big|\leq \Big|\delta-\frac{|g_2(\textbf{x})|}{L}\Big|$
 
 3. $|g_2(\textbf{x})-g_2(\textbf{x}(\lambda))|\leq |g_2(\textbf{x})|$
 
@@ -432,7 +464,7 @@ Let $g_k$ be $L_{g_k}$-Lipschitz continious. Then the following statements are t
 $$L_{g_1}\|\textbf{x}-\textbf{x}(\lambda)\|\leq |g_1(\textbf{x})|.$$
 
 2. For to test stop condition correctly one can calculate $\textbf{x}(\lambda)$ untill the following condition is approached:
-$$\frac{L_{g_2}}{L}\|\textbf{x}-\textbf{x}(\lambda)\|\leq\Big|\delta-\frac{|g_2(\textbf{x}|}{L})\Big|,$$
+$$\frac{L_{g_2}}{L}\|\textbf{x}-\textbf{x}(\lambda)\|\leq\Big|\delta-\frac{|g_2(\textbf{x})|}{L}\Big|,$$
 where $\delta$ is a distance between $\lambda$ and solution of one dimensional task $\lambda_*$.
 
 3. For to select rectangle according to strategy one can calculate $\textbf{x}(\lambda)$ untill the following condition is approached:
@@ -444,6 +476,73 @@ There are two interesting remarks.
 Firstly, the calculating of $\textbf{x}(\lambda)$ does not depend on required accuracy $\epsilon$ for function $\phi$. This result is unique for our method and one can not see such effect in other inexact methods (see the next section).
 
 Secondly, this strategies does not guarantee that the calculating of $\textbf{x}(\lambda)$ will stop. For example, let's consider the first condition. If $g_1(\textbf{x}(\lambda)) = 0$  and $|g_1(\textbf{x})|$ decreases faster than $L_{g_1}\|\textbf{x}-\textbf{x}(\lambda)\|$ with decreasing of $\|\textbf{x}-\textbf{x}(\lambda)\|$ than the stop condition will not be approached. This case is looked as extra specific and does not observed in our experiments but it can take place.
+
+
+
+\section{Complexity}
+
+Let's estimate complexity of one-dimensional problem.
+
+For the strategy \textbf{ConstEst} we have that each one-dimensional problem needs exactly the following iterations of one-dimensional method:
+
+$$\log_2\frac{2La(\sqrt{2}+\sqrt{5})(1-\frac{\epsilon}{Ma\sqrt{2}})}{\epsilon} = O\left(\log \frac{1}{\epsilon}\right)$$
+
+Now let's condider the strategy \textbf{CurGrad}. Let the modul of the perpendicular component at point-solution $|f'_\perp(\textbf{x}_*)|$ is equal to $\tilde{\epsilon}$. A point from segment $\textbf{x}$ is its approximation and $\delta$ is a distance between them.
+
+If we use the dichotomy method and $N$ is a number of current dichotomy iteration we have from $L$-Lipschitz continious gradient the following estimates for derivative at $\textbf{x}$:
+$$\tilde{\epsilon}-La2^{-N} \leq |f_\perp'(\textbf{x})|\leq \tilde{\epsilon}+La2^{-N}$$
+
+Accordint to this estimates for to approach a the first alternative from adaptive estimate \ref{Adaptive} the following condition is sufficient:
+
+$$a2^{-N} \leq \frac{\tilde{\epsilon}-La2^{-N}}{L}$$
+
+Similarly for the second alternative:
+
+$$a2^{-N} \leq \frac{\epsilon - \tilde{\epsilon} - La2^{-N}}{M+LR}\leq \frac{\epsilon - \tilde{\epsilon}}{M+LR} - La2^{-N}$$
+
+Accordint to this we have that for to approach estimate \ref{Adaptive} we need the following iterations number:
+
+$$1+\log_2\min\left\{\frac{La}{\tilde{\epsilon}},\frac{(M+LR)a}{\epsilon-\tilde{\epsilon}}\right\}$$
+
+Of course, we assume in this estimate that $\tilde{\epsilon}$ and $\epsilon-\tilde{\epsilon}$ are positive. If it is not true we can trash a bad alternative.
+
+The bad case of this iterations number's estimate occurs when
+
+$$\tilde{\epsilon} = \frac{L}{M+L(R+1)}\epsilon.$$
+
+In the bad case we have the following estimate for iterations number:
+$$1+\log_2\frac{(M+L(R+1))a}{\epsilon} = O\left(\log\frac{1}{\epsilon}\right)$$
+
+From this estimate we see that the our adaptive strategy needs the same iterations number in the bad case as the strategy \textbf{ConstGrad} needs always.
+
+But for complexity estimation we have that for to solve one-dimensional problem we needs $O\left(\log \frac{1}{\epsilon}\right)$ iterations.
+
+\begin{theorem}
+For to approach accuracy $\epsilon$ on function our method needs the following number of calculating function $f$ and its derivatives of the first order:
+$$O\left(\log^2\frac{1}{\epsilon}\right)$$
+\end{theorem} 
+\begin{proof}
+We have that for to solve one-dimensional problem one needs not more than
+$$\log_2\frac{Ca}{\epsilon}$$
+iteration, where $C$ is a constant determined by the used strategy and function's parameter and $a$ is a size of current segment.
+
+On each iteration of our method we solve to problems on segments of size $a_N=a2^{-N}$. Let $N_{\max1}=\left\lfloor\log_2\frac{Ca}{\epsilon}\right\rfloor$ is a maximal number of global method which the estimation for iteration number of one-dimensional problem is positive. And $N_{\max2}=\left\lceil\log_2\frac{La\sqrt{2}}{\epsilon}\right\rceil$ is estimation from \ref{NI1}. $$N_{\max}:=\min\{N_{\max1},N_{\max2}\}=\log_2\frac{1}{\epsilon}+O(1)$$ we have the following number of derivatives and function values calculation:
+
+$$\sum_{k=0}^{N_{\max}}\log_2\frac{Ca2^{-k}}{\epsilon} = $$
+$$= \sum_{k=0}^{N_{\max}}\log_2\frac{Ca}{\epsilon} - \sum_{k=0}^{N_{\max}}k=$$
+$$= N_{\max}\log_2\frac{Ca}{\epsilon} - \frac{1}{2}N_{\max}^2 + O\left(\log\frac{1}{\epsilon}\right)=$$
+
+$$= \frac{1}{2}\log_2^2\frac{1}{\epsilon} +O\left(\log\frac{1}{\epsilon}\right)=$$
+$$=O\left(\log^2\frac{1}{\epsilon}\right)$$
+\end{proof}
+
+
+In the case of dual problems the complexity of function's parameters calculation depends on $\epsilon$ too. But accordint to (...) in this case the complexity will change by obvious way:
+
+\begin{theorem}
+For to approach accuracy $\epsilon$ on function our method needs the following number of calculation of functions from primal problem and their derivatives:
+$$O(\log^3\frac{1}{\epsilon})$$
+\end{theorem} 
 
 \section{Other Inexact Methods}
 \label{Inexact}
@@ -474,74 +573,12 @@ if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textb
 
 Note that our method converge by the following way:
 
-$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq C\exp(-k),$$
+$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq Cexp(-k\ln 2),$$
 and it is the best theoretical convergence rate from all methods in this section.
 \section{Tests}
 
-In this section we show estimate on number iterations of practice. ALso there is comparison work time our new method with work time of other optimization methods such as inexact gradient descent and method ellipsoid\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
+In this section we show estimate on number iterations of practice. Also there is comparison work time of our new method with work time of other optimization methods such as inexact gradient methods and inexact ellipsoids method\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
 
-\subsection{Tests for iterations number}
-
-There is results of tests for iterations number. We consider task when global solution is internal point and external point. In \ref{table:est} you can find values of estimates (see theorems \ref{NI1}, \ref{NI3}) for this expirements.
-
-\begin{table}[h!]
-\centering
-\begin{tabular}{||c|c|c||}
-\hline
-Estimate& Internal & External \\
-\hline
-Through $L_f$ & 40& 30\\
-\hline
-Through $L_{f'}$ & 20& 14\\
-\hline
-\end{tabular}
-\caption{Value for estimates through function's and gradient's lipschitz constant}
-\label{table:est}
-\end{table}
-
-Let's consider task of minimization semi-positive definite quadratic function with randomly generated parameters. We took such square that it involve global solution of this task.
-
-\begin{figure}[ht!]  
-\vspace{-4ex} \centering \subfigure[]{
-\includegraphics[width=0.45\linewidth]{Tests/Images/In_point.pdf} \label{InPoint} }  
-\hspace{1.2ex}
-\subfigure[]{
-\includegraphics[width=0.45\linewidth]{Tests/Images/Out_point.pdf} \label{OutPoint} }
-\caption{Test for iterations number \subref{InPoint}  when the estimate \ref{NI3} is reached; \subref{OutPoint} when the estimate \ref{NI3} is not reached.} \label{fig:threeDMcases}
-\end{figure}
-
-
-
-We can see on \ref{InPoint} that the estimate \ref{NI3} (see table \ref{table:est}) is reached in this case. But let's consider following task:
-
-$$f(x,y) = (x+y)^2+x^2, Q = [1,2]^2,\,(x^*, y^*) = (1,1)$$
-$$\min\limits_{(x,y)\in Q}f(x,y)$$
-
-And we see on \ref{OutPoint} that the estimate \ref{NI3} (see table \ref{table:est}) is not reached in this case and in this case we should use estimate \ref{NI1}.
-
-\subsection{Comparison Of Stop Conditions}
-
-In current section we will compare different stop conditions for the solving task on separating segments. Fistly, let's define all stop conditions.
-
-\begin{itemize}
-	\item Constant estimate (\textbf{Const}): $\delta \leq \frac{\epsilon}{2La\sqrt{5}\log_2\frac{2Ma\sqrt{2}}{\epsilon}}$ from \cite{Ston_Pas},
-	\item Constant gradient estimate (\textbf{ConstGrad}): $\delta \leq \frac{M_{der}}{L}$ from \ref{ConstGrad},
-	\item Estimate through current gradient (\textbf{CurGrad}): $\frac{|f'(\textbf{x}_{cur})|}{L}$ from \ref{CurGrad}.
-\end{itemize}
-
-Obviously, that in practic we can not use the second strategy because to calculate this estimate for one segment is harder than to solve all task. This estimate is the improved the third estimate. And there is interesting question: how much better does the second strategy work than the third?
-
-We will test on the simple quadratic functions. Parameters for this functions will be generated randomly. We will research dependence of work time on required accuracy $\epsilon$. For each epsilon we will generate $N$ tested functions and measure work time of each method. In our expirements $N$ is equal to 1000 times. Results of experimetns you can see on the picture \ref{res}.
-
-\begin{figure}[h!]
-\center{\includegraphics[scale=0.4]{Tests/Images/Stop_compare.pdf}}
-\label{res}
- \caption{Comparison of different strategies for a segment}
-\end{figure}
-
-Firstly, we see that the first strategy is the slowest strategy from the three strategy. There is good explonation for it. The estimate for the iterations number is proportional to $\epsilon$. The dichotomy method makes the steps number proportional to the logarithm of epsilon. Therefore, the number of iteration on segment for the first strategy is proportional to $(\ln \frac{1}{\epsilon})^2$. It decreases speed of this strategy. But for the saddle point problems calculating derivative that the second strategy needs is a hard and this fact can increase speed of the second strategy. But when we will test our method on such tasks that the second strategy is faster then the first too (see results on \ref{fig:image}).
-
-Secondly, we can see that the second and the third stratagies have similar results that's why we can state that the second estimate is good replacement for the third. Of course, it is only for the simple tasks when calculating gradients and derivatives is fast procedure. Obviously, when to calculate gradient is the hard procedure we will not have such positive results.
 
 \subsection{Comparison With Other Methods}
 \label{Comparison}
