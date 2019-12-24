@@ -236,12 +236,13 @@ class LogSumExp():
 		x = np.zeros(self.a.shape)
 		if not warm is None:
 			x, R = warm
-		R *= L/2
+		#R *= L/2
 		x, x_prev= x - 1/L * grad(x), x
-		R *= 1/5
+		#R *= 1/5
 		N = 1
 		while abs(der(x)) < R:
-			R *= min(q, (N+4)/(N+5))
+			#R *= min(q, (N+4)/(N+5))
+			R *= q
 			x = x - alpha *grad(x)
 			N += 1
 		return x

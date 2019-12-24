@@ -348,12 +348,13 @@ class halving_square:
 		alpha = 1/(L+mu)
 		beta = q**2
 		N = 1
-		R *= 1/5
+		#R *= 1/5
 		x = x0
 		x = x - alpha * grad(x)
 		while L_gk*R/self.f_M > abs(delta-abs(g(x))/self.f_M):
 			x = x - alpha * grad(x)
-			R *= min((N+4)/(N+5), q)
+			#R *= min((N+4)/(N+5), q)
+			R *= q
 			N+=1
 		return delta-abs(g(x))/self.f_M<=0
 	def CurGrad(self, l1, l2, delta, x, R):
@@ -378,9 +379,10 @@ class halving_square:
 		x_prev = x
 		x = x_prev - 1/L*grad(x_prev)
 		N=1
-		R *= 1/5
+		#R *= 1/5
 		while L_g * R >= abs(der(x)):
-			R *= min((N+4)/(N+5), q)
+			#R *= min((N+4)/(N+5), q)
+			R *= q
 			x = x - alpha*grad(x)
 			N += q
 		return x, R
