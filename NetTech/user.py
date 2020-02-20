@@ -3,9 +3,11 @@ import pickle
 import matplotlib.pylab as plt
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = 'localhost'
-port = 8007
-s.connect(('', port))
+host = '10.55.169.240'
+port = 55088
+#host = ''
+#port = 8007
+s.connect((host, port))
 
 while True:
 	i = input()
@@ -28,6 +30,7 @@ while True:
 			plt.xlabel("Time")
 			plt.ylabel("Dual Problem")
 			plt.grid()
+		plt.legend(keys)
 		plt.show()
 	print('received', len(data), 'bytes')
 s.close()

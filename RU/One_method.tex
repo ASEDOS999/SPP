@@ -67,7 +67,7 @@ $$\min_{(x,y)}\left\{f(x,y)|(x,y) \in Q\right\},$$
 
 Утверждается, что для некоторой точности решения вспомогательной задачи $\delta$ данный метод будет сходиться к решению по функции. Это будет обсуждено в следующей секции.
 
-Сейчас обсудим корректность алгоритма. Здесь и далее мы будем использовать следующую нотацию. Если у нас определен некоторый сегмент и есть некоторый вектор $\textbf{g}$, то $\textbf{g}_\parallel$ - его проекция на этот отрезок, а $\textbf{g}_\perp$ - его перпендикулярная компонента.
+Сейчас обсудим корректность алгоритма. Здесь и далее мы будем использовать следующую нотацию. Пусть мы работаем с некоторым отрезком. Если есть некоторый вектор $\textbf{g}$, то $\textbf{g}_\parallel$ - его проекция на этот отрезок, а $\textbf{g}_\perp$ - его перпендикулярная компонента. Если этот отрезок параллелен одной из осей координат и функция $f(\textbf{x})$ зависит от двух переменных, то $f_\perp'(\textbf{x})$ есть ее производная по компоненте, перпендикулярной этому отрезку, а $f_\parallel'(\textbf{x})$ - по компоненте, параллельной отрезку.
 
 Здесь и далее нам понадобятся стандартные понятия субдифференциала и субградиента, которые можно найти, например, в \cite{Nesterov}.
 
@@ -172,7 +172,7 @@ $$\left|f'_\perp(\textbf{x}_*) - f'_\perp(\textbf{x})\right| \leq |f'_\perp(\tex
 
 Тогда для достижения точности $\epsilon$ в точке $\textbf{x}$ следующего условия достаточно:
 $$\delta \leq \frac{\epsilon-LR|f_\perp'(x)|}{L+MR}, $$
-where $R=a\sqrt{2}$ is size of current square.
+где $R=a\sqrt{2}$ это размер диагонали квадрата.
 \end{theorem}
 
 \begin{proof}[Доказательство]
@@ -180,8 +180,6 @@ where $R=a\sqrt{2}$ is size of current square.
 Из леммы \ref{subgradient} мы имеем:
 
 $$g \in \partial f(\textbf{x}_*): g_\parallel = 0.$$
-
-Then the following inequallity is true by diffenition of subgradient:
 
 Тогда по определению субградиента:
 
@@ -206,7 +204,6 @@ $$M\delta +\|g\|a\sqrt{2} = M\delta + \left(|f_\perp'(\textbf{x})|+L\delta\right
 $$\delta \leq \frac{\epsilon - |f_\perp'(\textbf{x})|}{M+LR}$$
 \end{proof}
 
-Then our addaptive strategy is following. One is to calculate untill the following condition is met:
 
 Определим нашу адаптивную стратегию. Мы решаем задачу одномерной оптимизации, пока не выполнено условие на точность по аргументу:
 
@@ -277,7 +274,6 @@ $$f(\textbf{x}) - f(\textbf{x}^*)\leq L\left(\frac{a}{2^N}\right)^2,$$
 \end{gather}
 $$\textbf{x}(\lambda) = \arg\min_\textbf{x}\Phi(\textbf{x}, \lambda)$$
 
-In this section we will discuss how transform this task to task of the task of minimization on square, what is derivative and lipschitz constants. Also, there is description of way for to calculate the value of function $\phi$ and its derivative.
 
 В данной секции мы обсудим как свести это к нашей задаче, как вычислить липшецевы константы и каким образом вычислять $\textbf{x}(\lambda)$.
 
@@ -286,7 +282,7 @@ In this section we will discuss how transform this task to task of the task of m
 \begin{gather}
 \label{restr:dual}
 \|{\lambda}\|_1 \leq a = \frac{1}{\gamma}\left(f(\overline{\textbf{x}}) -\min\limits_{\textbf{x}}f(\textbf{x})\right),\\
-\text{where $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_i[-g_i(\overline{\textbf{x}})]$}
+\text{где $\overline{\textbf{x}}:g_i(\overline{\textbf{x}})<0,\gamma = \min\limits_i[-g_i(\overline{\textbf{x}})]$}
 \end{gather}
 Согласно этому утверждению, мы можем локализовать $\lambda^*$ в квадрате $Q = [0, a]^2$. В таком случае мы свели нашу задачу оптимизации к следующему виду:
 \begin{gather}
@@ -308,7 +304,7 @@ $$\nabla \phi(\lambda) = F'_\lambda\left(x(\lambda),\lambda\right)$$
 
 Кроме этого, мы нуждаемся в константе Липшица для градиента. В работе \cite{Stonykin} сформулирована и доказана следующая теорема:
 \begin{theorem}
-Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies the Lipschitz condition with a constant $M_g$. Then the function $\phi(\lambda) = \min_\textbf{x}\left(f(\textbf{x}+\lambda_1g_1(\textbf{x}) + \lambda_2g_2(\textbf{x})\right)$ defined in \ref{phi}, where $x(\lambda) = \arg\min\limits_x(f(x)+\lambda g(x))$, has Lipschitz smooth gradient with constant $L_{\phi'} = \frac{M_g^2}{\mu_f}$
+Пусть $f(x)$ есть $\mu_f$-сильно выпуклая функция, функция $g(x)$ удовлетворяет условию Липшица с константой $M_g$. Тогда функция $\phi(\lambda) = \min_\textbf{x}\left(f(\textbf{x}+\lambda_1g_1(\textbf{x}) + \lambda_2g_2(\textbf{x})\right)$, определенная в \ref{phi}, где $x(\lambda) = \arg\min\limits_x(f(x)+\lambda g(x))$, имеет липшецев градиент с константой $L_{\phi'} = \frac{M_g^2}{\mu_f}$
 \end{theorem}
 
 В случае размерности 2 по $\lambda$ доказательство повторяется практически в точности. В таком случае, $g(\textbf{x})$ есть вектор-функция.
@@ -325,9 +321,9 @@ Let $f(x)$ be a $\mu_f$-strongly convex function, the function $g(x)$ satisfies 
 
 1. Проекция градиента на отрезок, т.е. $g_\parallel(\textbf{x}(\lambda))$.
 
-2. Значение разниц $\delta-\frac{|g_\perp(\textbf{x}(\lambda))|}{L}$ и $\delta-...$, где $L$ это липшецева константа для градиента $\phi$.
+2. Значение разниц $\delta-\frac{|g_\perp(\textbf{x}(\lambda))|}{L}$, где $L$ это липшецева константа для градиента $\phi$.
 
-3. Перпендикулярная компонента, т.е. $g_2(\textbf{x}(\lambda))$.
+3. Перпендикулярная компонента, т.е. $g_\perp(\textbf{x}(\lambda))$.
 
 Согласно \cite{Ston_Pas}, мы можем вычислять производные неточно, для того чтобы выбрать прямоугольник с $\epsilon$-решением. Так, если $\delta$ - это точность по аргументу текущего приближения одномерной задачи, и $\Delta$ - точность вычисления градиента в точке по величине градиента, то следующего условия достаточно для нужного выбора прямоугольника:
 
@@ -364,71 +360,73 @@ $$2\Delta + L\delta \leq \frac{\epsilon}{2a(\sqrt{2}+\sqrt{5})},$$
 1. Для того, чтобы сделать шаг дихотомии корректно, т.е. сохраняя сходимость по аргументу, достаточно вычислять $\textbf{x}(\lambda)$, пока не выполнено следующее условие
 $$L_{g_\parallel}\|\textbf{x}-\textbf{x}(\lambda)\|\leq |g_\parallel(\textbf{x})|.$$
 
-2. For to test stop condition correctly one can calculate $\textbf{x}(\lambda)$ untill the following condition is approache
-2. Для того, чтобы проверить условие останова из стратегии 
+2. Для того, чтобы проверить условие останова из стратегии, достаточно вычислять $\textbf{x}(\lambda)$, пока не выполнено следующее условие
 $$\frac{L_{g_\perp}}{L}\|\textbf{x}-\textbf{x}(\lambda)\|\leq\Big|\delta-\frac{|g_\perp(\textbf{x})|}{L}\Big|,$$
-where $\delta$ is a distance between $\lambda$ and solution of one dimensional task $\lambda_*$.
+где $\delta$ это расстояние между текущей $\lambda$ и решением одномерной задачи $\lambda_*$.
 
-3. For to select rectangle according to strategy one can calculate $\textbf{x}(\lambda)$ untill the following condition is approached:
+3. Для того, чтобы выбрать прямоугольник согласно стратегии, достаточно вычислять $\textbf{x}(\lambda)$, пока не выполнено следующее условие
 $$L_{g_\perp}\|\textbf{x}-\textbf{x}(\lambda)\|\leq |g_\perp(\textbf{x})|.$$
 \end{theorem}
 
-There are two interesting remarks.
+Выше предложенный способ проверки условий требует сходимости метода по аргументу. Следующая теорема позволит использовать в точке $\epsilon$-субградиент, который, как известно, совпадает с градиентом функции в точке по внутренней переменной в точке $x_\epsilon$ - точке-решении внутренней задачи с точностью $\epsilon$.
 
-Firstly, the calculating of $\textbf{x}(\lambda)$ does not depend on required accuracy $\epsilon$ for function $\phi$. This result is unique for our method and one can not see such effect in other inexact methods (see the next section).
+\begin{theorem}
 
-Secondly, this strategies from written above theorem does not guarantee that the calculating of $\textbf{x}(\lambda)$ will stop. For example, let's consider the first condition. If $g_1(\textbf{x}(\lambda)) = 0$  and $|g_1(\textbf{x})|$ decreases faster than $L_{g_1}\|\textbf{x}-\textbf{x}(\lambda)\|$ with decreasing of $\|\textbf{x}-\textbf{x}(\lambda)\|$ than the stop condition will not be approached. This case is looked as extra specific and does not observed in our experiments but it can take place.
+Пусть задано выпуклое множество $Q$ и на этом множестве определена выпуклая дифференцируемая функция $f$, при этом ее градиент удовлетворяет условию Липшица с константой $L$. Тогда любой ее $\epsilon$-субградиент будет отличаться от ее градиента не более чем на $\sqrt{\frac{L\epsilon}{2}}$, т.е.
 
+$$\|\partial_\epsilon f(\textbf{x}) - \nabla f(\textbf{x})\| \leq \sqrt{\frac{L\epsilon}{2}},$$
 
+если расстояние от $\textbf{x}$ до границы $Q$ меньше, чем $\sqrt{\frac{\epsilon}{2L}}$.
+\end{theorem}
 
-\section{Complexity}
+Сделаем два замечания.
 
-Let's estimate complexity of one-dimensional problem.
+Во-первых, вычисление $\textbf{x}(\lambda)$ не зависит от требуемой точности $\epsilon$ для исходной задачи в том смысле, что если мы вычислили $\textbf{x}(\lambda)$ в некоторой точке для некоторого $\epsilon$, то для всех меньших $\epsilon$ мы также будем вычислять это значение, причем за такое же время.
 
-For the strategy \textbf{ConstEst} we have that each one-dimensional problem needs exactly the following iterations of one-dimensional method:
+Во-вторых, стратегии, обозначенные в выше сформулированной теореме, не гарантируют сходимости. Например, рассмотрим условие $L_{g_\parallel}\|\textbf{x}-\textbf{x}(\lambda)\|\leq |g_\parallel(\textbf{x})|.$ Если $g_\parallel(\textbf{x}(\lambda))=0$ и левая часть будет убывать медленнее правой, то это условие не будет выполнено. Для того, чтобы избежать этого, предлагается использовать комбинированную стратегию из выше написанных теорем, т.е. высчитывать $\textbf{x}(\lambda)$, пока не будет выполнено одно из условий. Хотелось бы отметить, что в наших экспериментах, описанных ниже, не наблюдалось таких случаев, что условие из теоремы не достижимо.
+
+\section{Сложность}
+
+Оценим сложность решения одномерной проблемы.
+
+Для стратегии \textbf{ConstEst} мы имеем, что одномерная задача требует в точности следующее количество итераций одномерного метода:
 
 $$\log_2\frac{2La(\sqrt{2}+\sqrt{5})(1-\frac{\epsilon}{Ma\sqrt{2}})}{\epsilon} = O\left(\log \frac{1}{\epsilon}\right)$$
 
-Now let's condider the strategy \textbf{CurGrad}. Let the modul of the perpendicular component at point-solution $|f'_\perp(\textbf{x}_*)|$ is equal to $\tilde{\epsilon}$. A point from segment $\textbf{x}$ is its approximation and $\delta$ is a distance between them.
+Теперь рассмотрим стратегию \textbf{CurGrad}. Пусть модуль перпендикулярной компоненты в точке-решении $|f'_\perp(\lambda_*)|$ равен $\tilde{\epsilon}$, точка $\lambda$ - это приближение $\lambda_*$, $\delta=\|\lambda-\lambda_*\|$.
 
-If we use the dichotomy method and $N$ is a number of current dichotomy iteration we have from $L$-Lipschitz continious gradient the following estimates for derivative at $\textbf{x}$:
-$$\tilde{\epsilon}-La2^{-N} \leq |f_\perp'(\textbf{x})|\leq \tilde{\epsilon}+La2^{-N}$$
+Если мы используем метод дихотомии и $N$ - это количество итераций дихотомии, из $L$-липшецевости градиета мы имеем следующую оценку:
 
-Accordint to this estimates for to approach a the first alternative from adaptive estimate \ref{Adaptive} the following condition is sufficient:
+$$\tilde{\epsilon}-La2^{-N} \leq |f_\perp'(\lambda)|\leq \tilde{\epsilon}+La2^{-N}.$$
+
+Согласно этоц оценке, чтобы достичь необходимой точности в первом выражении в максимуме из оценки \ref{Adaptive} следующего количества итераций достаточно:
 
 $$a2^{-N} \leq \frac{\tilde{\epsilon}-La2^{-N}}{L}$$
-
-Similarly for the second alternative:
-
+Для второго выражения в максимуме имеем условие:
 $$a2^{-N} \leq \frac{\epsilon - \tilde{\epsilon} - La2^{-N}}{M+LR}\leq \frac{\epsilon - \tilde{\epsilon}}{M+LR} - La2^{-N}$$
 
-Accordint to this we have that for to approach estimate \ref{Adaptive} we need the following iterations number:
-
+Тогда согласно этим оценкам, чтобы достичь выполнения условия \ref{Adaptive}, нам достаточно следующее количество итераций:
 $$1+\log_2\min\left\{\frac{La}{\tilde{\epsilon}},\frac{(M+LR)a}{\epsilon-\tilde{\epsilon}}\right\}$$
 
-Of course, we assume in this estimate that $\tilde{\epsilon}$ and $\epsilon-\tilde{\epsilon}$ are positive. If it is not true we can trash a bad alternative.
-
-The bad case of this iterations number's estimate occurs when
-
-$$\tilde{\epsilon} = \frac{L}{M+L(R+1)}\epsilon.$$
-
-In the bad case we have the following estimate for iterations number:
+Худший случай набдюдается при следующих значениях
+$$\tilde{\epsilon} = \frac{L}{оценкуM+L(R+1)}\epsilon.$$
+В этом случае нам достаточно следующее количество итераций:
 $$1+\log_2\frac{(M+L(R+1))a}{\epsilon} = O\left(\log\frac{1}{\epsilon}\right)$$
 
-From this estimate we see that the our adaptive strategy needs the same iterations number in the bad case as the strategy \textbf{ConstGrad} needs always.
+Из этой оценки следует, что адаптивная стратегия в худшем случае работает так же, как и стратегия \textbf{ConstGrad}, т.е. \textbf{CurGrad} не хуже \textbf{ConstGrad}. 
 
-But for complexity estimation we have that for to solve one-dimensional problem we needs $O\left(\log \frac{1}{\epsilon}\right)$ iterations.
+Таким образом для одномерной задачи требуется $O\left(\log \frac{1}{\epsilon}\right)$ итераций.
 
 \begin{theorem}
-For to approach accuracy $\epsilon$ on function our method needs the following number of calculating function $f$ and its derivatives of the first order:
+Для того, чтобы достичь точности $\epsilon$ по функции, двумерная дихотомия требует следующее количество вычислений значения функции $f$ и ее производных первого порядка:
 $$O\left(\log^2\frac{1}{\epsilon}\right)$$
 \end{theorem} 
 \begin{proof}[Доказательство]
-We have that for to solve one-dimensional problem one needs not more than
-$$\log_2\frac{Ca}{\epsilon}$$
-iteration, where $C$ is a constant determined by the used strategy and function's parameter and $a$ is a size of current segment.
+Мы доказали, что для решения одномерной задачи требуется следующее количество итераций:
+$$\log_2\frac{Ca}{\epsilon},$$
+где $C$ - константа, определеяемая стратегией и зависящая от констант Липшица для функции и градиента.
 
-On each iteration of our method we solve to problems on segments of size $a_N=a2^{-N}$. Let $N_{\max1}=\left\lfloor\log_2\frac{Ca}{\epsilon}\right\rfloor$ is a maximal number of global method which the estimation for iteration number of one-dimensional problem is positive. And $N_{\max2}=\left\lceil\log_2\frac{La\sqrt{2}}{\epsilon}\right\rceil$ is estimation from \ref{NI1}. $$N_{\max}:=\min\{N_{\max1},N_{\max2}\}=\log_2\frac{1}{\epsilon}+O(1)$$ we have the following number of derivatives and function values calculation:
+На $N$-ой итерации двумерной дихотомии требуется решить две одномерные задачи на сегменте размера $a_N=a2^{-N}$. Из оценок на количество итераций двумерной дихотомии получаем, что всего мы сделаем $N_{\max}=\log_2\frac{1}{\epsilon}+O(1)$ итераций. Тогда можем оценить количество обращений к оракулу первого порядка:
 
 $$\sum_{k=0}^{N_{\max}}\log_2\frac{Ca2^{-k}}{\epsilon} = $$
 $$= \sum_{k=0}^{N_{\max}}\log_2\frac{Ca}{\epsilon} - \sum_{k=0}^{N_{\max}}k=$$
@@ -438,144 +436,113 @@ $$= \frac{1}{2}\log_2^2\frac{1}{\epsilon} +O\left(\log\frac{1}{\epsilon}\right)=
 $$=O\left(\log^2\frac{1}{\epsilon}\right)$$
 \end{proof}
 
-
-In the case of dual problems the complexity of function's parameters calculation depends on $\epsilon$ too. But accordinп to \ref{StonPas_Dual} in this case the complexity will change by obvious way:
-
-\begin{theorem}
-For to approach accuracy $\epsilon$ on function our method needs the following number of calculation of functions from primal problem and their derivatives:
+В случае решения седловых задач мы имеем сложность, верхняя оценка которой также зависит от $\epsilon$. Пусть мы рассматриваем задачу
+\begin{gather}
+\phi(\lambda_1, \lambda_2) \rightarrow \min_{\lambda\geq 0},\\
+\text{where } \phi = -\min_\textbf{x}\left(f(\textbf{x}) + \lambda_1 g_1(\textbf{x}) + \lambda_2 g_2(\textbf{x})\right)
+\end{gather}
+Если функция $f$ сильно выпуклая, то следующего количества обращений к оракулу первого порядка для $f$ и $g_k$ достаточно, чтобы достичь точности $\epsilon$ по функции в двойственной задаче:
 $$O(\log^3\frac{1}{\epsilon})$$
-\end{theorem} 
 
-\section{Other Inexact Methods}
+В данном разделе приведены оценки для худшего случая, на практике метод сходится сильно лучше.
+
+\section{Другие неточные методы}
 \label{Inexact}
 
-Our optimization method can solve the task of minimization function $f$ on square when the function and its gradient can not be calculated accurately but there are other optimization method for such tasks. In each section one describes some of them and below there is experimental comparison of them with our method.
+В этой секции мы обсудим другие неточные методы, которые не нуждаются в точном значении градиента и функции в точке, чтобы сходиться  к решению с некоторой заранее заданной точностью.
 
-The fist method is Primal Gradient Method (PGM) with $(\delta, L,\mu)$ oracle. There are proves in the \cite{PGM} that this method converges to the solution with accuracy $\delta$:
+Во-первых, это Primal Gradient Method (PGM) с $(\delta, L,\mu)$ оракулом. В \cite{PGM} было доказано, что это метод сходится к решению с точностью $\delta$ со слеующей скоростью:
 $$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \frac{LR^2}{2}\exp\left(-k\frac{\mu}{L}\right) + \delta,$$
-where $R = \|\textbf{x}_0-\textbf{x}^*\|$ in our task. Moreover, in the \cite{PGM} it is proved that for the function
+где $R = \|\textbf{x}_0-\textbf{x}^*\|$. Более того, в \cite{PGM} доказано, что для функции вида
 $$f(\textbf{x}) = \min\limits_\textbf{u} \left(\Psi(\textbf{x},\textbf{u}) + \textbf{u}^\top A\textbf{x}\right)$$
-there is following $(\delta, L,\mu)$ oracle:
+существует следующий $(\delta, L,\mu)$-оракул:
 $$f_{\delta, L,\mu}(\textbf{x}) = \Psi(\textbf{x}, \textbf{u}_\textbf{x}) - \xi$$
 $$g_{\delta, L,\mu}(\textbf{x}) = A\textbf{u}_\textbf{x}$$
-with parameters $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$ if $\textbf{u}_\textbf{x}$ is a solution approximation of $\textbf{u}^*$ for current $\textbf{x}$ with accuracy $\xi$ on function.
+с параметрами $\delta = 3\xi$, $L = \frac{2\lambda_{\max}(A^\top A)}{\mu(G)}$, $\mu = \frac{\lambda_{\min}(A^\top A)}{2L(G)}$, если $\textbf{u}_\textbf{x}$ это приближение решения $\textbf{u}^*$ в текущей точке $\textbf{x}$ с точностью $\xi$ по функции.
 
-The second method is Fast Gradient Method with $(\delta, L,\mu)$ oracle.
-this method converges to the solution with accuracy $\delta$:
+Вторым методом будет Fast Gradient Method с $(\delta, L,\mu)$ оракулом. Этот метод также сходится к решению с точностю $\delta$ со следующей скоростью:
 $$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq \min\left(\frac{4LR^2}{k^2}, LR^2\exp\left(-\frac{k}{2}\sqrt{\frac{\mu}{L}}\right)\right) + C_k\delta,$$
-where $C_k = \min\left(\frac{k}{3}+\frac{12}{5}, 1+\sqrt\frac{L}{\mu}\right)$. The method's description and proves for it is in the \cite{PGM} too. This method has significantly better convergence rate for  ill-conditioned problems.
+где $C_k = \min\left(\frac{k}{3}+\frac{12}{5}, 1+\sqrt\frac{L}{\mu}\right)$. Описание этого метода также можно найти в \cite{PGM}.
 
-The third having to be discussed method is inexact ellipsoid method. The ellipsoid method with $\epsilon$-subgradient instead usual subgradient converges to a solution with accuracy $\epsilon$:
+
+Третий метод - это неточный метод эллипсоидов. Этот метод использует $\epsilon$-субградиент вместо обычного и сходится к $\epsilon$-решению:
 $$\min_k f(\textbf{x}_k) - f(\textbf{x}^*)\leq \max_{\textbf{x}\in Q}|f(\textbf{x})|\exp\left(-\frac{k}{8}\right)+\delta$$
-It is proved in \cite{Ellipsoids}. Moreover, in \cite{Polyak} there is proved that for the function
+Это доказано в \cite{Ellipsoids}. Более того, в книге \cite{Polyak} доказано, что для функции
 $$f(\textbf{x}) = \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})$$
-the following statement is met:
+мы можем найти $\epsilon$-субградиент:
 $$\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon})\in\partial_\epsilon f(\textbf{x}),$$
-if $\textbf{u}_{\textbf{x},\epsilon}$ is such point that $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
+есди $\textbf{u}_{\textbf{x},\epsilon}$ это такая точка, что $\Psi(\textbf{x},\textbf{u}_{\textbf{x},\epsilon}) - \min\limits_\textbf{u}\Psi(\textbf{x},\textbf{u})\leq\epsilon$.
 
-Note that our method converge by the following way:
-
-$$\min_k f(\textbf{x}_k) - f(\textbf{x}^*) \leq Cexp(-k\ln 2),$$
-and it is the best theoretical convergence rate from all methods in this section.
-\section{Tests}
-
-In this section we show estimate on number iterations of practice. Also there is comparison work time of our new method with work time of other optimization methods such as inexact gradient methods and inexact ellipsoids method\footnote{You can find all code in the repository~\cite{my_git}}. All code was made in Anaconda 5.3.1 Python 3.6 (see cite~\cite{conda})
-
-
-\subsection{Comparison With Other Methods}
+\section{Эксперименты}
 \label{Comparison}
+
+
+В этом разделе мы приведем сравнение неточных методов (см. \ref{Inexact}) с предложенным в этой статье на примере двойственной задачи по времени работы\footnote{Вы можете найти весь код в репозитории~\cite{my_git}}. Весь код был сделана на Anaconda 5.3.1 Python 3.6 (см.~\cite{conda}).
 
 \begin{figure}[ht!]  
 \vspace{-4ex} \centering \subfigure[]{
-\includegraphics[width=0.25\linewidth]{../Tests/Images/100_1e-03.pdf} \label{100_3} }  
+\includegraphics[width=0.25\linewidth]{../Tests/Images/1000_1e-03.pdf} \label{100_3} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{../Tests/Images/100_1e-10.pdf} \label{100_10} }
+\includegraphics[width=0.25\linewidth]{../Tests/Images/1000_1e-10.pdf} \label{100_10} }
 \vspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{../Tests/Images/1000_1e-03.pdf} \label{1000_3} }  
+\includegraphics[width=0.25\linewidth]{../Tests/Images/10000_1e-03.pdf} \label{1000_3} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{../Tests/Images/1000_1e-10.pdf} \label{1000_10} }
+\includegraphics[width=0.25\linewidth]{../Tests/Images/10000_1e-10.pdf} \label{1000_10} }
 \vspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{../Tests/Images/10000_1e-03.pdf} \label{10000_3} }  
+\includegraphics[width=0.25\linewidth]{../Tests/Images/20000_1e-03.pdf} \label{10000_3} }  
 \hspace{2ex}
 \subfigure[]{
-\includegraphics[width=0.25\linewidth]{../Tests/Images/10000_1e-10.pdf} \label{10000_10} }
+\includegraphics[width=0.25\linewidth]{../Tests/Images/20000_1e-10.pdf} \label{10000_10} }
 \hspace{2ex}
-\caption{Comparison of different on inexact methods for task with different dimension $N$ and for different required accuracy $\epsilon$: \subref{100_3} $N=100,\epsilon=10^{-3}$; \subref{100_10} $N=100,\epsilon=10^{-10}$; \subref{1000_3} $N=1000,\epsilon=10^{-3}$; \subref{1000_10} $N=1000,\epsilon=10^{-10}$; \subref{10000_3} $N=10000,\epsilon=10^{-3}$; \subref{10000_10} $N=10000,\epsilon=10^{-10}$. } \label{fig:image}
+\caption{Сравнение различных неточных методов на двойственных задачах с различными размерностями прямой задачи $N$ и различными требуемыми точностями $\epsilon$: \subref{100_3} $N=1000,\epsilon=10^{-3}$; \subref{100_10} $N=1000,\epsilon=10^{-10}$; \subref{1000_3} $N=10000,\epsilon=10^{-3}$; \subref{1000_10} $N=10000,\epsilon=10^{-10}$; \subref{10000_3} $N=20000,\epsilon=10^{-3}$; \subref{10000_10} $N=20000,\epsilon=10^{-10}$. } \label{fig:image}
 \end{figure}
 
-Let's compare our method with inexact ellipsoid method and gradient methods (PGM and FGM) with $(\delta, L,\mu)$ oracle (see previous subsection \ref{Inexact}) on a dual task.
+Для нахождения $\textbf{x}(\lambda)$ мы будем использовать градиентный спуск. Есть следующие результаты для теоретической скорости сходимости:
 
-For to find $\textbf{x}(\lambda)$ we will use gradient descent. There are theoretical result that can help to manange distance $\|\textbf{x}_k-\textbf{x}^*\|$ from optimal point to its current approximation. In particular, there are following results:
-\begin{itemize}
-\item If $f$ is a convex function with $L$-Lipschitz continious gradient then gradient descent with step $\alpha_k = \frac{1}{L}$ converges with speed
-$$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \frac{\|\textbf{x}_0-\textbf{x}^*\|}{k+4}$$
-\item If $f$ is a $\mu$-strong convex function with $L$-Lipschitz continious gradient then gradient descent with step $\alpha_k = \frac{1}{L+\mu}$ converges with speed
+Если $f$ есть $\mu$-сильно выпуклая функция с $L$-липшецевым градиентом, то градиентынй спуск с шагом $\alpha_k = \frac{1}{L+\mu}$ сходится со следующей скоростью
 $$\|f(\textbf{x}_k)-f(\textbf{x}^*)\|\leq \left(\frac{M-1}{M+1}\right)^kL\|\textbf{x}_0-\textbf{x}^*\|,$$
-where $M =\frac{L}{\mu}$.
-\end{itemize}
+$$\|\textbf{x}_k-\textbf{x}^*\|\leq \left(\frac{M-1}{M+1}\right)^k\|\textbf{x}_0-\textbf{x}^*\|,$$
+где $M =\frac{L}{\mu}$. Доказательство этого факта можно найти в \cite{Polyak}.
 
-The proves for this statements one can find in many books of optimization, for example, in the book \cite{Polyak}.
+Для всех неточных методов высчитываем $\textbf{x}(\lambda)$, пока теоретическая скорость сходимости градиентного спуска не гарантирует достаточного условия для того, чтобы наш неточный метод сошелся к решению с точностью $\epsilon$ по функции. Так для PGM, FGM и неточного метода эллипсоидов мы вычисляем $\textbf{x}(\lambda)$ с точностью $\frac{\epsilon}{2}$ по функции. Для нашего метода для обоих стратегий условия останова были обсуждены в секции \ref{dual}.
 
-We will use functions where $\mu$ is small enough. Therefore, our method for calculating $\textbf{x}(\lambda)$ will converge to solution according to the first estimate.
-
-For all inexact method we will calculate $\textbf{x}(\lambda)$ with such accuracy as the method will converge to the solution with same for all methods accuracy $\epsilon$. For PGM, FGM and ellipsoids methods we will calculate $\textbf{x}(\lambda)$ with accuracy $\frac{\epsilon}{2}$ on function. For our method with the both strategies we will calculate $\textbf{x}(\lambda)$ untill the conditions from the \ref{dual} is approached.
-
-
-We consider the following prime task:
-
+Рассмотрим следующую задачу:
 \begin{gather}
 \label{prime}
 f(\textbf{x}) = \ln \left(1+\sum_{k=1}^ne^{\alpha x_k}\right) + \beta\|\textbf{x}\|_2^2\rightarrow \min\limits_{\textbf{x}\in \mathbb{R}^N}\\
 g_k(\textbf{x}) = \langle \textbf{b}_k, \textbf{x}\rangle+c_k\leq0, k = \overline{1,m}\\
 \end{gather}
 
-It is task of minimization the LogSumExp-function with $l2$-regularization. The regularization parameter $\beta$ determines strong convexity of our task and in the tests one takes $beta=0.1$. The $N$ is diminsionality of primal task and is determined for different tests below. The parameter $\alpha$ is equal to 1. The parameters $c_k$ are equal to 1 too. The vectors $\{b_k\}_{k=1}^m$ are generated randomly for the each test. The $m$ is equal to dimensionality of dual task and in the current case is equal to 2.
+Это задача минимизации LogSumExp-функции с $l_2$-регуляризацией. Параметр регуляризации $\beta$ равен параметру сильной выпуклости для этой задачи, и в наших экспериментах мы брали его равным $0.01$. Число $N$ - это размерность прямой задачи и определяется  в разных экспериментах по разному. Параметр $\alpha$ взят равным $1.0$. Парметры $c_k$ для простоты также взяты равными $1.0$. Векторы $\{\textbf{b}_k\}_{k=1}^m$ для каждого эксперимента генерируются случайно из равномерного распределения на $[0, 1.0]^N$. Параметр $m$ равен размерности двойственной задачи и равен двум.
 
-The LogSumExp-problem is $L$-Lipschitz continious function with $M$-Lipschitz continious gradient where $L=1$ and $M=\alpha$. Therefore:
+Минимизируемая функция $f$ есть $L$-липшицева функция с $M$-липшецевым градиентом, где $L=1$ and $M=\alpha$. В таком случае имеем:
 $$L_f = \alpha+2\beta R, M_f = \alpha^2 + 2\beta,$$
 $$\mu_f = 2\beta,$$
-where $R=\|\textbf{x}_0-\textbf{x}^*\|$ is the size of initial approximation. The functions $g_k$ are $L_k$-Lipschitz continious where $L_k=\|b_k\|$. 
+где $R=\|\textbf{x}_0-\textbf{x}^*\|$ это расстояние от решения до начального приближения. Функции $g_k$ есть $L_k$-липшецевы с параметрами $L_k=\|b_k\|$. 
 
-We introduce the following notation:
-
+Используем следующую нотацию:
 \begin{equation}
 \label{phi}
 \phi(\lambda_1, \lambda_2) = -\min\limits_{\textbf{x}\in \mathbb{R}^N}\left(f(\textbf{x}) +\lambda_1 g_1(\textbf{x}) +\lambda_2g_2(\textbf{x})\right)
 \end{equation}
 
-In such notations the dual task for the task \ref{prime} looks like:
-
+В такой нотации, двойственная задача \ref{prime} выглядит следующим образом
 \begin{gather}
 \phi(\lambda_1, \lambda_2) \rightarrow \min\limits_{\lambda_1, \lambda_2}\\
 \text{s.t}\, \lambda_1, \lambda_2 \geq 0
 \end{gather}
  
-Obviously, $\min\limits_{\textbf{x}}f(\textbf{x}) \geq 0$. Therefore, according to \ref{restr:dual} we can add following conditions on the dual variables:
-
+Очевидно, что $\min\limits_{\textbf{x}}f(\textbf{x}) \geq 0$. Тогда, согласно \ref{restr:dual},  мы имеем следующую локализацию решения:
 $$|\lambda_k| \leq \lambda_{\text{max}}=\frac{f(\overline{\textbf{x}})}{\gamma}, k=1,2$$
 
-And we have following task:
-
+И получаем следующую задачу:
 $$\phi(\lambda_1, \lambda_2) \rightarrow \min_{0\leq\lambda_k\leq\lambda_{max}}$$
 
-Calculating of function and derivatave value for such task was discussed in the section \ref{details}.
-
-We can see on \ref{fig:image} the following results. Firstly, the halving square method with provided in this work strategy \textbf{CurGrad} are the fastest method in the most tests tests. This method can be slower than other inexact methods if dimensional of primal task is small or $\epsilon$ is big. In particular, this strategy is faster than strategy with constant estimate provided in \cite{Ston_Pas}. It proves that provided by Nesterov method with strategy through gradient is the best method for to solve two dimensional dual task of minimization. Secondly, the gain of this strategy in comparison with other method is increase when the required $\epsilon$ decrease. This fact demonstrated important advantange of this strategy: it does not depend on required accuracy strongly. So, this method with constant estimate has strong dependity on it because there is this accuracy in the constant estimate, PGM and inexact ellipsoid method require that the $x(\lambda)$ is found with accuracy depended on $\epsilon$. But halving square with ellipsoid method has not such dependety.
-\section{Conclusion}
-
-We discussed and proved that this method converges to the solution for smooth convex functon. Moreover, in the \cite{Ston_Pas} there is conterexample when the problem is non-smooth and we can not to converge to the solution with the accuracy on function better than a constant.
-
-After it we discussed different strategy for one-dimensional task. Two strategies were considered. The both suggest to use stop conditions that are met when the current approximation is "very near" to the segment's solution. The first compares the distance between them with derivative value in accurate segment's solution but the second compares it with derivative value in approximation. In the experiment the first has a little better result but it can not be used for real task. The second strategy using derivative value in current approximation is significantly better then constant estimate and does not depend on required accuracy.
-
-But all this strategy are good when the derivative value is high enough. But when the segment is near to the global solution this value will be small. Therefore one needs to make a lot of iterations on segment. For to avoid it we consider additional stop condition for global task on square when in current approximation the derivative value is near to zero.
-
-The most steps of methods assumped that derivative can be calculated accurately. But the main method purpose is to solve dual problems and for it one can not usually calculate it so. That's why we consider different modifications of this method for to solve such problems. The important moment is we don't add some dependence on initial required accuracy in the modificated method.
-
-Finally, we compared our method with new strategy for dual problem to prime LogSumExp problem with two linear constaints with our method with strategy using the constant estimate, primal gradient method and fast gradient method with $(\delta, L, \mu)$ -oracle and with inexact ellipsoids methods. The Halving Square Method is the fastest of them for enough high dimension (more 100) and for enough high required solution ($1e-3$ and more).
+На рис.~\ref{fig:image} мы видим следующие результаты. Во-первых, двумерная дихотомия показывает сравнительно хороший результат, когда задача нахождения $\textbf{x}(\lambda)$ "сложная", т.е. размерность прямой задачи или требуемая точность являются высокими. Во-вторых, наш метод со стратегией \textbf{CurGrad} показывает наилучший результат для таких сложных задач.
 
 \newpage
 \begin{thebibliography}{3}

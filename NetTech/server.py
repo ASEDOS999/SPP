@@ -27,11 +27,11 @@ while True:
 			if args[0] == "N":
 				N = int(args[1])
 			if args[0] == "time_max":
-				N = float(args[1])
+				time_max = float(args[1])
 			if args[0] == "eps":
-				N = float(args[1])
+				eps = float(args[1])
 			if args[0] == "C":
-				N = float(args[1])
+				C = float(args[1])
 		if N is None:
 			N = 10
 		if time_max is None:
@@ -54,7 +54,7 @@ while True:
 			f.close()
 		with open("1.pickle", "rb") as f:
 			data = f.read()
-			print(data)
+			print(len(data))
 			f.close()
 	conn.send(data)
 conn.close()

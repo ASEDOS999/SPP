@@ -1,0 +1,295 @@
+ \documentclass[12pt]{article}
+\usepackage[T2A]{fontenc}
+\usepackage[utf8]{inputenc}       
+
+\usepackage[russian, english]{babel}
+\usepackage{amsmath,amsfonts,amsthm,amssymb,amsbsy,amstext,amscd,amsxtra,multicol}
+\usepackage{verbatim}
+\usepackage{tikz}
+\usetikzlibrary{automata,positioning}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage[colorlinks,urlcolor=blue]{hyperref}
+\usepackage[stable]{footmisc}
+\usepackage{ dsfont }
+\usepackage{wrapfig}
+\usepackage{xparse}
+\usepackage{ifthen}
+\usepackage{bm}
+\usepackage{color}
+ \usepackage{subfigure}
+ 
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+\definecolor{linkcolor}{HTML}{799B03} % цвет гиперссылок
+\definecolor{urlcolor}{HTML}{799B03} % цвет гиперссылок
+ 
+%\hypersetup{pdfstartview=FitH,  linkcolor=linkcolor,urlcolor=urlcolor, colorlinks=true}
+
+\newtheorem{theorem}{Теорема}[section]
+\newtheorem{lemma}{Лемма}[section]
+
+\DeclareMathOperator{\sign}{sign}
+\DeclareMathOperator{\grad}{grad}
+\DeclareMathOperator{\intt}{int}
+\DeclareMathOperator{\conv}{conv}
+\begin{document}
+\subsection{Второй подход, многомерная дихотомия}
+
+Рассмотрим задачу минимизации функции на гиперкубе:
+
+$$\min_{\textbf{x}\in Q}f(x,y),$$
+где $f$ - это выпуклая функция, $Q = [0,a]^n\subset \mathbb{R}^n, a >0$ - гиперкуб. Здесь и далее будем считать, что стороны квадрата соориентированы параллельно осям текущей системы координат. Очевидно, что это не предположение не существенно, поскольку для любого гиперкуб существует тривиальное афинное преобразование, приводящее его к такому виду.
+
+Тогда рассмотрим метод многомерные дихотомии. Его основные этапы следующие:
+
+1. Для всех осей $Ox_k$ рассмотреть гиперкуб $Q_k = \left\{\textbf{x} \in Q\Big| x_k = \frac{\max_{\textbf{y}\in Q} y_k + \min_{\textbf{y}\in Q} y_k}{2}\right\}$.
+
+2. Решить задачу минимизации $f$ на $Q_k$ с точностью $\Delta$ (по функции или по аргументу )при помощи этого метода для $Q_k$
+
+3. Взять $\delta$-субградиент в этой точке и оставить ту часть, в котору смотрит антиградиент.
+
+4. Повторять шаги 1-3 до достижения необходимой точности
+
+Заметим, что когда $\dim_Q=1$, то полученное на первом шаге $Q_k$ содержит только одну точку.
+
+Сейчас обсудим корректность алгоритма. Здесь и далее мы будем использовать следующую нотацию. Пусть на текущем уровне рекурсии рассматривается множество $Q$ и его некоторое сечение $Q_k$. Пусть $\nabla_\delta f(\textbf{x})$ - $\delta$-субградиент функции в точке $\textbf{x}$. Тогда определим $\nabla_{\delta, \parallel Q_k} f(\textbf{x})$, $\nabla_{\delta, \perp Q_k} f(\textbf{x})$ - проекции $\delta$ субградиента на $Q_k$ и его ортогональное дополнение в пространстве $\mathbb{R}^{\dim Q}$ соответсвенно.
+
+Здесь и далее нам понадобятся стандартные понятия субдифференциала и субградиента, которые можно найти, например, в \cite{nesterov2018lectures}.
+
+Нам понадобится следующая лемма.
+
+\begin{lemma}
+\label{subgradient}
+
+Пусть $f$ есть непрерывно дифференцируемая выпуклая функция. Пусть на гиперкубе $Q$ решается задача минимизации на $Q_k$. Если $\textbf{x}_*$ решение этой задачи:
+
+$$\exists g \in \partial_Q f(\textbf{x}_*) : g_\parallel = 0$$
+\end{lemma}
+\begin{proof}[Доказательство]
+Если $\textbf{x}_*$ есть внутренняя точка, то градиент по нефиксированным переменнам равен нулю в силу того, что $\textbf{x}_*$ - минимум. Тогда с учетом того, что $\nabla f(\textbf{x}_*)\in\partial f(\textbf{x}_*)$, получаем утвержение из теоремы.
+
+Допустим, что $\textbf{x}_*$ граничная точка. Тогда множество условного субдифференциала на гиперкубе $Q$ определяется следующим образом:
+
+$$\partial_Q f(\textbf{x}) = \partial f(\textbf{x}) + N\left(\textbf{x}|Q\right),$$
+где $N(\textbf{x}|Q) = \left\{\textbf{a}|\langle\textbf{a}, \textbf{y} - \textbf{x}\rangle\leq 0, \forall \textbf{y} \in Q\right\}$. 
+
+В случае дифференцируемой функции имеем:
+
+$$\partial f(\textbf{x}_*) = \{\nabla f(\textbf{x}_*)\},$$
+
+Из того, что $\textbf{x}_*$ есть внутренняя точка, следует, что существует непустой набор координат $\{x_j\}_j$, такой что $x_j = \max_{\textbf{y}\in Q_k}y_j$ или $x_j = \min_{\textbf{y}\in Q_k}y_j$. Введем обозначение:
+$$J_+=\{j\in \mathbb{N}| x_j = \max_{\textbf{y}\in Q_k}y_j\}$$
+$$J_-=\{j\in \mathbb{N}| x_j = \min_{\textbf{y}\in Q_k}y_j\}$$
+
+В таком случае заметим, что любой вектор $a$ такой, что $a_j \geq 0, \forall j \in J_+$, $a_j \leq 0, \forall j \in J_-$ и $a_j=0$ в противном случае, принадлежит нормальному конусу.
+
+Также заметим, что $(\nabla f(\textbf{x}_*))_j \leq 0, \forall j \in J_+$, $(\nabla f(\textbf{x}_*))_j  0, \forall j \in J_-$ и $(\nabla f(\textbf{x}_*))_j=0$. Действительно, если $(\nabla f(\textbf{x}_*))_j > 0$ для некоторого $j\in J_+$, то существует вектор $\textbf{x}=\textbf{x}_* + \alpha \textbf{e}_k \in Q$ для некоторого $\alpha<0$ и вектора $e_k^j = \delta_{kj}$, причем значение в этой функции будет $f(\textbf{x}) = f(\textbf{x}_*) + \alpha (\nabla f(\textbf{x}_*))_j + o(\alpha)  < f(\textbf{x}_*)$ для достаточно малого $\alpha$, что противоречит тому, что $\textbf{x}_*$ - решение.
+
+Тогда выбрав $\textbf{a}$, такой что $\textbf{a}_\parallel = -\left(\nabla f(\textbf{x}_*)\right)_\parallel$, получаем субградиент из условия:
+
+$$\textbf{g} = \nabla f(\textbf{x}_*) + \textbf{a} : \textbf{g}_\parallel =0$$
+\end{proof}
+
+Данный метод работает не для всех выпуклых функций, даже если решать задачу одномерной оптимизации точно. Пример негладкой выпуклой функции был расмотрен в \cite{Ston_Pas}.
+
+Обобщая результат из  работы \cite{Ston_Pas}, получаем следующую оценку. Если задан гиперкуб $Q$ и требуется минимизировать на нем функцию с точностью $\epsilon$, то для этого в методе достаточно решить вспомогательную задачу с точностью по аргументу
+\begin{equation}
+    \label{ConstEst}
+    \Delta \leq \frac{\epsilon}{8L_f \sqrt{n}a},
+\end{equation}
+где $n=\dim Q$, $R$ - есть размер начального гиперкуба. Если $f$ есть $\mu_f$-сильно выпуклая функция, то используя выше написанное условие останова, получаем, что достаточно решить вспомогательную задачу с точностью $\tilde{\epsilon}$ по функции:
+\begin{equation}
+    \label{ConstEstFunc}
+    \tilde{\epsilon} \leq \frac{\mu_f \epsilon^2}{128 L_f^2 n a^2}
+\end{equation}
+Теперь допустим, что у нас не доступен вектор $\nabla f(\textbf{x})$, но доступно его приближение $\nu(\textbf{x})$, такое что $\|\nabla f(\textbf{x})-\nu(\textbf{x})\|\leq \tilde{\delta}$. Тогда наш метод сойдется к $\epsilon$-решению при использовании $\nu(\textbf{x})$ вместо точного градиента при выполнении следующего условия
+\begin{equation}
+    L_f \Delta +  2\tilde{\delta}\leq \frac{\epsilon}{4L_f \sqrt{n}a}.
+\end{equation}
+
+Данный результат доказывается аналогично замечанию 1 из работы \cite{Ston_Pas}. В частности:
+
+\begin{equation}
+    \Delta \leq \frac{\epsilon}{16L_f \sqrt{n}a},
+\end{equation}
+
+\begin{equation}
+	\label{InexGradConst}
+    \tilde{\delta} \leq \frac{\epsilon}{32\sqrt{n}a},
+\end{equation}
+Тогда для точности по функции решения вспомогательной задачи достаточно
+
+\begin{equation}
+    \tilde{\epsilon} \leq \frac{\mu_f \epsilon^2}{512 L_f^2 n a^2}.
+\end{equation}
+
+
+Данная оценка требует точности решения по функии на $k$-ом уровне рекурсии вспомогательной задачи порядка $\epsilon^{2k}$. Таким образом, учитывая максимальную глубину рекурсии, равную $n-1$, получаем, что нам потребуется в худшем случае на каждом шаге алгоритма решать задачу с точностью $\epsilon^{2n-2}$ по функции.
+
+Интуитивно понятно, что для функции с липшицевым градиентом "большая" величина ортогональной компоненты при близости к решению не сможет сильно уменьшиться, а следовательно, изменить направление, а с другой стороны, если эта компонента малая, и решалась вспомогательная задача на многомерном параллепипеде $Q_k$, то мы можем взять эту точку как решение всей задачи на $Q_k$. Представим стратегию, реализующую эти идеи. 
+
+Здесь и далее нам понадобится следующая простая лемма:
+
+\begin{lemma}
+\label{trick_lemma}
+$$\forall a,b\in\mathbb{R}, |a-b|\leq |b| \Rightarrow ab \geq 0$$
+\end{lemma}
+\begin{proof}[Доказательство]
+Если $b>0$ и $a\leq b$, тогда условие из леммы эквивалентно следующему:
+$$b-a\leq b\Rightarrow a\geq 0.$$
+Если $b>0$ и $a \geq b$, тогда $a\geq 0$.
+
+Случай отрицательного $b$ доказывается аналогично.
+\end{proof}
+
+\begin{theorem}
+\label{CurGrad}
+
+Функция $f$ выпуклая с липшецевым градиентом с константой $L_{xx}$. Точка $\textbf{x}_*$ решение вспомогательной задачи оптимизации, $\textbf{x}$ - ее приближение, $\Delta = \|\textbf{x}_*-\textbf{x}\|$ есть расстояние между ними.
+
+Тогда если приближение удовлетворяет следующему условию:
+
+$$\Delta \leq \frac{|f_\perp'(\textbf{x})|}{L_{xx}},$$
+то множество, выбранное на основе градиента в этой точке, содержит решение исходной задачи на квадрате. 
+\end{theorem}
+\begin{proof}[Доказательство]
+
+Заметим, что множества выбирается правильно, если знак производной в решении вспомогательной задачи по фиксированной переменной совпадает со знаком производной в ее приближении.
+
+Из леммы \ref{trick_lemma} следует, что для того чтобы совпали знаки, достаточно потребовать
+
+$$\left|f'_\perp(\textbf{x}_*) - f'_\perp(\textbf{x})\right| \leq |f'_\perp(\textbf{x})|$$
+
+Используя липшецевость градиента получаем утверждение теоремы.
+\end{proof}
+
+Описанная в теореме оценка крайне не эффективна, если модуль ортогональной компоненты стремительно убывает при приближении к точке-решению, поэтому сформулируем альтернативное условие остановки:
+
+\begin{theorem}
+\label{small}
+Пусть $f$ есть $M_f$-липшецева выпуклая с $L_f$-липшецевым градиентов. Пусть решается вспомогательная задача на множестве $\tilde{Q}$ для задачи на множестве $Q$. Точка $\textbf{x}_*$ есть решение задачи оптимизации на $\tilde{Q}$, $\textbf{x}$ - ее приближение, $\Delta \geq \|\textbf{x}_*-\textbf{x}\|$ - верхняя оценка расстояния между ними.
+
+Тогда для достижения точности решения $\epsilon$ на множестве $Q$ в точке $\textbf{x}\in \tilde{Q}\subset Q$ по функции следующего условия достаточно:
+$$\Delta \leq \frac{\epsilon- R|f_\perp'(\textbf{x})|}{L_f+M_f R}, $$
+где $R=a\sqrt{n}$ - это размер диагонали в исходном гиперкубе.
+\end{theorem}
+
+\begin{proof}[Доказательство]
+
+Из леммы \ref{subgradient} мы имеем:
+
+$$g \in \partial f(\textbf{x}_*): g_\parallel = 0.$$
+
+Тогда по определению субградиента:
+
+$$f(\textbf{x}^*) - f(\textbf{x}_*) \geq (g, \textbf{x}^* - \textbf{x}_*)$$
+
+Используем неравенство Коши-Буняковского-Шварца:
+$$f(\textbf{x}_*) - f(\textbf{x}^*) \leq -(g, \textbf{x}^* - \textbf{x}_* )\leq$$
+$$\leq \|g\| \|\textbf{x}^* - \textbf{x}_*\|\leq \|g\|a\sqrt{n}$$
+
+С другой стороны, из липшецевости функции мы имеем:
+$$f(\textbf{x})-f(\textbf{x}_*)\leq M_f \Delta$$
+
+$$f(\textbf{x})-f(\textbf{x}^*) \leq M_f \Delta +\|g\|a\sqrt{n} = M_f \Delta + |f_\perp'(\textbf{x}_*)|R$$
+
+Из липшецевости градиента:
+$$f(\textbf{x})-f(\textbf{x}^*) \leq M_f\Delta + \left(|f_\perp'(\textbf{x})|+L_f\Delta\right)R$$
+
+Тогда для достижения точности $\epsilon$ по функции в точке $\textbf{x}$ для исходной задачи достаточно следующего условия:
+
+$$M_f\Delta +\|g\|a\sqrt{n} = M_f\Delta + \left(|f_\perp'(\textbf{x})|+L_f\Delta\right)R \leq \epsilon$$
+
+$$\Delta \leq \frac{\epsilon - R |f_\perp'(\textbf{x})|}{M_f+L_f R}$$
+\end{proof}
+
+В этой теореме подразумевается, что $\epsilon$ - есть точность задачи по функции, с которой нужно решить задачу оптимизации на $Q$, при условии, что мы находимся на $Q_k$. Т.е. это $\epsilon$ для подзадач, возникающих в подзадачах, отличается от $\epsilon$ для исходной задачи на начальном гиперкубе.
+
+Определим нашу адаптивную стратегию. Мы решаем вспомогательную задачу оптимизации, пока не выполнено условие на точность по аргументу:
+
+\begin{equation}
+\label{Adaptive}
+\Delta \leq \max\left\{
+	\frac{|f_\perp'(\textbf{x})|}{L}, 
+	\frac{\epsilon - R |f_\perp'(\textbf{x})|}{M+LR}
+	\right\}.
+\end{equation}
+
+Эту стратегию мы назвали \textbf{CurGrad}(Current Gradient). Заметим, что если нам доступен не сам градиент $\nabla f(\textbf{x})$, а некоторое его приближение $\nu(\textbf{x})$ при условии
+$$\|\nabla f(\textbf{x}) - \nu(\textbf{x})\|\leq \tilde{\delta},$$
+то условие \ref{Adaptive} будет выполнено, если 
+$$
+\max\left(\frac{1}{L}, \frac{R}{M+LR}\right) \tilde{\delta} + \Delta \leq \max\left\{
+	\frac{|\nu_\perp(\textbf{x})|}{L}, 
+	\frac{\epsilon - R |\nu_\perp(\textbf{x})|}{M+LR}
+	\right\},
+$$
+или после упрощения
+\begin{equation}
+\label{Adapt_inexact}
+\frac{1}{L}\tilde{\delta} + \Delta \leq \max\left\{
+	\frac{|\nu_\perp(\textbf{x})|}{L}, 
+	\frac{\epsilon - R |\nu_\perp(\textbf{x})|}{M+LR}
+	\right\}.
+\end{equation}
+
+Таким образом, для каждой задачи оптимизации на многомерном прямоугольном параллепипеде $Q$ каждую вспомогательную задачу мы решаем до тех пор, пока не выполнена оценка \ref{Adapt_inexact}. Причем, если мы остановили решение вспомогательной задачи в точке, в которой выполнено это неравенство для правой части максимума, то мы останавливаем решение на множестве $Q$.
+
+Для того, чтобы знаки $f'_\perp(\textbf{x})$ и $\nu_\perp(\textbf{x})$ совпдали, достаточно потребовать, чтобы $\tilde{\delta} \leq |\nu_\perp(\textbf{x})|$. Если мы не остановили наш метод после выполнения условия \ref{Adapt_inexact}, то 
+$$	\frac{|\nu_\perp(\textbf{x})|}{L} \geq
+	\frac{\epsilon - R |\nu_\perp(\textbf{x})|}{M+LR}$$
+$$|\nu_\perp(\textbf{x})| \geq \frac{L}{M+2LR}\epsilon.$$
+Таким образом, если у нас есть итеративный метод, который генерирует $\nu_k(\textbf{x}):\|\nu_k(\textbf{x})- \nabla f(\textbf{x})\| \rightarrow_{k\rightarrow\infty}0$, то условие $C\delta \leq |\nu(\textbf{x})|$ будет выполнено за конечное число итераций. Если же это не выполнено, то мы можем посчитать $\nu(\textbf{x})$ согласно оценке \ref{InexGradConst}.
+
+Откуда взять условие $\|\nu_k(\textbf{x})- \nabla f(\textbf{x})\|\leq \tilde{\delta}$? Пусть $\nu(\textbf{x})$ есть $\delta$-субградиент для функции $f$ в точке $\textbf{x}$. Пользуясь тем, что $f(\textbf{x})=S(\textbf{x}, \textbf{y}(\textbf{x}))$ и тем, что для такой задачи $\nabla_x S(\textbf{x}, \textbf{y}_\delta)$, где $\textbf{y}_\delta$ есть решение задачи $\max_{\textbf{y}}S(\textbf{x}, \textbf{y})$  с точностью $\delta$ по функции, есть $\delta$-субградиент. При этом в силу липшецевости $S$.
+
+$$\|\nabla_\delta f(\textbf{x})- \nabla f(\textbf{x})\|\leq L_{yy} \|\textbf{y}(\textbf{x}) - \textbf{y}_\delta\|$$
+
+Таким образом, для того, чтобы правильно определить оставшееся множество, достаточно выполнения неравенства \ref{Adapt_inexact} и неравенства 
+\begin{equation}
+    L_{yy} \|\textbf{y}(\textbf{x}) - \textbf{y}_\delta\|\leq |\left(\nabla_\delta f(\textbf{x})\right)_\perp|.
+\end{equation}
+
+Выше обозначенный способ требует сходимости внутренней задачи по аргументу. Однако если $S(\textbf{x}, \textbf{y})$ - $\mu_y$-сильно выпукла по $\textbf{y}$, то эти условия можно заменить на условия сходимости по функции. С другой стороны, если $\rho(\textbf{x}, \partial Q)\geq \sqrt{\frac{\delta}{2L_f}}$ , то мы имеем из \ref{th2}  следующее неравенство:
+
+\begin{equation}
+\|\nabla_\delta f(\textbf{x}) - \nabla f(\textbf{x})\|\leq \sqrt{\frac{L_f\delta}{2}}.
+\end{equation}
+
+
+Приведем оценку сходимости для нашего метода.
+
+\begin{theorem}
+Если функция $f$ выпуклая и $Ь$-липшецева, тогда для достижения $\epsilon$ по функции следующего количества итераций достаточно:
+\begin{equation}\label{NI1}N = \left\lceil\log_2\frac{\sqrt{n}Ma}{\epsilon}\right\rceil\end{equation}
+где $a$ размер исходного квадрата $Q$.
+\end{theorem}
+
+\newpage
+\begin{thebibliography}{3}
+\bibitem{task}
+Gasnikov A.  Universal gradient descent // MIPT --- 2018, 240 p.
+\bibitem{Ston_Pas}
+Pasechnyk D.A., Stonyakin F.S.  One method for minimization a convex Lipchitz continuous function of two variables on a fixed square // arXiv.org e-Print archive. 2018. – URL: \href{https://arxiv.org/pdf/1812.10300.pdf}{https://arxiv.org/pdf/1812.10300.pdf}
+\bibitem{Nesterov}
+Nesterov U.E.  Methods of convex optimization // M.MCNMO --- 2010, 262 p.
+\bibitem{conda}
+Anaconda[site]. At available: \href{https://www.anaconda.com}{https://www.anaconda.com}
+\bibitem{DDR-theorem}
+Danskin, J.M.: The theory of Max-Min, with applications. J. SIAM Appl. Math.14(4) (1966)
+\bibitem{Stonykin}
+Fedor S. Stonyakin, Mohammad S. Alkousa, Alexander A. Titov,and Victoria V. Piskunova1 On Some Methods for Strongly Convex Optimization Problems with One Functional Constraint // ...
+\bibitem{PGM}
+Olivier Devolder Exactness, Inexactness and Stochasticityin First-Order Methods for Large-ScaleConvex Optimization // UCL --- 2013,
+\bibitem{Ellipsoids}
+Need Reference To Book with Inexact Ellipsoids
+\bibitem{Polyak}
+B.T. Polyak. The Introduction to Optimization // Moscow, Science - 1983
+\bibitem{my_git}
+Repository with code: \href{https://github.com/ASEDOS999/Optimization-Halving-The-Square}{https://github.com/ASEDOS999/Optimization-Halving-The-Square}
+\end{thebibliography}
+\end{document}
