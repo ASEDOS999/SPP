@@ -24,7 +24,8 @@ class ConvConcFunc:
 		self.L_xx, self.L_yy = np.infty, np.infty
 		self.L_yx, self.L_xy = np.infty, np.infty
 		self.mu_y, self.mu_x = 0, 0
-	
+		self.M_x, self.M_y = np.infty, np.infty
+		
 	def get_value(self, x, y):
 		return 0
 
@@ -42,14 +43,14 @@ class TestFunction:
 		self.h = h
 		
 		# Solver for the internal problem
-		self.solver
+		self.solver = solver
 		
 		# Lipshitz constants for gradient
-		self.L_xx = r.L + F.L_xx + (F.L_xy)^2 / F.mu_y
+		self.L_xx = r.L + F.L_xx + (F.L_xy)**2 / F.mu_y
 		self.L_yy = h.L + F.L_yy
 		
 		# Lipschitz constant for function
-		self.M_x = r.M + F.M_xx
+		self.M_x = r.M + F.M_x
 		
 		# History of calculated delta-gradients
 		self.history_x, self.history = [], []
@@ -64,7 +65,6 @@ class TestFunction:
 		self.history_x.append(x)
 		self.history.append((y, eps))
 		if len(self.history_x) > max_len:
-			self.history_x = self.history_x[-max_len:]
 			self.history = self.history[-max_len:]
 		
 	def get_delta_grad(self, x, cond = None):
