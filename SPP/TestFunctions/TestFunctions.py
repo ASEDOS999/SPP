@@ -17,7 +17,7 @@ class ConvFunc_OneArg:
 		return 0
 	
 	def grad(self, x):
-		return np.zeros(self.x)
+		return np.zeros(x.shape)
 	
 class ConvConcFunc:
 	def __init__(self):
