@@ -35,7 +35,7 @@ class F(ConvConcFunc):
 		self.L_xx, self.L_yy = 0, 0
 		self.L_yx, self.L_xy = 2, 2
 		self.mu_y, self.mu_x = 1, 1
-		self.M_x = 2
+		self.M_x, self.M_y = 2, 2
 		self.alpha = alpha
 	def get_value(self, x, y):
 		return 2 * self.alpha * x.dot(y)
@@ -46,4 +46,11 @@ class F(ConvConcFunc):
 	def grad_x(self, x, y):
 		return 2 * self.alpha * y
 
-TrivialFunc = TestFunction(r(), F(), h(), None)
+def get_test_func():
+	return TestFunction(r(), F(), h())
+
+if __name__ == "__main__":
+	TrivialFunc = get_test_func()
+	print(TrivialFunc.get_value(np.ones(10,), np.ones(10,)))
+	print(TrivialFunc.grad_x(np.ones(10,), np.ones(10,)))
+	print(TrivialFunc.grad_y(np.ones(10,), np.ones(10,)))
