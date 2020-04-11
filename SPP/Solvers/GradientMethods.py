@@ -10,7 +10,7 @@ def cond_for_fgm(f, eps, R):
 	z = min(1/3 * k+ 2.4, 1 + np.sqrt(f.L_xx/f.mu_x))
 	return lambda y, R : f.L * R <= eps / (2 * z)
 
-def FGM_external(f, start_x, R, eps = 0.001, Q, history = {}, key = "FGM"):
+def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM"):
 	# It is realization for FGM method to optimize Saddle-Point problem
 	# on external variables
 	N = 0
@@ -46,7 +46,7 @@ def FGM_external(f, start_x, R, eps = 0.001, Q, history = {}, key = "FGM"):
 			history[key] = results
 			return (x, N, results)
 
-def FGM_internal(f, start_x, R, ext_var, eps = 0.001, Q, history = {}, key = "FGM"):
+def FGM_internal(f, start_x, R, ext_var, Q, eps = 0.001, history = {}, key = "FGM"):
 	# It is realization for FGM method to optimize Saddle-Point problem
 	# on external variables
 	N = 0
