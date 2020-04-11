@@ -91,7 +91,7 @@ class TestFunction:
 			start_point = self.get_start_point(x)
 		y, eps = self.solver(func = lambda y: -(self.F.get_value(x, y) - self.h.get_value(y)), 
 					   grad = lambda y: -self.grad(x, y),
-					   L = self.L_yy,
+					   L = self.L_yy, mu = self.mu_y,
 					   start_point = start_point,
 					   cond = cond)
 		self.update_history(x, y, eps)
