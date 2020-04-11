@@ -36,7 +36,7 @@ class ConvConcFunc:
 		return np.zeros(x.shape)
 
 class TestFunction:
-	def __init__(self, r, F, h, solver):
+	def __init__(self, r, F, h, solver, get_start_point):
 		# S(x,y) = r(x) + F(x, y) - h(y)
 		self.r = r
 		self.F = F
@@ -44,6 +44,10 @@ class TestFunction:
 		
 		# Solver for the internal problem
 		self.solver = solver
+		
+		# Function for to get start point and estimation of distance between it
+		# and the point-solution of the internal problem with fixed x
+		self.get_start_point = get_start_point
 		
 		# Lipshitz constants for gradient
 		self.L_xx = r.L + F.L_xx + (F.L_xy)**2 / F.mu_y
@@ -71,7 +75,7 @@ class TestFunction:
 		if x in self.history_x:
 			start_point = self.history[self.history_x.index(x)]
 		else:
-			start_point = None
+			start_point = self.get_start_point(x)
 		y, eps = self.solver(func = lambda y: -(self.F.get_value(x, y) - self.h.get_value(y)), 
 					   grad = lambda y: -self.grad(x, y),
 					   L = self.L_yy,
