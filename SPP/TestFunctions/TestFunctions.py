@@ -36,7 +36,9 @@ class ConvConcFunc:
 		return np.zeros(x.shape)
 
 class TestFunction:
-	def __init__(self, r, F, h, solver, get_start_point):
+	def __init__(self, r, F, h, solver = None, get_start_point = None):
+		# Arguments 'r' and 'h' are object of 'ConvFunc_OneArg' class
+		# Argument 'F' is object of 'ConvConcFunc' class
 		# S(x,y) = r(x) + F(x, y) - h(y)
 		self.r = r
 		self.F = F
@@ -49,20 +51,29 @@ class TestFunction:
 		# and the point-solution of the internal problem with fixed x
 		self.get_start_point = get_start_point
 		
-		# Lipshitz constants for gradient
+		# Lipshitz constants for gradient according to notation in the article
 		self.L_xx = r.L + F.L_xx + (F.L_xy)**2 / F.mu_y
 		self.L_yy = h.L + F.L_yy
 		
-		# Lipschitz constant for function
+		# Lipschitz constants for function
 		self.M_x = r.M + F.M_x
+		self.M_y = h.M + F.M_y
+		
+		# Constants of strong convexity (concavity) on x (y)
+		self.mu_x = r.mu
+		self.mu_y = h.mu
 		
 		# History of calculated delta-gradients
 		self.history_x, self.history = [], []
 		
+	def get_value(self, x, y):
+		return self.r.get_value(x) + self.F.get_value(x, y) - self.h.get_value(y)
 	def grad_y(self, x, y):
+		# Gradient with respect to y for function S
 		return self.F.grad_y(x, y) - self.h.grad(y)
 	
 	def grad_x(self, x, y):
+		# Gradient with respect to y for function S
 		return self.r.grad(x) + self.F.grad_x(x, y)
 
 	def update_history(self, x, y, eps, max_len = np.infty):
@@ -72,6 +83,8 @@ class TestFunction:
 			self.history = self.history[-max_len:]
 		
 	def get_delta_grad(self, x, cond = None):
+		# G(x) = max_y S(x,y)
+		# The method should return some delta-subgradient of function G
 		if x in self.history_x:
 			start_point = self.history[self.history_x.index(x)]
 		else:
