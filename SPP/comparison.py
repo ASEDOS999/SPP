@@ -4,16 +4,16 @@ import threading
 
 from Solvers import GradientMethods, Ellipsoids, HalvCube
 
-def create_methods_dict(f, start_x_fgm, R_fgm, Q, eps, history):
+def create_methods_dict(f, start_x_fgm, R_fgm, Q, eps, history, time_max = 1):
 	methods = dict()
 	fgm = GradientMethods.FGM_external
-	methods["FGM"] = lambda : fgm(f, start_x_fgm, R_fgm, Q, eps = eps, history = history)
+	methods["FGM"] = lambda : fgm(f, start_x_fgm, R_fgm, Q, eps = eps, history = history, time_max = 1)
 	
 	ellipsoids = Ellipsoids.delta_ellipsoid
-	methods["Ellipsoids"] = lambda: ellipsoids(f, Q, eps = eps, history = history)
+	methods["Ellipsoids"] = lambda: ellipsoids(f, Q, eps = eps, history = history, time_max = 1)
 	
 	dichotomy = HalvCube.Dichotomy(history = history)
-	methods["Dichotomy"] = lambda: dichotomy.Halving(f, Q, eps)
+	methods["Dichotomy"] = lambda: dichotomy.Halving(f, Q, eps, time_max = 1)
 	return methods
 	
 def method_comparison(methods = None):

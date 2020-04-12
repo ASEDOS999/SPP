@@ -77,7 +77,7 @@ class Dichotomy:
 	def Est(self, eps, g, R):
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
 	
-	def Halving(self, f, Q, eps, indexes = {}):
+	def Halving(self, f, Q, eps, indexes = {}, time_max = None):
 		if self.L == np.infty:
 			# There was not initialization
 			self.f = f
@@ -127,6 +127,9 @@ class Dichotomy:
 					# Try condition
 					if self.M * R <= eps:
 						return x, R
+					if not time_max is None:
+						if self.history[self.key][-1][1] - self.history[self.key][0][1] >time_max:
+							return x, R
 				
 				# Choice of multidimensional rectangle
 				c = sum(i)/2
