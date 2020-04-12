@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Sat Apr 11 21:43:45 2020
 
-@author: elias
-"""
 import numpy as np
 
 def cond_for_ellipsoids(f, eps, R):
@@ -17,7 +13,7 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids"):
 	R = np.linalg.norm((Q[:, 0] - Q[:, 1]))/ 2
 	cond = cond_for_ellipsoids(f, eps, R)
 	H = R**2 * np.identity(n)
-	domain = np.array([[Q[0], Q[1]], [Q[2], Q[3]]])
+	domain = np.array(Q)
 	grad = lambda x: f.get_delta_grad(x, cond)
 	N = 0
 	results = [x]

@@ -30,6 +30,8 @@ class Dichotomy:
 		def stop_cond(y, R, x, ind, est = None, L = self.L, f = self.f, L_yy = self.f.L_yy):
 			lipschitz_estimate = L_yy * R
 			g = f.grad_y(x, y)[ind]
+			if g == 0:
+				return True
 			est = est(g)
 			if lipschitz_estimate / L <= est:
 				return True
@@ -50,7 +52,6 @@ class Dichotomy:
 		new_indexes[ind] = fixed_value
 		def reconstruct(x, indexes = new_indexes):
 			n = len(x) + len(indexes)
-			#print(n)
 			new_x = np.zeros((n,))
 			for ind,i in enumerate(new_x):
 				if ind in indexes:
@@ -61,15 +62,16 @@ class Dichotomy:
 			for ind, i in enumerate(new_x):
 				if np.isnan(i):
 					new_x[ind] = x.pop(0)
-			#print(new_x)
 			return new_x
 		return lambda x: reconstruct(x), new_indexes, ind
 		
 	def Est1(self, g):
-		return abs(g)/self.L
+		est = abs(g)/self.L
+		return est
 	
 	def Est2(self, eps, g, R):
-		return (eps - R * abs(g))/(self.M + self.L*R)
+		est = (eps - R * abs(g))/(self.M + self.L*R)
+		return est
 	
 	def Est(self, eps, g, R):
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
@@ -91,7 +93,6 @@ class Dichotomy:
 			# This set includes only one point
 			return [], 0
 		R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
-		#print(R)
 		while True:
 			for ind, i in enumerate(Q):
 				# Fix coordinat with index 'ind'
@@ -102,12 +103,11 @@ class Dichotomy:
 				
 				# Solution of the new problem through this method
 				x, Delta  = self.Halving(f, Q_new, self.get_new_eps(eps), new_indexes)
-				#print(true_ind == ind)
+
 				# Calculate delta-subgradient
 				grad = f.get_delta_grad(reconstruct(x),
-									 self.cond(reconstruct(x), Q, eps, ind))
+									 self.cond(reconstruct(x), Q, eps, true_ind))
 				g = grad[true_ind]
-				#print("x", reconstruct(x), indexes, grad, g)
 				x_ = list(x)
 				x = x_[:ind] + [sum(i)/2] + x_[ind:]
 				x = np.array(x)				
@@ -125,8 +125,6 @@ class Dichotomy:
 					# Update History
 					self.history[self.key].append((x, time.time()))
 					# Try condition
-					#print(self.M * R, eps)
-					print(self.M, R, eps)
 					if self.M * R <= eps:
 						return x, R
 				
@@ -136,9 +134,7 @@ class Dichotomy:
 					Q[ind] = [i[0], c]
 				else:
 					Q[ind] = [c, i[1]]
-					
 				# Update estimation of distance to point solution
 				Q_ = np.array(Q)
 				R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
-				#print(R)
 		return x, R
