@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from TestFunctions import ConvFunc_OneArg,  ConvConcFunc
-from TestFunctions import TestFunction
+from .TestFunctions import ConvFunc_OneArg,  ConvConcFunc
+from .TestFunctions import TestFunction
 import numpy as np
 
 
 class r(ConvFunc_OneArg):
 	def __init__(self):
-		self.L, self.M = 2, np.infty
+		self.L, self.M = 2, 10
 		self.mu = 1
 	def get_L(self):
 		return self.L
@@ -21,7 +21,7 @@ class r(ConvFunc_OneArg):
 
 class h(ConvFunc_OneArg):
 	def __init__(self):
-		self.L, self.M = 2, np.infty
+		self.L, self.M = 2, 10
 		self.mu = 1
 		
 	def get_value(self, y):
@@ -46,8 +46,8 @@ class F(ConvConcFunc):
 	def grad_x(self, x, y):
 		return 2 * self.alpha * y
 
-def get_test_func():
-	return TestFunction(r(), F(), h())
+def get_test_func(alpha = 1, solver = None, get_start_point = None):
+	return TestFunction(r(), F(alpha = alpha), h(), solver, get_start_point)
 
 if __name__ == "__main__":
 	TrivialFunc = get_test_func()
