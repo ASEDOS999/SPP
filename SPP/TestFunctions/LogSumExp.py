@@ -23,40 +23,49 @@ from .TestFunctions import ConvFunc_OneArg,  ConvConcFunc
 import numpy as np
 
 class r(ConvFunc_OneArg):
-	def __init__(self, alpha = 1, beta = 1):
-		self.L, self.M = #...
+	def __init__(self, alpha = 1, beta = 1, size_domain = 10):
+		selph,alpha = alpha
+		self.beta = beta
+		self.L, self.M = alpha**2 + 2 * beta, alpha + 2 * beta * size_domain
 		self.mu = beta
 		
 	def get_value(self, x):
+		beta = self.beta
+		alpha = self.alpha
 		return np.log(1 + np.exp(alpha * x).sum()) + beta/2 * np.linalg.norm(x)**2
 	
 	def grad(self, x):
+		beta = self.beta
+		alpha = self.alpha
 		return alpha * np.exp(alpha * x)/ (1 + np.exp(alpha * x).sum()) + beta*x
 
 class h(ConvFunc_OneArg):
-	def __init__(self, c, beta = 0):
-		self.L, self.M = # ...
+	def __init__(self, c, beta = 0, size_domain = 10):
+		self.c = c
+		self.beta = beta
+		self.L, self.M = beta, np.linalg.norm(c) + beta/2 * size_domain
 		self.mu = beta
 		
 	def get_value(self, y):
-		return c.dot(y) + beta/2 * np.linalg.norm(y)**2
+		return self.c.dot(y) + self.beta/2 * np.linalg.norm(y)**2
 	
 	def grad(self, y):
-		return c + beta * y
+		return self.c + self.beta * y
 	
 class F(ConvConcFunc):
-	def __init__(self, B = B):
+	def __init__(self, B, size_domain = 10):
 		self.B = B
-		self.L_xx, self.L_yy = # ...
-		self.L_yx, self.L_xy = # ...
+		self.L_xx, self.L_yy = 0, 0
+		lambda_B = np.linalg.norm(self.B, ord=2)
+		self.L_yx, self.L_xy = lambda_B, lambda_B
 		self.mu_y, self.mu_x = 0, 0
-		self.M_x, self.M_y = # ...
+		self.M_x, self.M_y = lambda_B * size_domain, lambda_B * size_domain
 
 	def get_value(self, x, y):
-		return y.dot(B @ x)
+		return y.dot(self.B @ x)
 
 	def grad_y(self, x, y):
-		return B @ x
+		return self.B @ x
 	
 	def grad_x(self, x, y):
-		return B @ y
+		return self.B @ y
