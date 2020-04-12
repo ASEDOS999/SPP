@@ -73,6 +73,6 @@ def FGM_internal(func,
 
 		N += 1
 		est = min(4 * L * R/N**2, L * R * np.exp(-N/2 * np.sqrt(mu/L)))
-		if cond(y, np.sqrt(est/mu)):
+		if cond(x, np.sqrt(est/mu)):
 			return (x, np.sqrt(est/mu))
 
