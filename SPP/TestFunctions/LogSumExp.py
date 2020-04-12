@@ -68,4 +68,4 @@ class F(ConvConcFunc):
 		return self.B @ x
 	
 	def grad_x(self, x, y):
-		return self.B @ y
+		return self.B.T @ y
