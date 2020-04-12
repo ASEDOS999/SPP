@@ -4,7 +4,7 @@
 import numpy as np
 
 def cond_for_ellipsoids(f, eps, R):
-	return lambda y, R : f.L * R <= eps / 2
+	return lambda y, R : f.L_yy * R <= eps / 2
 
 def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids"):
 	n = len(Q)
@@ -24,7 +24,8 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids"):
 		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
 		N += 1
 		results.append((np.clip(x, *domain.T)))
+		x = (np.clip(x, *domain.T))
 		est = f.L_xx * R * np.exp(- N / (2 * n**2))
 		if est <= eps:
 			history[key] = results
-			return (x, N, results)
+			return x, N
