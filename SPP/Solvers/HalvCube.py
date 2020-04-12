@@ -17,6 +17,7 @@ class Dichotomy:
 		self.indexes = {}
 		
 	def help_task(self, f, Q, ind):
+		Q = list(Q)
 		Q_new = Q[:ind] + Q[ind+1:]
 		return Q_new
 
@@ -97,7 +98,6 @@ class Dichotomy:
 			for ind, i in enumerate(Q):
 				# Fix coordinat with index 'ind'
 				Q_new = self.help_task(f, Q, ind)
-				
 				# The new function of reconstructing x
 				reconstruct, new_indexes, true_ind = self.fix(sum(i)/2, ind, indexes.copy())
 				
