@@ -40,6 +40,7 @@ class TestFunction:
 		# Arguments 'r' and 'h' are object of 'ConvFunc_OneArg' class
 		# Argument 'F' is object of 'ConvConcFunc' class
 		# S(x,y) = r(x) + F(x, y) - h(y)
+		print("Hello")
 		self.r = r
 		self.F = F
 		self.h = h
@@ -52,7 +53,7 @@ class TestFunction:
 		self.get_start_point = get_start_point
 		
 		# Lipshitz constants for gradient according to notation in the article
-		self.L_xx = r.L + F.L_xx + (F.L_xy)**2 / F.mu_y
+		self.L_xx = r.L + F.L_xx + (F.L_xy)**2 / (F.mu_y+h.mu)
 		self.L_yy = h.L + F.L_yy
 		
 		# Lipschitz constants for function
@@ -81,16 +82,14 @@ class TestFunction:
 		self.history.append((y, eps))
 		if len(self.history_x) > max_len:
 			self.history = self.history[-max_len:]
+			self.history_x = self.history_x[-max_len:]
 		
 	def get_delta_grad(self, x, cond = None):
 		# G(x) = max_y S(x,y)
 		# The method should return some delta-subgradient of function G
-		if x in self.history_x:
-			start_point = self.history[self.history_x.index(x)]
-		else:
-			start_point = self.get_start_point(x)
+		start_point = self.get_start_point(x)
 		y, eps = self.solver(func = lambda y: -(self.F.get_value(x, y) - self.h.get_value(y)), 
-					   grad = lambda y: -self.grad(x, y),
+					   grad = lambda y: -self.grad_y(x, y),
 					   L = self.L_yy, mu = self.mu_y,
 					   start_point = start_point,
 					   cond = cond)
