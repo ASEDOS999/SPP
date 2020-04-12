@@ -40,7 +40,6 @@ class TestFunction:
 		# Arguments 'r' and 'h' are object of 'ConvFunc_OneArg' class
 		# Argument 'F' is object of 'ConvConcFunc' class
 		# S(x,y) = r(x) + F(x, y) - h(y)
-		print("Hello")
 		self.r = r
 		self.F = F
 		self.h = h

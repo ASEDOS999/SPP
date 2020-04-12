@@ -24,7 +24,6 @@ import numpy as np
 
 class r(ConvFunc_OneArg):
 	def __init__(self, alpha = 1, beta = 1, size_domain = 10):
-		print(alpha)
 		self.alpha = alpha
 		self.beta = beta
 		self.L, self.M = alpha**2 + 2 * beta, alpha + 2 * beta * size_domain
@@ -84,7 +83,7 @@ class F_tilde(ConvConcFunc):
 		return -x.dot(self.B @ y)
 
 	def grad_y(self, x, y):
-		return -self.B @ y
+		return -self.B.T @ x
 	
 	def grad_x(self, x, y):
-		return -self.B.T @ x
+		return -self.B @ y
