@@ -7,6 +7,15 @@ import time
 def cond_for_ellipsoids(f, eps, R):
 	return lambda y, R : f.L_yy * R <= eps / 2
 
+def get_w(Q, x):
+	w = []
+	for i in x:
+		if x > Q[1]:
+			w.append(1)
+		else:
+			w.append(-1)
+	return np.array(w)/np.linalg.norm(x)
+
 def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_max = None):
 	n = len(Q)
 	Q = np.array(Q)
@@ -17,8 +26,12 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_ma
 	domain = np.array(Q)
 	grad = lambda x: f.get_delta_grad(x, cond)
 	N = 0
-	history[key] = [x]
+	history[key] = [(x.copy(), time.time())]
 	while True:
+		if (np.clip(x, *domain.T) == x).any():
+			_df = grad(x)
+		else:
+			_df = get_w(x)
 		_df = grad(x)
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
 		x = x - 1/(n+1) * H @ _df
