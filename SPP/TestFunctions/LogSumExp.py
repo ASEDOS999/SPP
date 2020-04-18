@@ -32,12 +32,16 @@ class r(ConvFunc_OneArg):
 	def get_value(self, x):
 		beta = self.beta
 		alpha = self.alpha
-		return np.log(1 + np.exp(alpha * x).sum()) + beta/2 * np.linalg.norm(x)**2
+		x_max = x.max()
+		x = x - x_max
+		return alpha*x_max + np.log(np.exp(-alpha*x_max) + np.exp(alpha * x).sum()) + beta/2 * np.linalg.norm(x)**2
 	
 	def grad(self, x):
 		beta = self.beta
 		alpha = self.alpha
-		return alpha * np.exp(alpha * x)/ (1 + np.exp(alpha * x).sum()) + beta*x
+		x_max = x.max()
+		x = x - x_max
+		return alpha * np.exp(alpha * x)/ (np.exp(-alpha*x_max) + np.exp(alpha * x).sum()) + beta*x
 
 class h(ConvFunc_OneArg):
 	def __init__(self, c, beta = 0, size_domain = 10):
