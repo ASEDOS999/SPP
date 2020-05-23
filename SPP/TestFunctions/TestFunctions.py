@@ -1,20 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 20 17:04:56 2020
-
-@author: elias
-"""
 
 import numpy as np
 
-# There is implementation of parent classes for to implement functions
-# S(x,y) = r(x) + F(x,y) - h(y)
-# G(x) = max_y S(x,y)
+"""
+There is implementation of parent classes for to implement functions
+S(x,y) = r(x) + F(x,y) - h(y)
+G(x) = max_y S(x,y)
+"""
 
 class ConvFunc_OneArg:
-	# The parent class for convex function of one argument
-	# The functions r and f will be implemented through this class 
+	"""
+	The parent class for convex function of one argument
+	The functions r and f will be implemented through this class 
+	"""
 	def __init__(self):
 		self.L, self.M = 0,0
 		self.mu = 0
@@ -26,8 +25,10 @@ class ConvFunc_OneArg:
 		return np.zeros(x.shape)
 	
 class ConvConcFunc:
-	# Convex-concave function
-	# The fynction F(X,y) will be implemented through this class
+	"""
+	Convex-concave function
+	The function F(X,y) will be implemented through this class
+	"""
 	def __init__(self):
 		self.L_xx, self.L_yy = 0,0
 		self.L_yx, self.L_xy = 0,0
@@ -44,12 +45,15 @@ class ConvConcFunc:
 		return np.zeros(x.shape)
 
 class TestFunction:
-	# It is class for to implement function S through functions r, F, h
+	"""
+	It is class for to implement function S through functions r, F, h
+	"""
 	def __init__(self, r = None, F = ConvConcFunc(), h = ConvFunc_OneArg, solver = None, get_start_point = None):
-		# Arguments 'r' and 'h' are object of 'ConvFunc_OneArg' class
-		# Argument 'F' is object of 'ConvConcFunc' class
-		# S(x,y) = r(x) + F(x, y) - h(y)
-		
+		"""
+		Arguments 'r' and 'h' are object of 'ConvFunc_OneArg' class
+		Argument 'F' is object of 'ConvConcFunc' class
+		S(x,y) = r(x) + F(x, y) - h(y)
+		"""
 		if r is None:
 			r = ConvFunc_OneArg()
 		if F is None:
@@ -60,18 +64,22 @@ class TestFunction:
 		self.F = F
 		self.h = h
 		
-		# Solver for the internal problem
-		# It should be callable object 
-		# solver(func, grad, L, mu, start_point, cond)
-		# 'func' is minimized function
-		# 'gtad  is gradient of this function
-		# 'L' and 'mu' are constants of Lipshitz and strong convexity
-		# 'start_point' is a tuple of start point and distance to solution (x, R)
-		# 'cond' is the stop-condition for solver
+		"""
+		 Solver for the internal problem
+		 It should be callable object 
+		 solver(func, grad, L, mu, start_point, cond)
+		 'func' is minimized function
+		 'gtad  is gradient of this function
+		 'L' and 'mu' are constants of Lipshitz and strong convexity
+		 'start_point' is a tuple of start point and distance to solution (x, R)
+		 'cond' is the stop-condition for solver
+		"""
 		self.solver = solver
 		
-		# Function for to get start point and estimation of distance between it
-		# and the point-solution of the internal problem with fixed x
+		"""
+		Function for to get start point and estimation of distance between it
+		and the point-solution of the internal problem with fixed x
+		"""
 		self.get_start_point = get_start_point
 		
 		# Lipshitz constants for gradient according to notation in the article
@@ -95,14 +103,19 @@ class TestFunction:
 	def grad_x(self, x, y):
 		# Gradient with respect to y for function S
 		return self.r.grad(x) + self.F.grad_x(x, y)
-		
-	def get_delta_grad(self, x, cond = None):
-		# G(x) = max_y S(x,y)
-		# The method should return some delta-subgradient of function G
+	
+	def get_solution(self, x, cond = None):
 		start_point = self.get_start_point(x)
-		y, eps = self.solver(func = lambda y: -(self.F.get_value(x, y) - self.h.get_value(y)), 
+		return self.solver(func = lambda y: -(self.F.get_value(x, y) - self.h.get_value(y)), 
 					   grad = lambda y: -self.grad_y(x, y),
 					   L = self.L_yy, mu = self.mu_y,
 					   start_point = start_point,
 					   cond = cond)
+		
+	def get_delta_grad(self, x, cond = None):
+		"""
+		G(x) = max_y S(x,y)
+		The method should return some delta-subgradient of function G
+		"""
+		y, eps = self.get_solution(x, cond)
 		return self.grad_x(x, y)
