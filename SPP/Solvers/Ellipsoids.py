@@ -9,12 +9,14 @@ def cond_for_ellipsoids(f, eps, R):
 
 def get_w(Q, x):
 	w = []
-	for i in x:
-		if x > Q[1]:
+	for ind, i in enumerate(x):
+		if i > Q[ind, 1]:
 			w.append(1)
-		else:
+		elif i < Q[ind, 0]:
 			w.append(-1)
-	return np.array(w)/np.linalg.norm(x)
+		else:
+			w.append(0)
+	return np.array(w)
 
 def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_max = None):
 	n = len(Q)
@@ -31,14 +33,13 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_ma
 		if (np.clip(x, *domain.T) == x).any():
 			_df = grad(x)
 		else:
-			_df = get_w(x)
-		_df = grad(x)
+			_df = get_w(Q, x)
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
 		x = x - 1/(n+1) * H @ _df
 		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
 		N += 1
 		history[key].append((np.clip(x, *domain.T), time.time()))
-		x = (np.clip(x, *domain.T))
+		#x = (np.clip(x, *domain.T))
 		est = f.L_xx * R * np.exp(- N / (2 * n**2))
 		if est <= eps:
 			return x, N
