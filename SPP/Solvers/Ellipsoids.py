@@ -46,3 +46,34 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_ma
 		if not time_max is None:
 			if history[key][-1][1] - history[key][0][1] >time_max:
 				return x, R
+
+def get_w_sphere(x, R, c):
+	d_xc =np.linalg.norm(x-c) 
+	if d_xc <= R:
+		return R
+	lambda_ = d_xc / R - 1
+	y = (x + lambda_ * c) / (lambda_ + 1)
+	return y
+
+def ellipsoid(func, 
+					   grad,
+					   L, mu,
+					   start_point,
+					   cond):
+	x, R = start_point
+	x_0 = x.copy()
+	n = len(x)
+	H = R**2 * np.identity(n)
+	N = 0
+	while True:
+		if np.linalg.norm(x-x_0) <= R:
+			_df = grad(x)
+		else:
+			_df = get_w_sphere(x, R, x_0)
+		_df = _df / (np.sqrt(abs(_df@H@_df)))
+		x = x - 1/(n+1) * H @ _df
+		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
+		N += 1
+		est = L* R * np.exp(- N / (2 * n**2))
+		if cond(x, np.sqrt(est/mu)):
+			return (x, np.sqrt(est/mu))
