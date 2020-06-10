@@ -65,6 +65,7 @@ def ellipsoid(func,
 	n = len(x)
 	H = R**2 * np.identity(n)
 	N = 0
+	cur = None
 	while True:
 		if np.linalg.norm(x-x_0) <= R:
 			_df = grad(x)
@@ -75,5 +76,8 @@ def ellipsoid(func,
 		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
 		N += 1
 		est = L* R * np.exp(- N / (2 * n**2))
+		value = func(x)
+		if np.linalg.norm(x-x_0) <= R and (cur is None or cur[1] > func(x)):
+			cur = x, value
 		if cond(x, np.sqrt(est/mu)):
-			return (x, np.sqrt(est/mu))
+			return (cur[0], np.sqrt(est/mu))

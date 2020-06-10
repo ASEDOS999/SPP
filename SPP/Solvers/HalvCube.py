@@ -216,7 +216,7 @@ class Dichotomy_exact:
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
 	
 	def Halving(self, func, 
-					   grad,
+					   get_grad,
 					   L, mu, eps,
 					   start_point = None,
 					   cond = None,
@@ -226,13 +226,12 @@ class Dichotomy_exact:
 			# There was not initialization
 			self.L = L
 			x, R = start_point
-			Q = np.hstack([x + R * np.ones(x.shape), x - R * np.ones(x.shape)])
+			Q = np.vstack([x - R * np.ones(x.shape), x + R * np.ones(x.shape)]).T
 			self.n = len(Q)
 			self.Q = Q.copy()
 			self.mu = mu
 			Q_ = np.array(Q)
 			self.R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
-			self.history[self.key] = [((Q_[:,0] + Q_[:,1])/2, time.time())]
 		Q_ = np.array(Q)
 		if len(Q) == 0:
 			# This set includes only one point
@@ -246,31 +245,17 @@ class Dichotomy_exact:
 				reconstruct, new_indexes, true_ind = self.fix(sum(i)/2, ind, indexes.copy())
 				
 				# Solution of the new problem through this method
-				x, Delta  = self.Halving(func, grad, L, mu, self.get_new_eps(eps), Q = Q_new, indexes = new_indexes)
+				x, Delta  = self.Halving(func, get_grad, L, mu, self.get_new_eps(eps), Q = Q_new, indexes = new_indexes)
 
 				# Calculate delta-subgradient
-				grad = grad(reconstruct(x))
+				grad = get_grad(reconstruct(x))
 				g = grad[true_ind]
 				x_ = list(x)
 				x = x_[:ind] + [sum(i)/2] + x_[ind:]
 				x = np.array(x)				
 				if g == 0:
 					return x, 0
-				
-				# Try stop condition at point x
-				Est = self.Est(eps, g, R)
-				if len(Q) < self.n:
-					# It is not main problem
-					if Delta <= Est:
-						return x, R
-				if len(Q) == self.n:
-					# It is initial square
-					# Update History
-					self.history[self.key].append((x, time.time()))
-					# Try condition
-					if cond(x, np.sqrt(Est/mu)):
-						return x, R
-				
+
 				# Choice of multidimensional rectangle
 				c = sum(i)/2
 				if g > 0:
@@ -280,4 +265,19 @@ class Dichotomy_exact:
 				# Update estimation of distance to point solution
 				Q_ = np.array(Q)
 				R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
+				
+				# Try stop condition at point x
+				Est = self.Est(eps, g, R)
+				#print(len(Q), Est, R, np.sqrt(Est/mu), g)
+				if len(Q) < self.n:
+					# It is not main problem
+					if R <= Est:
+						return x, R
+				if len(Q) == self.n:
+					# It is initial square
+					# Update History
+					# Try condition
+					if cond(x, np.sqrt(R/mu)):
+						print("Stop", x, Est)
+						return x, R
 		return x, R
