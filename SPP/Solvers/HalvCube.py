@@ -278,6 +278,7 @@ class Dichotomy_exact:
 					# It is initial square
 					# Update History
 					# Try condition
-					if cond(x, np.sqrt(R/mu)):
+					if cond(x, R):
+						print("HI")
 						return x, R
 		return x, R
