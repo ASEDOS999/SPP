@@ -13,18 +13,22 @@ def get_stop_cond(stop_cond_args, eps):
 	def cond(x, y):
 		bad = B @ y - c
 		for ind,i in enumerate(x):
-			if i == 0 and bad[ind] != 0:
+			if i == 0 and bad[ind] > 0:
 				return False
 		return abs(x.dot(B @ y - c))<= eps and ((B @ y - c) <=0).any()
 	return cond
 	return lambda x, y: abs(y.dot(B @ x - c))<= eps
 
-def create_methods_dict(f, start_x_fgm, R_fgm, Q, eps, history, time_max = 1, keys = keys, stop_cond_args = None):
+def create_methods_dict(f, start_x_fgm, R_fgm, Q, eps, history, time_max = 1, keys = keys, inverse = False, stop_cond_args = None):
 	methods = dict()
 	if not stop_cond_args is None:
 		stop_cond = get_stop_cond(stop_cond_args, eps)
 	else:
-		stop_cond = lambda *args: False
+		stop_cond_ = lambda *args: False
+		if inverse:
+			stop_cond = lambda x, y: stop_cond_(y, x)
+		else:
+			stop_cond = stop_cond_
 	if "FGM" in keys:
 		fgm = GradientMethods.FGM_external
 		methods[keys["FGM"]] = lambda : fgm(f, start_x_fgm, R_fgm, Q, eps = eps, history = history, time_max = time_max,  key = keys["FGM"], stop_cond = stop_cond)
