@@ -74,10 +74,13 @@ def ellipsoid(func,
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
 		x = x - 1/(n+1) * H @ _df
 		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
+		#print(H)
 		N += 1
 		est = L* R * np.exp(- N / (2 * n**2))
 		value = func(x)
+		#print(x)
 		if np.linalg.norm(x-x_0) <= R and (cur is None or cur[1] > func(x)):
 			cur = x, value
 		if cond(x, np.sqrt(est/mu)):
+			#print("Next")
 			return (cur[0], np.sqrt(est/mu))

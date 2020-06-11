@@ -6,18 +6,20 @@ import time
 
 def cond_for_fgm(f, eps, R):
 	L = f.L_xx
-	k = min(np.sqrt(4 * L * R/ eps), 2 * np.sqrt(f.L_xx/f.mu_x) * np.log(L * R/ eps))
-	z = min(1/3 * k+ 2.4, 1 + np.sqrt(f.L_xx/f.mu_x))
+	if f.mu_x == 0:
+		k = np.sqrt(4 * L * R/ eps)
+		z = 1/3 * k+ 2.4
+	else:
+		k = min(np.sqrt(4 * L * R/ eps), 2 * np.sqrt(f.L_xx/f.mu_x) * np.log(L * R/ eps))
+		z = min(1/3 * k+ 2.4, 1 + np.sqrt(f.L_xx/f.mu_x))
 	def cond(y, R):
-		#print("Cond", f.L_xx * R, eps / (2 * z), z, eps)
-		return f.L_xx * R <= eps / (2 * z)
+		return f.L_yy * R <= eps / (2 * z)
 	return cond
 
 def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_max = None):
 	# It is realization for FGM method to optimize Saddle-Point problem
 	# on external variables
 	N = 0
-	print(eps)
 	cond = cond_for_fgm(f, eps, R)
 	domain = np.array(Q)
 	x = start_x
@@ -28,11 +30,7 @@ def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_
 	alpha, A = 1, 1
 	u, v = 2*L, 2*x
 	while True:
-		s = time.time()
 		der = grad(x)
-		print(time.time()-s)
-		np.array(der)
-		#print(x, der)
 		y = x - 1/L * der
 		y = np.clip(y, *domain.T)
 
@@ -41,8 +39,7 @@ def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_
 		z = v/u
 		z = np.clip(z, *domain.T)
 		tau = alpha/A
-		#print(z, y)
-		#print()
+
 		x = tau * z + (1 - tau) * y
 		alpha = (L+mu*A)/(2*L) * (1 + np.sqrt(abs(1 + (4*L*A)/(L+mu*A))) )
 		A += alpha
@@ -67,7 +64,6 @@ def FGM_internal(func,
 	x, R = start_point
 	alpha, A = 1, 1
 	u, v = 2*L, 2*x
-	#print(R)
 	while True:
 		der = np.array(grad(x))
 		np.array(der)
@@ -85,6 +81,5 @@ def FGM_internal(func,
 		N += 1
 		est = min(4 * L * R/N**2, L * R * np.exp(-N/2 * np.sqrt(mu/L)))
 		if cond(x, np.sqrt(est/mu)):
-			#print(N, np.sqrt(est/mu))
 			return (x, np.sqrt(est/mu))
 

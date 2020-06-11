@@ -268,7 +268,6 @@ class Dichotomy_exact:
 				
 				# Try stop condition at point x
 				Est = self.Est(eps, g, R)
-				#print(len(Q), Est, R, np.sqrt(Est/mu), g)
 				if len(Q) < self.n:
 					# It is not main problem
 					if R <= Est:
@@ -278,6 +277,5 @@ class Dichotomy_exact:
 					# Update History
 					# Try condition
 					if cond(x, np.sqrt(R/mu)):
-						print("Stop", x, Est)
 						return x, R
 		return x, R
