@@ -18,7 +18,7 @@ def get_w(Q, x):
 			w.append(0)
 	return np.array(w)
 
-def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_max = None):
+def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_max = None, stop_cond = lambda *args: False):
 	n = len(Q)
 	Q = np.array(Q)
 	x = (Q[:, 0] + Q[:, 1]) / 2
@@ -28,17 +28,17 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_ma
 	domain = np.array(Q)
 	grad = lambda x: f.get_delta_grad(x, cond)
 	N = 0
-	history[key] = [(x.copy(), time.time())]
+	history[key] = []
 	while True:
 		if (np.clip(x, *domain.T) == x).any():
-			_df = grad(x)
+			_df, y = grad(x)
 		else:
 			_df = get_w(Q, x)
+		history[key].append(((np.clip(x, *domain.T),y), time.time()))
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
 		x = x - 1/(n+1) * H @ _df
 		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
 		N += 1
-		history[key].append((np.clip(x, *domain.T), time.time()))
 		#x = (np.clip(x, *domain.T))
 		est = f.L_xx * R * np.exp(- N / (2 * n**2))
 		if est <= eps:
@@ -46,6 +46,8 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_ma
 		if not time_max is None:
 			if history[key][-1][1] - history[key][0][1] >time_max:
 				return x, R
+		if stop_cond(*history[key][-1][0]):
+			return x, R
 
 def get_w_sphere(x, R, c):
 	d_xc =np.linalg.norm(x-c) 

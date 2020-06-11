@@ -77,7 +77,7 @@ class Dichotomy:
 	def Est(self, eps, g, R):
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
 	
-	def Halving(self, f, Q, eps, indexes = {}, time_max = None):
+	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False):
 		if self.L == np.infty:
 			# There was not initialization
 			self.f = f
@@ -105,7 +105,7 @@ class Dichotomy:
 				x, Delta  = self.Halving(f, Q_new, self.get_new_eps(eps), new_indexes)
 
 				# Calculate delta-subgradient
-				grad = f.get_delta_grad(reconstruct(x),
+				grad, y = f.get_delta_grad(reconstruct(x),
 									 self.cond(reconstruct(x), Q, eps, true_ind))
 				g = grad[true_ind]
 				x_ = list(x)
@@ -123,13 +123,15 @@ class Dichotomy:
 				if len(Q) == self.n:
 					# It is initial square
 					# Update History
-					self.history[self.key].append((x, time.time()))
+					self.history[self.key].append(((x,y), time.time()))
 					# Try condition
 					if self.M * R <= eps:
 						return x, R
 					if not time_max is None:
 						if self.history[self.key][-1][1] - self.history[self.key][0][1] >time_max:
 							return x, R
+					if stop_cond(x, y):
+						return x, R
 				
 				# Choice of multidimensional rectangle
 				c = sum(i)/2

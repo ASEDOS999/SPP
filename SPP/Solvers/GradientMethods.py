@@ -16,7 +16,7 @@ def cond_for_fgm(f, eps, R):
 		return f.L_yy * R <= eps / (2 * z)
 	return cond
 
-def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_max = None):
+def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_max = None, stop_cond = lambda *args: False):
 	# It is realization for FGM method to optimize Saddle-Point problem
 	# on external variables
 	N = 0
@@ -30,7 +30,16 @@ def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_
 	alpha, A = 1, 1
 	u, v = 2*L, 2*x
 	while True:
-		der = grad(x)
+		der, y_ = grad(x)
+		history[key].append(((x.copy(),y_), time.time()))
+		est = 2 * min(4 * L * R/N**2, L * R * np.exp(-N/2 * np.sqrt(mu/L)))
+		if est <= eps:
+			return x, N
+		if not time_max is None:
+			if history[key][-1][1] - history[key][0][1] >time_max:
+				return x, R
+		if stop_cond(x, y_):
+			return x, R
 		y = x - 1/L * der
 		y = np.clip(y, *domain.T)
 
@@ -45,13 +54,6 @@ def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_
 		A += alpha
 
 		N += 1
-		history[key].append((x.copy(), time.time()))
-		est = 2 * min(4 * L * R/N**2, L * R * np.exp(-N/2 * np.sqrt(mu/L)))
-		if est <= eps:
-			return x, N
-		if not time_max is None:
-			if history[key][-1][1] - history[key][0][1] >time_max:
-				return x, R
 
 def FGM_internal(func, 
 					   grad,
