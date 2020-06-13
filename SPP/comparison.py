@@ -15,7 +15,7 @@ def get_stop_cond(stop_cond_args, eps):
 		for ind,i in enumerate(x):
 			if i == 0 and bad[ind] > 0:
 				return False
-		return abs(x.dot(B @ y - c))<= eps and ((B @ y - c) <=0).any()
+		return abs(x.dot(B @ y - c))<= eps
 	return cond
 	return lambda x, y: abs(y.dot(B @ x - c))<= eps
 
