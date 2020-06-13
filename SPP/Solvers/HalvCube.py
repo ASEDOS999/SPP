@@ -27,20 +27,20 @@ class Dichotomy:
 	def cond(self, x, Q, eps, ind):
 		Q_ = np.array(self.Q)
 		R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
-		est = lambda g: self.Est(eps, g, R)
-		def stop_cond(y, R, x, ind, est = None, L = self.L, f = self.f, L_yy = self.f.L_yy):
-			lipschitz_estimate = L_yy * R
-			g = f.grad_y(x, y)[ind]
+		est_ = lambda g: self.Est(eps, g, R)
+		def stop_cond(y, R = None, f_est = None):
+			lipschitz_estimate = self.f.L_yy * R
+			g = self.f.grad_y(x, y)[ind]
 			if g == 0:
 				return True
-			est = est(g)
-			if lipschitz_estimate / L <= est:
+			est = est_(g)
+			if lipschitz_estimate / self.L <= est:
 				return True
-			#s = min(min(x - Q_[:, 0]), min(Q_[:, 1] - x))
-			#if s >= np.sqrt(R / (2 * L)):
-			#	return np.sqrt(L * R / 2) <= est
+			s = min(min(x - Q_[:, 0]), min(Q_[:, 1] - x))
+			if s >= np.sqrt(R / (2 * self.L)):
+				return np.sqrt(self.L * R / 2) <= est
 			return False
-		return lambda y, R: stop_cond(y, R, x, ind, est = est)
+		return stop_cond
 	
 	def fix(self, fixed_value, ind, indexes):
 		new_indexes = indexes.copy()
@@ -78,8 +78,8 @@ class Dichotomy:
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
 	
 	def final_cond(self, eps, add_cond = lambda *args: True):
-		def cond(y, R):
-			return add_cond(y) and self.f.M_y * R <= eps 
+		def cond(y, R = None, f_est = None):
+			return add_cond(y) and f_est <= eps 
 		return cond
 	
 	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False):
@@ -177,23 +177,7 @@ class Dichotomy_exact:
 	def get_new_eps(self, eps):
 			return self.mu * eps**2 / (128 * self.L**2 * self.n * self.R)
 		
-	def cond(self, x, Q, eps, ind):
-		Q_ = np.array(self.Q)
-		R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
-		est = lambda g: self.Est(eps, g, R)
-		def stop_cond(y, R, x, ind, est = None, L = self.L, f = self.f, L_yy = self.f.L_yy):
-			lipschitz_estimate = L_yy * R
-			g = f.grad_y(x, y)[ind]
-			if g == 0:
-				return True
-			est = est(g)
-			if lipschitz_estimate / L <= est:
-				return True
-			s = min(min(x - Q_[:, 0]), min(Q_[:, 1] - x))
-			if s >= np.sqrt(R / (2 * L)):
-				return np.sqrt(L * R / 2) <= est
-			return False
-		return lambda y, R: stop_cond(y, R, x, ind, est = est)
+
 	
 	def fix(self, fixed_value, ind, indexes):
 		new_indexes = indexes.copy()
@@ -293,9 +277,7 @@ class Dichotomy_exact:
 						print(self.Est1, self.Est2, Delta, R)
 						return x, R
 				if len(Q) == self.n:
-					# It is initial square
-					# Update History
 					# Try condition
-					if cond(x, R):
+					if cond(x, R = R):
 						return x, R
 		return x, R

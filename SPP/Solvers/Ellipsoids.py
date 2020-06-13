@@ -5,7 +5,14 @@ import numpy as np
 import time
 
 def cond_for_ellipsoids(f, eps, R):
-	return lambda y, R : f.M_y * R <= eps / 2
+	def cond(x, R = None, f_est = None):
+		if R is None and f_est is None:
+			print("Error")
+		if not f_est is None:
+			return f_est <= eps / 2
+		if not R is None:
+			return f.M_y * R <= eps / 2
+	return cond
 
 def get_w(Q, x):
 	w = []
@@ -76,13 +83,10 @@ def ellipsoid(func,
 		_df = _df / (np.sqrt(abs(_df@H@_df)))
 		x = x - 1/(n+1) * H @ _df
 		H = n**2/(n**2 - 1)*(H - (2 / (n + 1)) * (H @ np.outer(_df, _df) @ H))
-		#print(H)
 		N += 1
 		est = L* R * np.exp(- N / (2 * n**2))
 		value = func(x)
-		#print(x)
 		if np.linalg.norm(x-x_0) <= R and (cur is None or cur[1] > func(x)):
 			cur = x, value
-		if cond(x, np.sqrt(est/mu)):
-			#print("Next")
+		if cond(x, f_est = est):
 			return (cur[0], np.sqrt(est/mu))
