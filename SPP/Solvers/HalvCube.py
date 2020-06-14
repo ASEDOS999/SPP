@@ -24,15 +24,17 @@ class Dichotomy:
 	def get_new_eps(self, eps):
 			return self.mu * eps**2 / (128 * self.L**2 * self.n * self.R)
 		
-	def cond(self, x, Q, eps, ind):
+	def cond(self, x, Q, eps, ind, delta = np.infty):
 		Q_ = np.array(self.Q)
 		R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
 		est_ = lambda g: self.Est(eps, g, R)
 		def stop_cond(y, R = None, f_est = None):
+			if f_est is None:
+				f_est = self.f.M_y * R
+			if f_est >= delta:
+				return False
 			lipschitz_estimate = self.f.L_yy * R
 			g = self.f.grad_y(x, y)[ind]
-			if g == 0:
-				return True
 			est = est_(g)
 			if lipschitz_estimate / self.L <= est:
 				return True
@@ -77,12 +79,7 @@ class Dichotomy:
 	def Est(self, eps, g, R):
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
 	
-	def final_cond(self, eps, add_cond = lambda *args: True):
-		def cond(y, R = None, f_est = None):
-			return add_cond(y) and self.f.M_y * R <= eps 
-		return cond
-	
-	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False):
+	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False, eps_R = None):
 		if self.L == np.infty:
 			# There was not initialization
 			self.f = f
@@ -95,6 +92,8 @@ class Dichotomy:
 			self.R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
 			self.history[self.key] = [((Q_[:,0] + Q_[:,1])/2, time.time())]
 			self.time_max = time_max
+		if eps_R is None:
+			eps_R =  np.sqrt(eps)
 		Q_ = np.array(Q)
 		if len(Q) == 0 and self.n != 0:
 			return [], 0, False
@@ -107,56 +106,63 @@ class Dichotomy:
 				reconstruct, new_indexes, true_ind = self.fix(sum(i)/2, ind, indexes.copy())
 				
 				# Solution of the new problem through this method
-				x, Delta, stop  = self.Halving(f, Q_new, self.get_new_eps(eps), new_indexes)
+				if len(Q) == self.n:
+					new_eps = eps
+				else:
+					new_eps = self.get_new_eps(eps)
+				x, Delta, stop  = self.Halving(f, Q_new, new_eps, new_indexes)
 				
-				if stop:
+				if stop and len(Q)<self.n:
 					x_ = list(x)
 					x_.insert(ind, sum(i)/2)
 					x = np.array(x_)
-					if len(Q)==self.n:
-						return x, R
-					else:
-						return x, R, False
-				# Calculate delta-subgradient
-				grad, y = f.get_delta_grad(reconstruct(x),
-									 self.cond(reconstruct(x), Q, eps, true_ind))
+					return x, R, False
+					
+				# Calculate inexact subgradient
+				x_reconstructed = reconstruct(x)
+				if R <= eps_R and len(Q) == self.n:
+					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind, delta = eps)
+				else:
+					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind)
+				grad, y = f.get_delta_grad(x_reconstructed, cond_grad)
+				
 				g = grad[true_ind]
-				x_ = list(x)
-				x_.insert(ind, sum(i)/2)
-				x = np.array(x_)				
+				
 				# Choice of multidimensional rectangle
 				c = sum(i)/2
-				if g > 0:
+				if g >= 0:
 					Q[ind] = [i[0], c]
 				else:
 					Q[ind] = [c, i[1]]
+				x_ = list(x)
+				x_.insert(ind, sum(i)/2)
+				x = np.array(x_)
+				
+				
 				# Update estimation of distance to point solution
 				Q_ = np.array(Q)
 				R = np.linalg.norm(Q_[:,0] - Q_[:,1])		
-				# Try stop condition at point x
+				
+				# Not initial problem
 				if len(Q) < self.n:
-					# It is not main problem
 					if R <= self.Est2(eps, g, R):
 						return x, R, True
 					if R <= self.Est1(g):
 						return x, R, False
 					if time.time()-self.history[self.key][0][1]> self.time_max:
 						return x, R, False
-
+				
+				# Initial problem
 				if len(Q) == self.n:
-					# It is initial square
 					# Update History
+					Q_ = np.array(Q)
+					x = (Q_[:, 0] + Q_[:, 1])/2
 					self.history[self.key].append(((x,y), time.time()))
 					# Try condition
-					#if self.M * R <= eps:
-					#	return x, R
 					if not time_max is None:
 						if self.history[self.key][-1][1] - self.history[self.key][0][1] >time_max:
 							return x, R
-					if stop_cond(x, y):
-						grad, y = f.get_delta_grad(x,
-									 self.final_cond(eps, lambda y: stop_cond(x, y)))
-						self.history[self.key].append(((x, y), time.time()))
+					if stop_cond(x_reconstructed, y) and R < eps_R:
 						return x, R
 		return x, R
 
