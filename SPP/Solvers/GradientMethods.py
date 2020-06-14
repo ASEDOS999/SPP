@@ -38,8 +38,6 @@ def FGM_external(f, start_x, R, Q, eps = 0.001, history = {}, key = "FGM", time_
 		der, y_ = grad(x)
 		history[key].append(((x.copy(),y_), time.time()))
 		est = 2 * min(4 * L * R/N**2, L * R * np.exp(-N/2 * np.sqrt(mu/L)))
-		if est <= eps:
-			return x, N
 		if not time_max is None:
 			if history[key][-1][1] - history[key][0][1] >time_max:
 				return x, R

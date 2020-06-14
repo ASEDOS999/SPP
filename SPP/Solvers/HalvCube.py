@@ -79,7 +79,7 @@ class Dichotomy:
 	
 	def final_cond(self, eps, add_cond = lambda *args: True):
 		def cond(y, R = None, f_est = None):
-			return add_cond(y) and f_est <= eps 
+			return add_cond(y) and self.f.M_y * R <= eps 
 		return cond
 	
 	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False):
@@ -94,9 +94,9 @@ class Dichotomy:
 			Q_ = np.array(Q)
 			self.R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
 			self.history[self.key] = [((Q_[:,0] + Q_[:,1])/2, time.time())]
+			self.time_max = time_max
 		Q_ = np.array(Q)
 		if len(Q) == 0 and self.n != 0:
-			# This set includes only one point
 			return [], 0, False
 		R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
 		while True:
@@ -110,6 +110,9 @@ class Dichotomy:
 				x, Delta, stop  = self.Halving(f, Q_new, self.get_new_eps(eps), new_indexes)
 				
 				if stop:
+					x_ = list(x)
+					x_.insert(ind, sum(i)/2)
+					x = np.array(x_)
 					if len(Q)==self.n:
 						return x, R
 					else:
@@ -121,9 +124,6 @@ class Dichotomy:
 				x_ = list(x)
 				x_.insert(ind, sum(i)/2)
 				x = np.array(x_)				
-				if g == 0:
-					return x, 0
-				
 				# Choice of multidimensional rectangle
 				c = sum(i)/2
 				if g > 0:
@@ -140,6 +140,9 @@ class Dichotomy:
 						return x, R, True
 					if R <= self.Est1(g):
 						return x, R, False
+					if time.time()-self.history[self.key][0][1]> self.time_max:
+						return x, R, False
+
 				if len(Q) == self.n:
 					# It is initial square
 					# Update History
@@ -156,6 +159,7 @@ class Dichotomy:
 						self.history[self.key].append(((x, y), time.time()))
 						return x, R
 		return x, R
+
 
 class Dichotomy_exact:
 	def __init__(self, history = {}, key = "Dichotomy"):
