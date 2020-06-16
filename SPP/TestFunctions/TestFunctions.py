@@ -85,10 +85,14 @@ class TestFunction:
 		# Lipshitz constants for gradient according to notation in the article
 		self.L_xx = r.L + F.L_xx + (F.L_xy)**2 / (F.mu_y+h.mu)
 		self.L_yy = h.L + F.L_yy
+		self.L_xy = F.L_xy
+		self.L_yx = F.L_yx
 		
 		# Lipschitz constants for function
 		self.M_x = r.M + F.M_x
 		self.M_y = h.M + F.M_y
+		print(self.M_x, self.M_y)
+		print(self.L_xx, self.L_yy, self.L_xy, self.L_yx)
 		
 		# Constants of strong convexity (concavity) on x (y)
 		self.mu_x = r.mu
@@ -118,4 +122,4 @@ class TestFunction:
 		The method should return some delta-subgradient of function G
 		"""
 		y, eps = self.get_solution(x, cond)
-		return self.grad_x(x, y)
+		return self.grad_x(x, y), y 

@@ -27,7 +27,6 @@ class r(ConvFunc_OneArg):
 		self.alpha = alpha
 		self.beta = beta
 		self.L, self.M = np.max(alpha**2) + 2 * beta, np.max(np.abs(alpha)) + 2 * beta * size_domain
-		print(self.L, self.M)
 		self.mu = beta
 		
 	def get_value(self, x):
@@ -43,21 +42,26 @@ class r(ConvFunc_OneArg):
 		alpha = self.alpha
 		x_ = (alpha*x)
 		x_max = (alpha*x).max()
+		x_max = max(0, x_max)
 		x_ -= x_max
 		return alpha * np.exp(x_)/ (np.exp(-x_max) + np.exp(x_).sum()) + beta*x
 
 class h(ConvFunc_OneArg):
-	def __init__(self, c, beta = 0, size_domain = 10):
+	def __init__(self, c, beta = 0, size_domain = 10, y0 = None):
 		self.c = c
 		self.beta = beta
 		self.L, self.M = beta, np.linalg.norm(c) + beta/2 * size_domain
 		self.mu = beta
-		
+		self.y0 = None
 	def get_value(self, y):
-		return self.c.dot(y) + self.beta/2 * np.linalg.norm(y)**2
+		if self.y0 is None:
+			self.y0 = np.zeros(y.shape)
+		return self.c.dot(y) + self.beta/2 * np.linalg.norm(y-self.y0)**2
 	
 	def grad(self, y):
-		return self.c + self.beta * y
+		if self.y0 is None:
+			self.y0 = np.zeros(y.shape)
+		return self.c + self.beta * (y-self.y0)
 	
 class F(ConvConcFunc):
 	def __init__(self, B, size_domain = 10):
@@ -78,13 +82,13 @@ class F(ConvConcFunc):
 		return self.B.T @ y
 
 class F_tilde(ConvConcFunc):
-	def __init__(self, B, size_domain = 10):
+	def __init__(self, B, size_domain_x = 10, size_domain_y = 10):
 		self.B = B
 		self.L_xx, self.L_yy = 0, 0
 		lambda_B = np.linalg.norm(self.B, ord=2)
 		self.L_yx, self.L_xy = lambda_B, lambda_B
 		self.mu_y, self.mu_x = 0, 0
-		self.M_x, self.M_y = lambda_B * size_domain, lambda_B * size_domain
+		self.M_x, self.M_y = lambda_B * size_domain_y, lambda_B * size_domain_x
 
 	def get_value(self, x, y):
 		return -x.dot(self.B @ y)
