@@ -85,6 +85,7 @@ def FGM_internal(func,
 		A += alpha
 		N += 1
 		est = min(4 * L * R/N**2, L * R * np.exp(-N/2 * np.sqrt(mu/L)))
-		if cond(x, R = np.sqrt(est/mu), f_est = est):
+		#print(N, '\t', est)
+		if cond(x, R = np.sqrt(est/mu), f_est = est) or N >= 1e5:
 			return (x, np.sqrt(est/mu))
 

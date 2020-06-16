@@ -33,9 +33,10 @@ class Dichotomy:
 				f_est = self.f.M_y * R
 			if f_est >= delta:
 				return False
-			lipschitz_estimate = self.f.L_yy * R
-			g = self.f.grad_y(x, y)[ind]
+			lipschitz_estimate = self.f.L_xy * R
+			g = self.f.grad_x(x, y)[ind]
 			est = est_(g)
+			#print("HC", self.f.L_xy, self.L, lipschitz_estimate / self.L, g, est)
 			if lipschitz_estimate / self.L <= est:
 				return True
 			s = min(min(x - Q_[:, 0]), min(Q_[:, 1] - x))
@@ -120,7 +121,7 @@ class Dichotomy:
 				# Calculate inexact subgradient
 				x_reconstructed = reconstruct(x)
 				if R <= eps_R and len(Q) == self.n:
-					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind, delta = eps)
+					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind, delta = np.infty)
 				else:
 					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind)
 				grad, y = f.get_delta_grad(x_reconstructed, cond_grad)
@@ -161,7 +162,8 @@ class Dichotomy:
 					if not time_max is None:
 						if self.history[self.key][-1][1] - self.history[self.key][0][1] >time_max:
 							return x, R
-					if stop_cond(x, y) and R < eps_R:
+					print(R, self.f.M_x, eps/4)
+					if (stop_cond(x, y) or f.M_x *R <= eps/4) and R < eps_R:
 						return x, R
 		return x, R
 
