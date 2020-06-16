@@ -48,8 +48,6 @@ def delta_ellipsoid(f, Q, eps = 0.001, history = {}, key = "Ellipsoids", time_ma
 		N += 1
 		#x = (np.clip(x, *domain.T))
 		est = f.L_xx * R * np.exp(- N / (2 * n**2))
-		if est <= eps:
-			return x, N
 		if not time_max is None:
 			if history[key][-1][1] - history[key][0][1] >time_max:
 				return x, R

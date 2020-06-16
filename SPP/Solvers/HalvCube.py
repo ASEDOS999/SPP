@@ -93,7 +93,7 @@ class Dichotomy:
 			self.history[self.key] = [((Q_[:,0] + Q_[:,1])/2, time.time())]
 			self.time_max = time_max
 		if eps_R is None:
-			eps_R =  np.sqrt(eps)
+			eps_R =  100*(eps)
 		Q_ = np.array(Q)
 		if len(Q) == 0 and self.n != 0:
 			return [], 0, False
@@ -111,7 +111,6 @@ class Dichotomy:
 				else:
 					new_eps = self.get_new_eps(eps)
 				x, Delta, stop  = self.Halving(f, Q_new, new_eps, new_indexes)
-				
 				if stop and len(Q)<self.n:
 					x_ = list(x)
 					x_.insert(ind, sum(i)/2)
@@ -127,7 +126,7 @@ class Dichotomy:
 				grad, y = f.get_delta_grad(x_reconstructed, cond_grad)
 				
 				g = grad[true_ind]
-				
+				#print(g)
 				# Choice of multidimensional rectangle
 				c = sum(i)/2
 				if g >= 0:
@@ -156,13 +155,13 @@ class Dichotomy:
 				if len(Q) == self.n:
 					# Update History
 					Q_ = np.array(Q)
-					x = (Q_[:, 0] + Q_[:, 1])/2
+					#x = (Q_[:, 0] + Q_[:, 1])/2
 					self.history[self.key].append(((x,y), time.time()))
 					# Try condition
 					if not time_max is None:
 						if self.history[self.key][-1][1] - self.history[self.key][0][1] >time_max:
 							return x, R
-					if stop_cond(x_reconstructed, y) and R < eps_R:
+					if stop_cond(x, y) and R < eps_R:
 						return x, R
 		return x, R
 
@@ -242,7 +241,6 @@ class Dichotomy_exact:
 			Q_ = np.array(Q)
 			self.R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
 		Q_ = np.array(Q)
-		print(len(Q))
 		if len(Q) == 0:
 			# This set includes only one point
 			return [], 0
