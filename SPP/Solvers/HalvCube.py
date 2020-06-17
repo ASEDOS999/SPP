@@ -80,7 +80,7 @@ class Dichotomy:
 	def Est(self, eps, g, R):
 		return max(self.Est1(g), self.Est2(eps, g, R))/2
 	
-	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False, eps_R = None):
+	def Halving(self, f, Q, eps, indexes = {}, time_max = None, stop_cond = lambda *args: False, eps_R = None, out_ind = None):
 		if self.L == np.infty:
 			# There was not initialization
 			self.f = f
@@ -94,7 +94,7 @@ class Dichotomy:
 			self.history[self.key] = [((Q_[:,0] + Q_[:,1])/2, time.time())]
 			self.time_max = time_max
 		if eps_R is None:
-			eps_R =  100*(eps)
+			eps_R =  (eps)
 		Q_ = np.array(Q)
 		if len(Q) == 0 and self.n != 0:
 			return [], 0, False
@@ -111,7 +111,7 @@ class Dichotomy:
 					new_eps = eps
 				else:
 					new_eps = self.get_new_eps(eps)
-				x, Delta, stop  = self.Halving(f, Q_new, new_eps, new_indexes)
+				x, Delta, stop  = self.Halving(f, Q_new, new_eps, new_indexes, out_ind = ind)
 				if stop and len(Q)<self.n:
 					x_ = list(x)
 					x_.insert(ind, sum(i)/2)
@@ -121,7 +121,7 @@ class Dichotomy:
 				# Calculate inexact subgradient
 				x_reconstructed = reconstruct(x)
 				if R <= eps_R and len(Q) == self.n:
-					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind, delta = np.infty)
+					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind, delta = eps)
 				else:
 					cond_grad = self.cond(x_reconstructed, Q, eps, true_ind)
 				grad, y = f.get_delta_grad(x_reconstructed, cond_grad)
@@ -145,6 +145,7 @@ class Dichotomy:
 				
 				# Not initial problem
 				if len(Q) < self.n:
+					g = grad[out_ind]
 					if R <= self.Est2(eps, g, R):
 						return x, R, True
 					if R <= self.Est1(g):
@@ -162,8 +163,9 @@ class Dichotomy:
 					if not time_max is None:
 						if self.history[self.key][-1][1] - self.history[self.key][0][1] >time_max:
 							return x, R
-					print(R, self.f.M_x, eps/4)
-					if (stop_cond(x, y) or f.M_x *R <= eps/4) and R < eps_R:
+					#print(R, self.f.M_x, eps/4)
+					#if (stop_cond(x, y) or f.M_x *R <= eps/4) and R < eps_R:
+					if stop_cond(x, y) and R < eps_R:
 						return x, R
 		return x, R
 
