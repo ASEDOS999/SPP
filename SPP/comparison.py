@@ -16,6 +16,8 @@ def get_stop_cond(stop_cond_args, eps, inverse, f):
 				return False
 			x, y = y, x
 		bad = B @ y - c
+		if inverse:
+			print(x.dot(B@y-c))
 		for ind,i in enumerate(x):
 			if i == 0 and bad[ind] > 0:
 				return False

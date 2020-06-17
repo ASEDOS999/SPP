@@ -86,5 +86,6 @@ def ellipsoid(func,
 		value = func(x)
 		if np.linalg.norm(x-x_0) <= R and (cur is None or cur[1] > func(x)):
 			cur = x, value
+		#rint(N, n, est)
 		if cond(x, f_est = est):
 			return (cur[0], np.sqrt(est/mu))

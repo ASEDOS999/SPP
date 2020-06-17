@@ -258,7 +258,11 @@ class Dichotomy_exact:
 				reconstruct, new_indexes, true_ind = self.fix(sum(i)/2, ind, indexes.copy())
 				
 				# Solution of the new problem through this method
-				x, Delta, stop  = self.Halving(func, get_grad, L, mu, self.get_new_eps(eps), Q = Q_new, indexes = new_indexes, out_ind = ind)
+				if len(Q) == self.n:
+					new_eps = eps
+				else:
+					new_eps = self.get_new_eps(eps)
+				x, Delta, stop  = self.Halving(func, get_grad, L, mu, new_eps, Q = Q_new, indexes = new_indexes, out_ind = ind)
 				if stop:
 					x_ = list(x)
 					x_.insert(ind, sum(i)/2)
@@ -287,13 +291,17 @@ class Dichotomy_exact:
 					Q[ind] = [c, i[1]]
 				# Update estimation of distance to point solution
 				Q_ = np.array(Q)
+				if R <= 1e-15:
+					if len(Q) < self.n:
+						return x, R, False
+					else:
+						return x, R
 				R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
-				
 				# Try stop condition at point x
-				Est = self.Est(eps, g, R)
 				if len(Q) < self.n:
 					# It is not main problem
 					g = grad[out_ind]
+					Est = self.Est(eps, g, R)
 					if R<= self.Est2(eps,g,R):
 						return x, R, True
 					if R <= Est:
