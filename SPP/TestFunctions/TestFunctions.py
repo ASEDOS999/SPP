@@ -91,8 +91,6 @@ class TestFunction:
 		# Lipschitz constants for function
 		self.M_x = r.M + F.M_x
 		self.M_y = h.M + F.M_y
-		print(self.M_x, self.M_y)
-		print(self.L_xx, self.L_yy, self.L_xy, self.L_yx)
 		
 		# Constants of strong convexity (concavity) on x (y)
 		self.mu_x = r.mu
