@@ -233,7 +233,8 @@ class Dichotomy_exact:
 					   start_point = None,
 					   cond = None,
 					   Q = None,
-					   indexes = {}):
+					   indexes = {},
+					   out_ind = None):
 		if self.L == np.infty:
 			# There was not initialization
 			self.L = L
@@ -247,7 +248,7 @@ class Dichotomy_exact:
 		Q_ = np.array(Q)
 		if len(Q) == 0:
 			# This set includes only one point
-			return [], 0
+			return [], 0, False
 		R = np.linalg.norm(Q_[:,0] - Q_[:,1])/2
 		while True:
 			for ind, i in enumerate(Q):
@@ -257,8 +258,15 @@ class Dichotomy_exact:
 				reconstruct, new_indexes, true_ind = self.fix(sum(i)/2, ind, indexes.copy())
 				
 				# Solution of the new problem through this method
-				x, Delta  = self.Halving(func, get_grad, L, mu, self.get_new_eps(eps), Q = Q_new, indexes = new_indexes)
-
+				x, Delta, stop  = self.Halving(func, get_grad, L, mu, self.get_new_eps(eps), Q = Q_new, indexes = new_indexes, out_ind = ind)
+				if stop:
+					x_ = list(x)
+					x_.insert(ind, sum(i)/2)
+					x = np.array(x_)
+					if len(Q) < self.n:
+						return x, R, False
+					else:
+						return x, R
 				# Calculate delta-subgradient
 				grad = get_grad(reconstruct(x))
 				g = grad[true_ind]
@@ -266,8 +274,10 @@ class Dichotomy_exact:
 				x = x_[:ind] + [sum(i)/2] + x_[ind:]
 				x = np.array(x)				
 				if g == 0:
-					print("Hello")
-					return x, 0
+					if len(Q) < self.n:
+						return x, 0, False
+					else:
+						return x, 0
 
 				# Choice of multidimensional rectangle
 				c = sum(i)/2
@@ -283,11 +293,11 @@ class Dichotomy_exact:
 				Est = self.Est(eps, g, R)
 				if len(Q) < self.n:
 					# It is not main problem
+					g = grad[out_ind]
 					if R<= self.Est2(eps,g,R):
-						print("Good")
+						return x, R, True
 					if R <= Est:
-						print(self.Est1, self.Est2, Delta, R)
-						return x, R
+						return x, R, False
 				if len(Q) == self.n:
 					# Try condition
 					if cond(x, R = R):
